@@ -1,5 +1,4 @@
 # All Nix dependencies for developing DokMelody
-# start with ``nix-shell deps.nix``
 
 with import <nixpkgs> {};
 
