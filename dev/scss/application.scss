@@ -1,0 +1,250 @@
+
+@import 'colors';
+@import 'code';
+@import 'fonts';
+
+html {
+  background-color: $color-background;
+  font-family: $font-serif;
+}
+
+* {
+  box-sizing: border-box;
+
+  // ask mobile browsers to please trust our judgement about font sizes
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#page-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+#page-content > section[role=main] {
+  flex: 1;
+  padding: 0 30px;
+
+  & > .content {
+    margin: 0 auto;
+    padding: 40px 0;
+    max-width: 780px;
+
+    @media (max-width: 550px) {
+      padding: 30px 0;
+    }
+  }
+
+  p {
+    line-height: 1.9em;
+  }
+
+  li {
+    line-height: 1.8em;
+  }
+
+  a {
+    color: $text-color-link;
+
+    &:hover {
+      color: $text-color-link-light;
+      text-decoration: none;
+    }
+  }
+}
+
+// hide the blog title in the navbar on small screen sizes
+@media (max-width: 550px) {
+  #blog-title-header {
+    display: none;
+  }
+}
+
+#page-content > footer {
+  background-color: $color-primary;
+  color: $text-color-navigation;
+  font-family: $font-sans-serif;
+  text-align: center;
+
+  & > .content {
+    margin: 0 auto;
+    padding: 10px 0;
+    max-width: 940px;
+  }
+
+  a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  h2, h3 {
+    font-weight: 300;
+    margin: 0.8em;
+  }
+
+  h2 {
+    font-size: 1.1em;
+  }
+
+  h3 {
+    font-size: 0.8em;
+  }
+}
+
+article > header {
+  .date-and-tags time {
+    color: $text-color-primary;
+    font-size: 1.5em;
+    font-weight: 300;
+  }
+
+  .tags a {
+    color: $text-color-link;
+  }
+}
+
+article.inline > header {
+  .title {
+    font-size: 2.3em;
+    margin-bottom: 10px;
+
+    @media (max-width: 550px) {
+      font-size: 2em;
+    }
+  }
+
+  .date-and-tags {
+    margin-bottom: 20px;
+  }
+}
+
+article.main > header {
+  .title {
+    font-size: 2.7em;
+    margin-bottom: 10px;
+    margin-top: 0;
+
+    @media (max-width: 550px) {
+      font-size: 2.2em;
+    }
+  }
+
+  .date-and-tags {
+    margin-bottom: 2em;
+  }
+}
+
+.content h1 {
+  font-size: 2em;
+  margin-top: 2em;
+}
+
+.footnotes {
+  font-size: small;
+  margin-top: 4em;
+}
+
+article.main > footer {
+  margin-top: 40px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-sans-serif;
+}
+
+a {
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+blockquote {
+  background-color: #F6F6F6;
+  margin: 0;
+  padding: 0.5em 35px;
+}
+
+.navigation-bar {
+  align-items: center;
+  background-color: $color-primary;
+  display: flex;
+  font-size: 1.2em;
+  font-family: $font-sans-serif;
+  font-weight: 300;
+  width: 100%;
+
+  a {
+    color: $text-color-navigation;
+    display: block;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+
+    &:hover { color: white; }
+  }
+
+  h1 {
+    margin: 5px 0;
+    text-decoration: none;
+    font-size: 1.5em;
+    font-weight: inherit;
+  }
+
+  .navigation-items {
+    padding: 0;
+
+    &.left, &.right { margin: 15px; }
+    &.center        { flex: 1;      }
+
+    li {
+      display: inline-block;
+      margin: 0 20px;
+    }
+  }
+}
+
+.pagination {
+  display: flex;
+  margin-top: 4em;
+  padding: 0;
+
+  li {
+    flex: 1;
+    list-style: none;
+    text-align: center;
+
+    a {
+      display: block;
+      transition: background-color 0.25s ease-in-out;
+      width: 90%;
+    }
+
+    &.active a {
+      cursor: default;
+    }
+
+    a:hover, &.active a {
+      background-color: $color-primary;
+      color: white !important;
+    }
+  }
+}
+
+div.figure, article.main > p > a {
+  & > img {
+    max-width: 100%;
+  }
+}

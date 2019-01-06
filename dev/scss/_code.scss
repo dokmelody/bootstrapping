@@ -1,0 +1,60 @@
+
+@import 'colors';
+@import 'fonts';
+
+pre, code {
+  font-family: $font-monospace;
+}
+
+p code, li code {
+  background-color: $color-section-background;
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+pre code, table.sourcetable pre, .source pre {
+  font-size: 0.95em;
+  line-height: 1.6em;
+  margin: 0;
+}
+
+.source {
+  display: inline-block;
+  margin: 1em 1.5em;
+}
+
+pre code {
+  display: block;
+}
+
+pre code, div[class^='brush: '] {
+  background-color: $color-section-background;
+  width: 100%;
+  overflow: auto;
+
+  // enable inertial horizontal scrolling
+  -webkit-overflow-scrolling: touch;
+}
+
+table.sourcetable {
+  width: 100%;
+
+  td.linenos {
+    color: desaturate(darken($color-section-background, 20%), 40%);
+    white-space: nowrap;
+    width: 1%;
+    font-weight: 300;
+  }
+
+  pre {
+    margin: 0;
+  }
+}
+
+pre code, table.sourcetable {
+  padding: 20px;
+}
+
+td.linenos {
+  padding-right: 15px;
+}
