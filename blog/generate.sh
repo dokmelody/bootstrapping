@@ -3,9 +3,12 @@
 
 set -e # exit with nonzero exit code if anything fails
 
-(raco pkg catalog-show frog >> /dev/null) || raco pkg install frog --auto
+(raco pkg catalog-show frog >> /dev/null) || raco pkg install frog markdown --auto
 
 mkdir -p out
+
+# Generate Blog
+
 cp -f -r images out/.
 cp -f -r js out/.
 
@@ -17,5 +20,5 @@ do
   sassc -t compressed -m inline $file out/css/$base.css
 done
 
-raco frog -bp
+raco frog --clean -bp
 

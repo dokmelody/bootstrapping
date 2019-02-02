@@ -1,6 +1,6 @@
-# Bootstrapping DokMelody
+# DokMelody Bootstrapping 
 
-Implement the first useable version of DokMelody, using an iterative bootstrapping process. 
+Implement the first useable version of DokMelody, using an iterative bootstrapping process.
 
 ## Getting started
 
@@ -10,25 +10,21 @@ nix-shell
 
 for loading dependencies.
 
-TODO continue
-
 ## Bootstrapping process
 
-* ``prod`` contains the last online/working version of DokMelody project: documentation, code, etc...
-* ``dev`` contains the currently developed version of DokMelody with some demo/test data
-* ``test`` is the upgrading of ``prod`` according the changes in ``dev``
+There are incremental passes, inside directories ``passXX``.
 
-After ``test`` is upgraded, it became the new ``prod``, and the iterative bootstrapping process can continue.
+Every important project decision is documented inside ``docs/decisions`` directory.
 
-This is a big mono-repo, that is not meant to be elegant or compact, because it is used only for designing and bootstrapping DokMelody. 
+``dev-blog`` is a blog/diary/journal documenting the development of the project. 
 
 ## Issues
 
-Use ``lentil-all`` for showing open issues.
+Use ``lentil-all`` for showing open issues. They are on DEV.org and spread on source files as TODO.
 
-## Decision process
+## License
 
-Every decision is documented inside ``kb`` directories.
+Source code is released under LGPL-3.0-or-later. 
 
-Every decision is taken following different possible methods, e.g. six hats, RFC, pros vs cons and so on.
+Documentation is released under CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>
 

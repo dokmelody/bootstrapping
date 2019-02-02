@@ -1,12 +1,15 @@
 #lang frog/config
 
+;; SPDX-License-Identifier: LGPL-3.0-or-later
+;; Copyright (C) 2019 Massimo Zaniboni <mzan@dokstar.org>
+
 ;; Called early when Frog launches. Use this to set parameters defined
 ;; in frog/params.
 (define/contract (init)
   (-> any)
-  (current-scheme/host "https://dev-blog.dokmelody.org")
+  (current-scheme/host "https://bootstrapping.dokmelody.org")
   (current-uri-prefix #f)
-  (current-title "DokMelody Bootstrapping")
+  (current-title "Bootstrapping DokMelody")
   (current-author "mzan")
   (current-show-tag-counts? #t)
   (current-permalink "/blog/{year}/{month}/{day}/{title}/index.html")
@@ -19,7 +22,8 @@
   (current-index-newest-first? #t)
   (current-posts-index-uri "/index.html")
   (current-source-dir "_src")
-  (current-output-dir "out"))
+  (current-output-dir "out")
+  )
 
 ;; Called once per post and non-post page, on the contents.
 (define/contract (enhance-body xs)
@@ -36,3 +40,4 @@
 (define/contract (clean)
   (-> any)
   (void))
+
