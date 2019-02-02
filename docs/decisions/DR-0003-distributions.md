@@ -1,3 +1,8 @@
+<!---
+SPDX-License-Identifier: CC-BY-4.0
+Copyright (C) 2019 Massimo Zaniboni - mzan@dokstar.org
+-->
+
 # Context
 
 DokMelody can be used for different problem domains, and it can run in many different run-time environments.

@@ -1,3 +1,8 @@
+<!--- 
+SPDX-License-Identifier: CC-BY-4.0
+Copyright (C) 2019 Massimo Zaniboni - mzan@dokstar.org
+-->
+
 # About
 
 DokMelody aims to be:

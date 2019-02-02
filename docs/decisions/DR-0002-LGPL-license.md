@@ -1,3 +1,8 @@
+<!---
+SPDX-License-Identifier: CC-BY-4.0
+Copyright (C) 2019 Massimo Zaniboni - mzan@dokstar.org
+-->
+
 # Context
 
 DokMelody is a project composed of an user interface, various programming languages compilers, and libraries.
@@ -21,6 +26,9 @@ following the spirit of [Collective Code Construction Contract (C4)](https://rfc
 Patches to external projects and libraries used from DokMelody will be released using the original upstream license, 
 for avoiding unucessary forks.
 
+Documentation that is not part of the source code will be released under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)
+for maximizing reuse.
+
 DokMelody will include a tool for checking the license of used libraries and components, and suggesting 
 the legal implications for the license of the combined-work. 
 
@@ -29,6 +37,8 @@ the legal implications for the license of the combined-work.
 ## Short story
 
 The majority of Dok applications can use commercial licenses but they had to be released with some (obfuscated) source-code, for allowing the rebuild/relink with newer version of Dok and related libraries.
+
+Documentation can be freely reused and licensed under different licenses.
 
 ## Long story
 

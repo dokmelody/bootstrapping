@@ -29,5 +29,6 @@ in runCommand "dummy" {
        sassc
        haskellPackages.lentil
        wrappedLentil
+       wget
     ];
 } ""

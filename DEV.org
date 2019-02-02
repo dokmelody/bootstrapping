@@ -1,34 +1,18 @@
 * Admin
 ** TODO rsync this directory with think directory, for performing backups
-** TODO delete dev-blog.dokmelody.org
 ** TODO add bootstrapping.dokmelody.org
 ** TODO point www.dokmelody.org to a redirect to developing.dokmelody.org
 ** TODO install the wiki/docs on docs.dokmelody.org and use the boostrapping version of DokMelody
 ** TODO install AWSTATS (but private, because it can contains private info) for seeing who is reaching the website
 ** MAYBE install all this using the decided DEVOP method, and in case on a dedicated NixOS server
 ** DONE create a google-group dokmelody-dev 
-** TODO use probably GNU documentation license, or some CC0 type of license
+** DONE use probably GNU documentation license, or some CC0 type of license
+- Add license file to the directory
+- Specify the license for documentation
+- Remove comments from imported MarkDown
 ** DONE use better colors for the Blog
-** TODO If I serve content directly from DokMelody server, in case put behind a 5minute NGINX cache
+** TODO If I serve dynamic content for the documentation directly from DokMelody server, in case put behind a 5minute NGINX cache
 * TODO Info to import
 ** TODO info from previous web-site attempt
 ** TODO info from previous bootstrapping documents
-** TODO decide which license use for the documentation
 ** TODO import notes about imported frog-website
-* TODO Use scribble for designing Dok
-The idea it is that the blog will be a journal, while the displayed manual will be:
-- the last version of the documentation
-- show concepts and ideas inclueded, for later review, when the language change again
-- document (distinct from manual) the decisions taken and the rationales, showing only in these sections old forms of the code
-** DONE generate the static HTML parts using a proper build tool
-** DONE include the pages inside Frog website using some routing rule
-** TODO convert Dok manual into Scribble document
-Use the function on Markdown Racket library.
-** TODO use Scribble macro for showing related links/conncepts/sections 
-** TODO Import also the Tutorial.dok with the new syntax
-** TODO Import mainly manually the relevant notes from org-mode to the manual, integrating with design decisions
-** TODO Port also other source of information
-- tecnologie da studiare bookmarks
-- my/dokmelody bookmarks
-- etc.. 
-** TODO Take inspiration also from OOSC

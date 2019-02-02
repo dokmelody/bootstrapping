@@ -16,7 +16,7 @@ There are incremental passes, inside directories ``passXX``.
 
 Every important project decision is documented inside ``docs/decisions`` directory.
 
-``dev-blog`` is a blog/diary/journal documenting the development of the project. 
+``blog`` is a blog/diary/journal documenting the development of the project. 
 
 ## Issues
 
@@ -25,6 +25,7 @@ Use ``lentil-all`` for showing open issues. They are on DEV.org and spread on so
 ## License
 
 Source code is released under LGPL-3.0-or-later. 
+See ``docs/decisions/DR-0002-LGPL-license.md`` for related consequences.
 
 Documentation is released under CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>
 

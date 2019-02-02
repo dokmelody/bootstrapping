@@ -17,19 +17,19 @@
 
 (provide insert-pdr-file)
 
-;; not used anymore
-(define (remove-empty-paragrahps expr)
+(define (not-html-comment? x)
+  (not (and (list? x)
+            (not (empty? x))
+            (eq? '!HTML-COMMENT (first x)))))
+
+(define (remove-copyright expr)
   (if (list? expr)
-      (if 
-       (and (element? expr)
-            (eq? (element-name expr) 'p)
-            (pcdata? (element-content expr))
-            (eq? 0 (string-length (pcdata-string (element-content expr))))) 
-       (make-comment "")
-       (map remove-empty-paragrahps expr))
+      (map remove-copyright (filter not-html-comment? expr))
       expr))
 
 (define (insert-pdr-file f1)
-  (let* ([f2 (string->path (string-append "../docs/decisions/" f1))])
-    (xexprs->scribble-pres (parse-markdown f2))))
+  (let* ([f2 (string->path (string-append "../docs/decisions/" f1))]
+         [c1 (parse-markdown f2)]
+         [c2 (remove-copyright c1)])
+    (xexprs->scribble-pres c2)))
 
