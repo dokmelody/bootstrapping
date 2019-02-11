@@ -28,4 +28,3 @@ Source code is released under LGPL-3.0-or-later.
 See ``docs/decisions/DR-0002-LGPL-license.md`` for related consequences.
 
 Documentation is released under CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>
-

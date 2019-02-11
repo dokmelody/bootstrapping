@@ -1,7 +1,7 @@
 * Admin
 ** TODO rsync this directory with think directory, for performing backups
-** TODO add bootstrapping.dokmelody.org
-** TODO point www.dokmelody.org to a redirect to developing.dokmelody.org
+** DONE add bootstrapping.dokmelody.org
+** DONE point www.dokmelody.org to a redirect to developing.dokmelody.org
 ** TODO install the wiki/docs on docs.dokmelody.org and use the boostrapping version of DokMelody
 ** TODO install AWSTATS (but private, because it can contains private info) for seeing who is reaching the website
 ** MAYBE install all this using the decided DEVOP method, and in case on a dedicated NixOS server
@@ -12,7 +12,65 @@
 - Remove comments from imported MarkDown
 ** DONE use better colors for the Blog
 ** TODO If I serve dynamic content for the documentation directly from DokMelody server, in case put behind a 5minute NGINX cache
-* TODO Info to import
-** TODO info from previous web-site attempt
-** TODO info from previous bootstrapping documents
-** TODO import notes about imported frog-website
+* TODO Convert info to KB format 
+** DONE Create "dataXX" directory with "XX" for each different bootstrapped format
+** TODO Decide a format to use
+*** Requirements
+- link to other entity
+- namespaces for entities
+- transclusion / insertion / import of content
+- different types of content
+  - PDF
+  - MarkDown
+  - XML
+  - etc..
+- support link/transclusion of content using only a part of it
+  - PDF page and paragraph
+  - XML part
+*** PROBLEM XML vs HTML
+In HTML the h1 ... sections does not create a real structure with parent relationship. There should be some <section title="...">...</section> element.
+
+Instead in markdown this is correct.
+*** PROBLEM In-place meta-info
+Metainfo (relations) can be added in two way:
+- external file referenc-id data
+- in-place, using comments with meta-info inside
+- probably do not use the XML microformats in-place conventions
+*** Solutions
+Use MarkDown format.
+
+``namespace1/namespace2/id.type`` identifies an entity ``namespace1/namespace2/id``.
+
+The ``.type`` is used for the format of the entity.
+
+The markdown is a special MD format with:
+- ``<include ref=""/>`` for transclusion of other content
+- links are resolved against DokMelody KB
+
+Images are transcluded/included using normal MD format.
+
+PDF and other formats are included using some ad-hoc reference syntax.
+
+A book is a MarkDown document with:
+- ``<-- topicref ... -> or some similar meta-comment
+- specify in the header which sections level transclude and which use navigation links
+- links to other IDS are considered as section of a book
+- the viewer use navigation by default
+- I follow a dita-like approach because instead of extracting sub-ids from the document, I compose already existing (and hopefully neutral IDS) into a whole document
+
+The viewer:
+- hide TOP menu after navigation is selected
+- show NEXT navigation links by default
+
+I add meta-info using schema.org like schemas, but on a distinct DB file. 
+
+Optionally I can insert metainfo about an ID in-place using some HTML-like format, also if MD does not support MD nested inside HTML code.
+** TODO Reuse some logical schema of schema.org website and related wibsites
+** TODO Reuse some logical schema of DITA
+** TODO Convert some DEMO data
+** TODO Create an initial UI
+** TODO Import all real info
+*** TODO info from previous web-site attempt
+*** TODO info from previous bootstrapping documents
+*** TODO import notes about imported frog-website
+** TODO Export info also to web/dita-like format and publish on the website
