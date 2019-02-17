@@ -5,16 +5,11 @@
 
 html {
   background-color: $color-background;
-  font-family: $font-serif;
+  font-family: $font-sans-serif;
 }
 
 * {
   box-sizing: border-box;
-
-  // ask mobile browsers to please trust our judgement about font sizes
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
 }
 
 html, body {
@@ -22,30 +17,72 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
+
+  a {
+      color: $text-color-link;
+      text-decoration: none;
+      font-weight: bold;
+
+      &:hover {
+          text-decoration: underline;
+      }
+  }
 }
 
+/* This contains all other elements */
 #page-content {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   min-height: 100%;
+  font-size: $font-size;
+
+  /* This is the header/title section */
+  nav {
+    border-bottom: solid 1px #ddd;
+    margin: 0;
+    padding: 0;
+    #title {
+      text-align: center;
+      font-size: 3em;
+      font-weight: bold;
+      width: 100%;
+      letter-spacing: -.01em;
+      font-family: 'Source Serif Pro',serif;
+      line-height: 1.5em;
+      margin: 0;
+      padding: 0;
+    }
+    #nav {
+        text-align: center;
+        font-size: $font-size;
+        font-weight: normal;
+        width: 100%;
+        font-family: sans-serif;
+        line-height: 1.5em;
+        margin-top: 1em;
+     }
+  }
 }
 
+/* This is the section containing all articles */
 #page-content > section[role=main] {
-  flex: 1;
   padding: 0 30px;
-  line-height: 1.5em;
-
+  line-height: $line-height;
+  text-align: justify;
+ 
   & > .content {
-    margin: 0 auto;
-    max-width: 780px;
+      margin: 0 auto;
+      font-size: $font-size; 
+      max-width: $article-width;
 
     @media (max-width: 550px) {
       padding: 30px 0;
     }
   }
 
-  p, div.SIntrapara { padding-bottom: 0.5em; }
+  p, div.SIntrapara {
+      padding-bottom: 0.25em;
+      text-align: justify;
+  }
 
   /* for some reason Frog generates empty paragraphs some-time, importing from MarkDown --> Scribble, so use this trick. */
   p:empty {
@@ -55,72 +92,40 @@ html, body {
 
   li, li > p { padding-bottom: 0; }
 
-  a {
-    color: $text-color-link;
-
-    &:hover {
-      color: $text-color-link-light;
-      text-decoration: none;
-    }
-  }
-}
-
-// hide the blog title in the navbar on small screen sizes
-@media (max-width: 550px) {
-  #blog-title-header {
-    display: none;
-  }
 }
 
 #page-content > footer {
-  background-color: $banner-background;
-  color: $banner-text;
+  border-top: solid 1px #ddd;
+
+  background-color: $color-background;
+  color: $footer-text-color;
   font-family: $font-sans-serif;
   text-align: center;
+  text-size: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0em;
+  max-width: 80em;
+}
 
-  & > .content {
-    margin: 0 auto;
-    padding: 10px 0;
-    max-width: 940px;
-  }
-
-  a {
-    color: inherit;
-    font-weight: bold;
-    text-decoration: underline;
-    &:hover { color: $color-primary; }
-  }
-
-  h2, h3 {
-    font-weight: 300;
-    margin: 0.8em;
-  }
-
-  h2 {
-    font-size: 1.1em;
-  }
-
-  h3 {
-    font-size: 0.8em;
-  }
+/* A section containing a blog post article */
+article {
+    font-size: $font-size;
+    color: $text-color;
+    font-family: $font-sans-serif;
+    line-height: $line-height;
 }
 
 article > header {
   .date-and-tags time {
-    color: $text-color-primary;
-    font-size: 1.5em;
-    font-weight: 300;
-  }
-
-  .tags a {
-    color: $text-color-link;
+    color: $text-color;
+    font-size: $font-size;
   }
 }
 
+/* "inline" articles are multiple articles in the same page (e.g. recents, tagged) */
 article.inline > header {
   .title {
     font-size: 2em;
-
     margin-bottom: 10px;
 
     @media (max-width: 550px) {
@@ -133,6 +138,7 @@ article.inline > header {
   }
 }
 
+/* "main" is a page with a single article */
 article.main > header {
   .title {
     font-size: 2em;
@@ -168,82 +174,23 @@ h1, h2, h3, h4, h5, h6 {
   font-family: $font-sans-serif;
 }
 
-a {
-  text-decoration: none;
-  transition: color 0.15s ease-in-out;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 blockquote {
   background-color: #F6F6F6;
   margin: 0;
   padding: 0.5em 35px;
 }
 
-.navigation-bar {
-  align-items: center;
-  background-color: $banner-background;
-  display: flex;
-  font-size: 1.2em;
-  font-family: $font-sans-serif;
-  font-weight: bold;
-  width: 100%;
-
-  a {
-    color: $banner-text;
-    display: block;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-
-    &:hover { color: $color-primary; }
-  }
-
-  h1 {
-    margin: 5px 0;
-    text-decoration: none;
-    font-size: 1.5em;
-    font-weight: inherit;
-  }
-
-  .navigation-items {
-    padding: 0;
-
-    &.left, &.right { margin: 15px; }
-    &.center        { flex: 1;      }
-
-    li {
-      display: inline-block;
-      margin: 0 20px;
-    }
-  }
-}
-
 .pagination {
-  display: flex;
   margin-top: 4em;
   padding: 0;
 
   li {
-    flex: 1;
     list-style: none;
     text-align: center;
 
     a {
       display: block;
-      transition: background-color 0.25s ease-in-out;
       width: 90%;
-    }
-
-    &.active a {
-      cursor: default;
-    }
-
-    a:hover, &.active a {
-      background-color: $color-primary;
-      color: white !important;
     }
   }
 }

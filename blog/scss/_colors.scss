@@ -1,13 +1,11 @@
 
-$color-background: #fffcfc;
-$color-primary: #00BFFF;
-$color-section-background: lighten($color-primary, 35.75%);
+$color-background: #eee;
 $text-color-navigation: #202020;
 
-$text-color-light: lighten($color-primary, 30%);
-$text-color-link: desaturate(darken($color-primary, 10%), 20%);
-$text-color-link-light: lighten($text-color-link, 10%);
-$text-color-primary: #473737;
+$text-color-link: #c33;
+$text-color: black;
+
+$footer-text-color: #666;
 
 $banner-background: #000000;
 $banner-text: #FFFFFF;

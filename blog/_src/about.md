@@ -3,8 +3,6 @@ SPDX-License-Identifier: CC-BY-4.0
 Copyright (C) 2019 Massimo Zaniboni - mzan@dokstar.org
 -->
 
-# About
-
 DokMelody aims to be:
 
 * an environment for analyzing and transforming knowledge
@@ -19,10 +17,9 @@ DokMelody and related projects will be bootstrapped using the [Racket] programmi
 
 This website will be a journal for this probably unrealistinc and too much ambitous project.
 
-## Contacts
+# Contacts
 
 * GitHub repository: <https://github.com/dokmelody/bootstrapping>
-* public mailing-list: <https://groups.google.com/forum/#!forum/dokmelody> or <dokmelody@googlegroups.com>
-* private messages: <mzan@dokmelody.org>
+* mailing-list: <https://groups.google.com/forum/#!forum/dokmelody> 
 
 [Racket]: http://racket-lang.org/

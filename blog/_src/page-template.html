@@ -28,17 +28,10 @@
   <body>
     <div id="page-content">
       <!-- Navigation Bar -->
-      <header>
-        <nav role="navigation" class="navigation-bar">
-          <ul class="navigation-items left">
-            <li id="blog-title-header"><a href="/"><h1>Bootstrapping DokMelody</h1></a></li>
-          </ul>
-          <ul class="navigation-items center"></ul>
-          <ul class="navigation-items right">
-              <li><a href="/about.html">About</a></li>
-          </ul>
-        </nav>
-      </header>
+        <nav>
+            <p id="title">Bootstrapping DokMelody</p>
+            <p id="nav">| <a href="/">Home</a> | <a href="/about.html">About</a> | <a href="https://github.com/dokmelody/bootstrapping">Source code</a> | <a href="https://groups.google.com/forum/#!forum/dokmelody">Mailing list</a> |</p>
+         </nav>
       <section role="main">
         <!-- Main column -->
         <div class="content" class="col-md-12">
@@ -51,17 +44,9 @@
       </section>
       <footer>
         <div class="content">
-            <h3 id="copyright-notice">© @date-year[(current-date)], Massimo Zaniboni &lt;mzan@"@"dokmelody.org&gt; </h3>
-            <h3><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</h3>
-          <h3>
-            Built with <a href="https://github.com/greghendershott/frog">Frog</a>, the
-            <strong>fr</strong>ozen bl<strong>og</strong> tool.
-          </h3>
-          <h3>
-            Feeds are available via <a href="/feeds/all.atom.xml">Atom</a>
-            or <a href="/feeds/all.rss.xml">RSS</a>.
-          </h3>
-        </div>
+            <p id="copyright-notice">Copyright © @date-year[(current-date)], Massimo Zaniboni &lt;mzan@"@"dokmelody.org&gt; </p>
+            <p>This documentation is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+       </div>
       </footer>
     </div>
   </body>

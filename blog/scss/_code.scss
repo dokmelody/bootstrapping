@@ -7,7 +7,7 @@ pre, code {
 }
 
 p code, li code {
-  background-color: $color-section-background;
+  background-color: $color-background;
   border-radius: 3px;
   padding: 2px 5px;
 }
@@ -28,7 +28,7 @@ pre code {
 }
 
 pre code, div[class^='brush: '] {
-  background-color: $color-section-background;
+  background-color: $color-background;
   width: 100%;
   overflow: auto;
 
@@ -40,7 +40,7 @@ table.sourcetable {
   width: 100%;
 
   td.linenos {
-    color: desaturate(darken($color-section-background, 20%), 40%);
+    color: desaturate(darken($color-background, 20%), 40%);
     white-space: nowrap;
     width: 1%;
     font-weight: 300;
