@@ -43,6 +43,8 @@ Use MarkDown format.
 
 The ``.type`` is used for the format of the entity.
 
+Use ``.variant.type`` for some variant of a type (e.g. like in mime types)
+
 The markdown is a special MD format with:
 - ``<include ref=""/>`` for transclusion of other content
 - links are resolved against DokMelody KB
@@ -66,7 +68,7 @@ I add meta-info using schema.org like schemas, but on a distinct DB file.
 
 Optionally I can insert metainfo about an ID in-place using some HTML-like format, also if MD does not support MD nested inside HTML code.
 ** TODO Reuse some logical schema of schema.org website and related wibsites
-** TODO Reuse some logical schema of DITA
+** TODO Reuse some logical schema of DITA for creating a book/map
 ** TODO Convert some DEMO data
 ** TODO Create an initial UI
 ** TODO Import all real info

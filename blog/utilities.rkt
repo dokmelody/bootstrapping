@@ -32,4 +32,3 @@
          [c1 (parse-markdown f2)]
          [c2 (remove-copyright c1)])
     (xexprs->scribble-pres c2)))
-
