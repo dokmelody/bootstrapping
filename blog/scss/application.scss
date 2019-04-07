@@ -20,11 +20,11 @@ html, body {
 
   a {
       color: $text-color-link;
-      text-decoration: none;
-      font-weight: bold;
+      text-decoration: underline;
+      font-weight: normal;
 
       &:hover {
-          text-decoration: underline;
+          color: $text-color-link-hover;
       }
   }
 }
@@ -35,7 +35,7 @@ html, body {
   min-height: 100%;
   font-size: $font-size;
 
-  /* This is the header/title section */
+  /* This is the main header/title section */
   nav {
     border-bottom: solid 1px #ddd;
     margin: 0;
@@ -59,8 +59,12 @@ html, body {
         font-family: sans-serif;
         line-height: 1.5em;
         margin-top: 1em;
+
+        a {
+            text-decoration: none;
+        }
      }
-  }
+   }
 }
 
 /* This is the section containing all articles */
@@ -127,12 +131,11 @@ article.inline > header {
   .title {
     font-size: 2em;
     margin-bottom: 10px;
-
+    a { font-weight: bold; }
     @media (max-width: 550px) {
       font-size: 2em;
     }
   }
-
   .date-and-tags {
     margin-bottom: 20px;
   }
@@ -144,12 +147,11 @@ article.main > header {
     font-size: 2em;
     margin-bottom: 10px;
     margin-top: 1em;
-
+    font-weight: bold;
     @media (max-width: 550px) {
       font-size: 2.2em;
     }
   }
-
   .date-and-tags {
     margin-bottom: 2em;
   }
