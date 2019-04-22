@@ -1,13 +1,13 @@
 #lang frog/config
 
 ;; SPDX-License-Identifier: LGPL-3.0-or-later
-;; Copyright (C) 2019 Massimo Zaniboni <mzan@dokstar.org>
+;; Copyright (C) 2019 Massimo Zaniboni <mzan@dokmelody.org>
 
 ;; Called early when Frog launches. Use this to set parameters defined
 ;; in frog/params.
 (define/contract (init)
   (-> any)
-  (current-scheme/host "https://bootstrapping.dokmelody.org")
+  (current-scheme/host "http://bootstrapping.dokmelody.org")
   (current-uri-prefix #f)
   (current-title "Bootstrapping DokMelody")
   (current-author "mzan")

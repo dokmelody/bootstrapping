@@ -30,5 +30,7 @@ in runCommand "dummy" {
        haskellPackages.lentil
        wrappedLentil
        wget
+       tetex
+       bibtex2html
     ];
 } ""

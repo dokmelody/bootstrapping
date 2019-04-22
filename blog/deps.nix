@@ -7,6 +7,8 @@ runCommand "dummy" {
     python
     pythonPackages.pygments
     racket
+    tetex
+    bibtex2html
     sassc
   ];
 } ""
