@@ -132,19 +132,15 @@ Dok design follows these guidelines:
 - whenever possible values are preferred to references
 - nested transaction semantic joins some of the benefit of functional programming (code with a predictable semantic) with imperative programming (convenience of local mutable state) 
 - every part of a Dok application can be meta-annotated and then manipulated by metaprogramming code
-- simple types can be extended with contracts (i.e. logical properties the code had to respect)
+- simple types can be extended with contracts (i.e. logical properties)
 - Dok compiler is fully extensible from developers
 - advanced features of the language are introduced using metaprogramming compilation rules that are user modifiable
-- advanced Dok code is progressively compiled to Dokk that is a kernel version of Dok with a simplified C-like semantic, where the cost of the operations is intuitive
+- advanced Dok code is compiled to Dokk that is a kernel version of Dok with a simplified C-like semantic, where the cost of the operations is intuitive
 - effects of metaprogramming analysis and transformation rules must be always inspectable from the user using the DokMelody IDE
 
-Dok programs are preferably developed using progressive refinements from high-level code to low-level code. 
-
-Dok programs can be developed using an Aspect Oriented Programming (AOP) approach:
+Dok programs are preferably developed using progressive refinements from high-level code to low-level code, in particular following an Aspect Oriented Programming (AOP) approach:
  - a complex problem can be partitioned in rather orthogonal aspects
- - "an internal feauture" is one of the intended effects that had to be respected from the code for being useful, i.e. it is an internal requirement of the code
- - "an aspect" is the implementation of a feature
- - Dok compiler plugins and source code annotations can transform high-level code into efficient code because they can analyze the entire code and apply domain-specific transformations to various aspects, making feasible AOP also when there are dependencies between distinct aspects or there are leaked abstractions
+ - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler plugins
 
 Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
 
@@ -1713,16 +1709,12 @@ Assert {
  value, but its implicit result are the effects on the variables changed
  inside the loop body, and other done actions.
 
- The loop terminates when there is a failing action in the loop body. All
- actions done in the last loop pass are aborted. All actions done in
- previous pass are maintained.
+ The loop terminates with success when there is a failing action in one of the ~while~ blocks. 
+ All actions done in the current loop pass are aborted.
+ The ~while~ conditions can be in any part of the loop code, but obviously if they are at the 
+ beginning the code will be (in general) faster. 
 
- The conditions determining the exit from the loop, can be any part of
- the code. Obviously if the loop testing instructions are at the
- beginning of the loop body, the compiler can optimize the code more
- easily, but they can be in any part of the loop code, and they can be
- more than one instruction. So loop termination logic, can be mixed with
- loop transformation code, reducing repetitions.
+ If there is a fail in a section of the loop outside ~while~, the entire loop will fail.
 
  =@Ensure= and =@MaxRepetitions= make debugging of loop code simpler,
  because they states properties that must be respected from the code.

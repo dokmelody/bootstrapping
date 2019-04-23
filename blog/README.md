@@ -5,4 +5,3 @@
 ```
 ./generate.sh
 ```
-
