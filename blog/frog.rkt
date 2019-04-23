@@ -7,7 +7,7 @@
 ;; in frog/params.
 (define/contract (init)
   (-> any)
-  (current-scheme/host "http://bootstrapping.dokmelody.org")
+  (current-scheme/host "https://bootstrapping.dokmelody.org")
   (current-uri-prefix #f)
   (current-title "Bootstrapping DokMelody")
   (current-author "mzan")
@@ -40,4 +40,3 @@
 (define/contract (clean)
   (-> any)
   (void))
-

@@ -1922,20 +1922,11 @@ a:hover {
 body {
  width:95%;
  margin:2% auto;
- font-size:14px;
+ font-size:1em;
  line-height:1.4em;
  font-family:Georgia,serif;
- color:#333
-}
-@media screen and (min-width:600px) {
- body {
-  font-size:18px
- }
-}
-@media screen and (min-width:910px) {
- body {
-  width:900px
- }
+ color:#333;
+ max-width: 50em
 }
 ::selection {
  background:#d6edff
