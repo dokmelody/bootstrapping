@@ -22,7 +22,7 @@ done
 
 # NOTE: the Dok.html must be updated manually inside Emacs org-mode, with "m e e h h" sequence
 mkdir -p out/dok-lang
-cp ../docs/dok-lang/* out/dok-lang/.
+cp -f -r ../docs/dok-lang/* out/dok-lang/.
 
 raco frog --clean -bp
 

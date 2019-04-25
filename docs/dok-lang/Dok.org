@@ -1788,47 +1788,37 @@ Exceptions are unexpected error conditions like:
 - contracts not respected at run-time 
 - insufficient RAM
 - insufficient disk space
-- network problem
+- network problems
+- etc..
 
-An excetpion can not be managed by a =try-else= branch because it is not an expected branch of computation but it is an unexpected error to manage.
+An excetpion is not managed by a =try-else= branch because it is not an expected branch of computation but it is an unexpected error to manage.
 
-Dok follows an approach similar to Eiffel cite:meyer1997object
-- the preferred way for managing an exception is fixing something and recalling the interrupted function
-- otherwise the exception can be rethrow to the caller, adding maybe more useful info messages
-- exceptions can not be ignored/masked
+Dok joins the approach of Eiffel cite:meyer1997object with the approach of the Actor model cite:armstrong_making_nodate.  
 
-#+BEGIN_SRC fundemantal :tangle yes
-Assert {
+Like in Eiffel the preferred way for managing an exception is trying to fix the (transient) problem and then recall the interrupted block of code from the beginning. This implies that the exception handling code can not calculate the result of the function using a different code path, but can only fix things. So the semantic of the original code path is fully respected. 
 
- DB --> (
-   @Abstract
+Another valid approach is rethrowing the exception to the parent block. The rethrowed exception can be a generic error exception or an exception with more details. The parent block will receive a stack of exceptions, and it can use this information mainly for log-reporting.
 
-   dbConnection::Ref(DBConnection)
- 
-   !!commitTransaction --> {
-     retryCount::= 5
-     try {
-       self.dbConnection!!commit        
-     } catch {
-       Exception.Current.is(NetworkDown)
-       retry {
-         retryCount:= ~ - 1
-         retryCount > 0
-       } else {
-         Exception!Add(DBMSDown)
-         #:NOTE: the exception is implicitely rethrow to the caller,
-         #       adding this more descriptive info  
-       }
-     } catch {
-       Exception.Current.is(DB/TransactionConflicts)
-       #:NOTE: the exception is implicitely rethrow to the caller
-     }
-   }
-  )
-}
-#+END_SRC
+Exceptions in Dok like in Eiffell can not be ignored/masked.
 
-TODO Dok will manage imperative code using an Actor-like model, so exception mechanism will be mainly used in some Actor-like library, with supervisor-policies and so on. But the basic ideas described here will remain.
+Exception handling:
+- must stop normal execution of code in case of errors
+- must restore the system to a reliable state where invariants are respected
+- can retry the operation or must abort it signaling the problem to the system/user
+
+The restoring of the system is a very delicate and difficult thing to do because exceptions can happen in any point of the code, and so the variants to take in consideration are too much. For solving this problem Dok follows these approaches:
+- in case of values they can be restored automatically using the nested transaction semantic
+- in case of impure actions theirs rollback is managed by Dok compiler plugins that can analyze the code and according the used instructions, the developer annotations and the developer customizations can apply the correct strategy
+
+Also retry or rethrow strategy is decided using Dok compiler plugins. 
+
+During exception escalation the parent supervisor will be advised of the stack of exceptions and it will be informed if the children has managed the exception restoring a consistent state or the state at the children level is potentially inconsistent. 
+
+The Dok code is mainly free from exception handling branch, and all these details are managed using compiler plugins and meta annotations.
+
+The rationale it is that in case of exceptional problems there are usually well defined and generic strategies to follow (e.g. rollback databases connections, retry a network connection a certain number of times, etc..) and these strategies can be coded in one place, instead of being repeated in all the code. This is a form of [[#AOP]].
+
+TODO the effective implementation and library support is postponed
 * Impure statements
   :PROPERTIES:
   :CUSTOM_ID: impure-statements
@@ -1930,133 +1920,13 @@ Assert {
 } 
 #+END_SRC
 ** Exceptions and resource management 
-Every fail of an impure statement raise an exception because there is no nested transaction semantic. If needed
-the rollback phase can be managed explicitly from developers in the
-exception catch part.
+Resources are initializated, used and released. In case of exceptions they can be released in the normal way or in some ad-hoc way according the type of exceptions and the operations done on the resource before the exception.
 
-Resources acquired are released when there are no any more references
-pointing to them, or according other resource policy management.
+Like in case of [[#exceptions]] the resources are finalized both in normal case and in case of exception from custom compiler plugins. This because the resource logic management is usually common for every type of resource, or type of application and it can be specified only one time. This is a form of [[#AOP]].  
 
-This is the statement managing all resources and actions:
+Concretely resources in Dok are explicitely acquired but implicitely released.
 
-#+BEGIN_EXAMPLE
-with {
- ... 
-} try { 
-  ... 
-} else {
-  ... 
-} catch {   
-  ... 
-} catch { ... 
-} finally {   
-  ... 
-}
-#+END_EXAMPLE
-
-The code inside catch and finally part is not optimized very much, and
-it is instrumented from the compiler for sanitizing it against common
-errors.
-
-The =with= part can initialize many resources and/or variables, and the
-=finally= part deallocate all of them, if a transaction succedee or
-fail. The compiler will instrument the code, for recognizing if a
-resource was not initializated on the with part, and so it does not
-execute the instructions on the finally part deallocating the resource.
-In this case convenience of programming wins against correct
-mathematical model of nested with parts. Dok is a code generating
-language, and in this case the compiler generates automatically code for
-taking care of minor details.
-
-The compiler warn if resources allocated in the =with= part are not
-deallocated in the =finally= part.
-
-The =catch= part can not reference variables inside the =case= part,
-because it is not clear the point of failure. So only resources in the
-=with= part or parent variables.
-
-The =catch= part is called also if there are errors in the =with= part.
-So there can be not initialized resources. The code can use the built-in
-=exception.isInWithPart= property. The compiler will instrument the
-code, for not processing code containing references to not initialized
-reources.
-
-There can be only one =finally= and =catch= part.
-
-Reasons of this design are:
-- code for transactions must often factour out common management, so it
-  is better having a unique exception property to manage and a case by
-  case analysis
-- exception code is rarely used, so dinamyc tags can be added to
-  exception objects, and inspected at run-time
-*** =catch= part
-There are the built-in variables that can be used in the catch part:
-
-- =exception=
-- =previousException=
-- =exception.isInWithPart=
-
-=exception: Exception= is a special variable, like =self=. It must be
-inspected using run-time type checks, because it is not 100% known at
-compile-time.
-
-A =catch= part can:
-- view and change only properties and variables defined outside =with=
-  part
-- view all variables defined in the =with= part, but they have =null=
-  value if they are not yet defined, and their access will fail
-- view all variables defined in the case part, but they have null value
-  if they are not yet used, when the error occurred, and their access
-  will fail
-- if a catch part fail, the next catch part is called
-- the rationale it is generating error messages using more available
-  info, and fall backing to other cases otherwise
-
-A =catch= part can react:
-- making nothing, and =exception= is raised to the caller
-- calling =!!throw(anotherException)= and a new exception is raised to
-  the caller, and =previousException::= exception=
-- calling =retry= and the part of =with= code not executed, and the
-  initial =case= code is executed again, and
-  =previousExcetpion::= excetpion=
-
-So a =catch= part can interact with the code in with and =case= part,
-thru variables in the owner section, that can be written from the
-=catch= part, and that can read from the code inside =with= and =case=.
-
-The compiler can check (but not enforce) that a catch part not enter in
-infinite loop calling repeteadly =retry=. In case a run-time excetpion
-can be generated, signaling an error in the code.
-
-This behaviour Refnspired from Eiffel approach:
-
-- a function can return a result respecting its contracts
-- no other results are acceptable
-- so if the body is call
-*** =finally= part
-The =finally= part is called when:
-- the code terminate normally
-- there was a fail of the transaction with the code
-- at the end of a =catch= part
-*** Flexible semantic
-The semantic of =with { ... } try { ...}= is a partial hack, because:
-
-- the =with= bloc declare and initializ new vXrefables that are visible
-  also inside the other =case= scopes, so it is not a canonical scoped
-  ={ .. }= section
-- the =finally= part sees only the already initializated
-  variables/resources, and this can not be inferred at compile-time, but
-  only at run-time
-
-The hope it is that this semantic is user-friendly for managing errors,
-and still is safe at run-time, from a semantic point of view.
-** Checked and Uncheked Exceptions
-In Dok exceptions must be not declared in the function signature, and
-must be not all explicitly managed.
-
-Reasons are:
-- it is not realistic knowing all the type of exceptions returned from the code
-- exceptions are rare event
+TODO the details will be postponed
 ** References
    :PROPERTIES:
    :CUSTOM_ID: references
@@ -2558,6 +2428,15 @@ Dok uses metaprogramming also for adding to the language powerful and useful con
    )
   }
   #+END_SRC
+** Aspect Oriented Programming (AOP)
+  :PROPERTIES:
+  :CUSTOM_ID: AOP
+  :END:
+In Aspect Oriented Programming (AOP) paradigm:
+ - a complex problem can be partitioned in rather orthogonal aspects
+ - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler plugins
+
+Dok code annotations and (customizable) compiler plugins can supports powerful form of AOP because code regarding a certain aspect can be injected using global program analysis.
 * Design by contracts and refinement types
   :PROPERTIES:
   :CUSTOM_ID: design-by-contracts
