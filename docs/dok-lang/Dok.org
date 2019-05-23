@@ -1817,7 +1817,7 @@ Exception handling:
 The restoring of the system state after an exception is a very delicate and difficult thing to do because exceptions can happen in any point of the code, and so the variants to take in consideration are too much. For solving this problem Dok follows these approaches:
 - in case of values they can be restored automatically using the nested transaction semantic
 - in case of impure actions theirs rollback is managed by Dok compiler plugins that can analyze the code and according the used instructions, the developer annotations and the developer customizations can apply the correct strategy. Also retry or rethrow strategy is decided using Dok compiler plugins. 
-- also [[resources are managed in the same way, see #resource_management]]
+- also resources are managed in the same way, see [[#resource_management]]
 
 During exception escalation the parent supervisor will be advised of the stack of exceptions and it will be informed if the children has managed the exception restoring a consistent state or the state at the children level is potentially inconsistent. 
 

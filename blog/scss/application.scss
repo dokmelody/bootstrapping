@@ -40,6 +40,11 @@ html, body {
     border-bottom: solid 1px #ddd;
     margin: 0;
     padding: 0;
+
+    a {
+      text-decoration: none;
+    }
+
     #title {
       text-align: center;
       font-size: 3em;
@@ -51,6 +56,7 @@ html, body {
       margin: 0;
       padding: 0;
     }
+
     #nav {
         text-align: center;
         font-size: $font-size;
@@ -60,11 +66,8 @@ html, body {
         line-height: 1.5em;
         margin-top: 1em;
 
-        a {
-            text-decoration: none;
-        }
-     }
-   }
+    }
+  }
 }
 
 /* This is the section containing all articles */
