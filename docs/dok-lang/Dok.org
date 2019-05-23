@@ -138,9 +138,17 @@ Dok design follows these guidelines:
 - advanced Dok code is compiled to Dokk that is a kernel version of Dok with a simplified C-like semantic, where the cost of the operations is intuitive
 - effects of metaprogramming analysis and transformation rules must be always inspectable from the user using the DokMelody IDE
 
-Dok programs are preferably developed using progressive refinements from high-level code to low-level code, in particular following an Aspect Oriented Programming (AOP) approach:
- - a complex problem can be partitioned in rather orthogonal aspects
- - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler plugins
+Dok programs can follow an Aspect Oriented Programming (AOP) approach:
+- a complex problem can be partitioned in rather orthogonal aspects
+- each aspect can be implemented extending previous code with the details of the aspect, and/or adding meta-annotations, and/or adding compiler plugins that can analyze globally the program and inject functionalities
+
+Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
+- high-level code does not contain irrelevant low-level details, and so it is more compact and comprehensible respect complete code with all implementation details
+- low-level code can extend or implement parent high-level code specifying the missing low-level details
+- high-level code is the specification and low-level code is the implementation
+- different low-level implementations of the same high-level specification can be created, for supporting different run-time environments or system constraints (e.g. real-time systems, systems with small data sets that can stay in RAM, systems with big data sets requiring a DBMS, and so on)
+
+Using the same techniques for progressive refinements, Dok programs can support different branches of the same code base, i.e. derive different version of an application from the same code base.
 
 Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
 
@@ -483,7 +491,7 @@ Assert {
   }
 #+END_SRC
 *** ~Stream~
-In Dok a container has usually only a finite number of elements, because Dok has no pervasive supports for lazy evaluation like Haskell or codada tyes like Idris. In Dok containers with potentially infinite elements are managed using streams, or producer/consumer oriented DSL.
+In Dok a container has usually only a finite number of elements, because Dok has no pervasive supports for lazy evaluation like Haskell or codada types like Idris. In Dok containers with potentially infinite elements are managed using streams, or producer/consumer oriented DSL.
 
 Dok follows this approach because it simplifies the semantic of the code (i.e. lazy semantic can obfuscate the run-time behavior of code), and because it should be explicit in the code when there are streams instead of normal containers.
 
@@ -1791,34 +1799,29 @@ Exceptions are unexpected error conditions like:
 - network problems
 - etc..
 
-An excetpion is not managed by a =try-else= branch because it is not an expected branch of computation but it is an unexpected error to manage.
+An exception is not managed by a =try-else= branch because it is not an expected branch of computation but it is an unexpected error to manage.
 
 Dok joins the approach of Eiffel cite:meyer1997object with the approach of the Actor model cite:armstrong_making_nodate.  
 
 Like in Eiffel the preferred way for managing an exception is trying to fix the (transient) problem and then recall the interrupted block of code from the beginning. This implies that the exception handling code can not calculate the result of the function using a different code path, but can only fix things. So the semantic of the original code path is fully respected. 
 
-Another valid approach is rethrowing the exception to the parent block. The rethrowed exception can be a generic error exception or an exception with more details. The parent block will receive a stack of exceptions, and it can use this information mainly for log-reporting.
+Another valid approach is re-throwing the exception to the parent block. The re-throwed exception can be a generic error exception or an exception with more details. The parent block will receive a stack of exceptions, and it can use this information mainly for log-reporting.
 
-Exceptions in Dok like in Eiffell can not be ignored/masked.
+Like in Eiffel, exceptions can not be ignored/masked.
 
 Exception handling:
 - must stop normal execution of code in case of errors
 - must restore the system to a reliable state where invariants are respected
 - can retry the operation or must abort it signaling the problem to the system/user
 
-The restoring of the system is a very delicate and difficult thing to do because exceptions can happen in any point of the code, and so the variants to take in consideration are too much. For solving this problem Dok follows these approaches:
+The restoring of the system state after an exception is a very delicate and difficult thing to do because exceptions can happen in any point of the code, and so the variants to take in consideration are too much. For solving this problem Dok follows these approaches:
 - in case of values they can be restored automatically using the nested transaction semantic
-- in case of impure actions theirs rollback is managed by Dok compiler plugins that can analyze the code and according the used instructions, the developer annotations and the developer customizations can apply the correct strategy
-
-Also retry or rethrow strategy is decided using Dok compiler plugins. 
+- in case of impure actions theirs rollback is managed by Dok compiler plugins that can analyze the code and according the used instructions, the developer annotations and the developer customizations can apply the correct strategy. Also retry or rethrow strategy is decided using Dok compiler plugins. 
+- also [[resources are managed in the same way, see #resource_management]]
 
 During exception escalation the parent supervisor will be advised of the stack of exceptions and it will be informed if the children has managed the exception restoring a consistent state or the state at the children level is potentially inconsistent. 
 
-The Dok code is mainly free from exception handling branch, and all these details are managed using compiler plugins and meta annotations.
-
-The rationale it is that in case of exceptional problems there are usually well defined and generic strategies to follow (e.g. rollback databases connections, retry a network connection a certain number of times, etc..) and these strategies can be coded in one place, instead of being repeated in all the code. This is a form of [[#AOP]].
-
-TODO the effective implementation and library support is postponed
+So the Dok code is mainly free from exception handling branch, and all these details are managed using compiler plugins and meta annotations. The rationale it is that in case of exceptional problems there are usually well defined and generic strategies to follow (e.g. rollback databases connections, retry a network connection a certain number of times, etc..) and these strategies can be coded in one place, instead of being repeated in all the code. This is a form of [[#AOP]]. The code become both more compact and more robust.
 * Impure statements
   :PROPERTIES:
   :CUSTOM_ID: impure-statements
@@ -1919,14 +1922,19 @@ Assert {
   #:NOTE: the `!!` action was not rollbacked
 } 
 #+END_SRC
-** Exceptions and resource management 
-Resources are initializated, used and released. In case of exceptions they can be released in the normal way or in some ad-hoc way according the type of exceptions and the operations done on the resource before the exception.
+** Resource management 
+  :PROPERTIES:
+  :CUSTOM_ID: resource_management 
+  :END:
+Resources are:
+- initialized using explicit code
+- used for completing a task
+- released by customisable compiler plugins, after task completion or interruption
 
-Like in case of [[#exceptions]] the resources are finalized both in normal case and in case of exception from custom compiler plugins. This because the resource logic management is usually common for every type of resource, or type of application and it can be specified only one time. This is a form of [[#AOP]].  
-
-Concretely resources in Dok are explicitely acquired but implicitely released.
-
-TODO the details will be postponed
+The release is managed by compiler plugins because:
+- it is often boiler-plate code
+- the type of release can depend from the type of exception, from the state of the acquired resource, and other run-time (i.e. dynamic) conditions, so it is part of [[#exceptions]] handling.
+- explicit release code can be not well structured code because exceptions can happen in too much places
 ** References
    :PROPERTIES:
    :CUSTOM_ID: references
@@ -2437,6 +2445,8 @@ In Aspect Oriented Programming (AOP) paradigm:
  - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler plugins
 
 Dok code annotations and (customizable) compiler plugins can supports powerful form of AOP because code regarding a certain aspect can be injected using global program analysis.
+
+Dok favours a layered implementation: from high-level code to low-level code. When aspects implementation is not perfectly orthogonal (i.e. implementation details of one aspect influence the implementation of another aspect), there can be high-level layers where the two aspects are nearly completely orthogonal, and intertwined implementation details can be specified only at lower level.
 * Design by contracts and refinement types
   :PROPERTIES:
   :CUSTOM_ID: design-by-contracts
