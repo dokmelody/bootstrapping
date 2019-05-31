@@ -1491,14 +1491,13 @@ Assert {
 }
 #+END_SRC
 ** Higher order functions
-  Dok supports functions as first-class-citzien in a limited way respect functional programming languages because for
-  complex cases Dok favours metaprogramming and generative-code respect advanced compositions of functions.
+In Dok functions can be passed as arguments. This allows a lot of useful functional programming patterns. 
 
-  In particular Dok can use functions as arguments of other functions, but *not*:
-  - functions as results of other functions
-  - function currying
-  - closures
-  - functions parameters with more arguments than `self`
+In Dok functions can see the environment where they are defined (i.e. their lexical scope), so they supports closures. This is useful also for actions like ~Any*!forEach~ because they can change the variables of their parent environment.
+
+Dok does not supports currying of functions (i.e. a function in Dok accepts a tuple as argument and return a result of a certain type that is not a function itself), and it does not support functions returned as results of other functions. Functional code using these advanced patterns is written in Dok using meta-programming tecninques, i.e. generating (DSL) code.  
+
+Some example of higher-order functions usage:
 
  #+BEGIN_SRC fundamental :tangle yes
  Assert {
@@ -2662,7 +2661,6 @@ TODO see also [[map-reduce]]
   :PROPERTIES:
   :CUSTOM_ID: knil
   :END:
-
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
