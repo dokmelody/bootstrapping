@@ -1285,7 +1285,10 @@ In cite:bruce2003some there is the "expression problem" that is a relatively sim
   :PROPERTIES:
   :CUSTOM_ID: functions
   :END:
-In Dok a function is a property of a type wich value depends from the ~self~ object (i.e. its properties), the params of the function and the function body.
+In Dok a function is a referential transparent method of an object which value depends from the ~self~ object, the arguments of the function and the function body. 
+
+In Dok every function must be a method of a type, so it must have the ~self~ object, i.e. there can not be functions with only arguments, but without a ~self~ object.
+
 #+BEGIN_SRC fundemantal :tangle yes
 Assert {
 
@@ -1293,13 +1296,18 @@ Assert {
     birthDay::Date
 
     age(at::Date) --> Int {
+      #: Calculate the age of a person
+
+      #:NOTE: `self` is the object of the function.
+      #       `at` is an argument of the function.
+
       at.year - self.birthDay.year
       #:NOTE: the last expression of a body is its result.
     }
   )
 }
 #+END_SRC
-
+*** Side effects
  A function can declare local variables and types and modify them.
  All these changes are transparent from function callers,
  because they have no side-effects, and they are used only for
@@ -1308,10 +1316,10 @@ Assert {
  A function can not modify the value of its arguments. They are const
  (read-only) variables.
 
- A function can not modify the properties of the =self= subject. They are
+ A function can not modify the properties of the =self= object. They are
  const (read-only) variables.
 
- A function can change (only) the private properties of its =self= subject.
+ A function can change (only) the private properties of its =self= object.
  They can change them for caching results, or other optimizations. But
  the function code must mantain referential transparency: calling a
  function with the same arguments, and with the same non private
@@ -1321,7 +1329,20 @@ Assert {
 ** Recursion
 Functions can be recursive. Tail call recursive functions are guarantee to not waste memory because they are equivalent to imperative loops.
 
-~this~ is a reserved word, and ~this(x, y)~ calls the current function.
+~this~ is a reserved word, and ~this(x, y)~ calls the current function. For example:
+
+#+BEGIN_SRC fundemantal :tangle yes
+Assert {
+  Int.factorial --> Int {
+    try {
+      self == 0
+      1
+    } else {
+      self * (n - 1).this
+    }
+  }
+}
+#+END_SRC
 ** Binary operators
   Operators are functions that can be used infix. 
   They must start with a symbolic character like ~=+!-.~ and so on.
@@ -1371,46 +1392,207 @@ Assert {
   # We are calling operator `+` using the prefix form, like a normal function
 }
 #+END_SRC
-** Pure actions
+** Update actions
    :PROPERTIES:
-   :CUSTOM_ID: pure-actions
+   :CUSTOM_ID: update-action
    :END:
- A pure action is an implicit pure function returning a new copy of the
- self object with different values.
+ An update-action is an implicit pure function returning a new copy of the
+ self object but with different values. It is equivalent to modifying the ~self~ object in mainstream imperative languages. 
 
- Pure actions are used because sometimes code is more readable describing
- changes of self property values, rather than calling pure functions
- returning a new copy of the object. But in any case pure actions are
- only a different way for writing pure immutable functions.
+ Pure actions are used because the code is more readable, but they are only syntax sugar for pure immutable functions returning
+ a new version of the ~self~ object.
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert { 
   Person --> ( 
     name::String 
     
-    !setName(n::String) --> Self {
+    !setName(n::String) {
        #:NOTE: prefix ``!`` is mandatory
-       #:NOTE: the ``Self`` return type is mandatory. 
+       #:NOTE: this declaration is equivalent to
+       # > setName(n::String) --> Self 
 
        self.name:= n
        # properties of ``self`` can be changed from pure actions.
+    }
 
-       # For making it explicit that is a pure action, self must be returned, as result of the pure action.
-       self
+    addMrToTheName --> Self {
+      #:NOTE: a pure function returning `Self` is an alternative way for defining an update action
+      r::= self
+      r!setName("Mr. " ++ r.name)
+      r
+
+      #:NOTE: an equivalent and more compact way to define the body is
+      # > self.setName("Mr. " ++ r.name)
     }
  )
 
  p1::=Person
  p1!setName("Massimo")
+ #:NOTE: equivalent to 
+ # > p1:= p1.setName("Massimo")
 
  p2::= p1
  p2!setName("Max")
 
  p1.name == "Massimo"
- p2.name == "Max" 
+ p2.name == "Max"
+
+ # an equivalent way to call update actions as normal functions
+ p2.setName("Maximiliam").is(Person)
+ p2.setName("Maximiliam").name == "Maximiliam"
+
+ # but in this case `p2` is not affected
+ p2.name == "Max"
+
+ # I can call a pure function returning `Self` like an update action:
+ p2!addMrToTheName
+ p2.name == "Mr. Max"
+}
+#+END_SRC
+** Pure actions
+   :PROPERTIES:
+   :CUSTOM_ID: pure-actions
+   :END:
+ A pure action is a rollbackable action (according the [[nested-transaction-semantic]]) that can change the properties of the `self` object, the variables of its parent lexical scope and that can return a value of the declared type. If no return type is specified, then the action return no value.
+
+Whenever possible as suggested by cite:meyer1997object in the command-query-separation principle, a pure action should return nothing, but only change the environment. The effects of the action can be then inspected using functions of the ~self~ object. But there can be API requiring actions returning values.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  IntStream --> (
+    _curr::Int := -1
+
+    !getNext --> Int {
+      #: Return current number and advance the counter.
+      #:NOTE: this is not the suggested API to use, beacuse there is no command-query-separation.
+      
+      self._curr:= self._curr + 1
+      self._curr  
+    }
+
+    !next {
+      #: Advance the counter
+ 
+      self._curr:= self_curr + 1
+    } 
+
+    get --> Int {
+      #: Return the position of the counter.
+      
+      self._curr
+    } 
+
+  )
+
+  s::= IntStream
+  s!getNext== 0
+  s!getNext == 1 
+
+  # Use the command-query-separation API
+
+  s.get == 1
+  s!next
+  s.get == 2
+  s.get == 2
+  s!next
+  s.get == 3
+  s.next == 4
+  s.next == 4 #:NOTE: called as pure function
 
 }
 #+END_SRC
+** Nested functions
+  :PROPERTIES:
+  :CUSTOM_ID: nested-function
+  :END:
+  A function can have nested functions. A nested functions must have some type as `self` object, and it can have optional arguments. 
+
+  A nested function can see the the arguments and the local variables of its parent function.
+  So it supports closure. 
+  
+  A nested function can invoke functions of the parent function using something like ~super.someFunctionName(someArgument)~.
+
+  A nested function is visible only inside the lexical scope of the function defining it.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  P --> (
+    p::Int
+
+    f(x::Int) --> Int {
+      Int.g(y::Int) --> Int { 
+        x + y + self + super.p
+      }
+      (self + 1).g(self + 2)
+    }
+  )
+
+  c::P
+  c.p:= 5
+  c.f(2) == 2 + (2 + 2) + 3 + 5
+}
+#+END_SRC
+** Nested actions
+  :PROPERTIES:
+  :CUSTOM_ID: nested-action
+  :END:
+A nested actions is like a [[nested-function]] but it can change the variables of the parent function, and the properties of the object of the parent function.
+
+In case action is invoked inside a domain specific language in which the order of execution is not deterministic and so it is not clear the order of changes of the parent variables and properties, the compiler will signal an error. The rational is that nested actions are support actions, and so their semantic/effect must be clear.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  Int*.mySum --> Int {
+    s::= 0
+    self!forEach { 
+      s:= s + self 
+      #:NOTE: this is an anonymous nested action reading the Int `self` object,
+      #       and modifying the `s` parent variable
+    }
+    s
+    #:NOTE: the effects of the anonymous nested action are clear because `s` variable is only modified from it
+  }
+
+  (1, 2, 3)*.mySum == 6
+}
+#+END_SRC
+** Higher order functions
+In Dok only simple functions of type ~Fun(From::Type, To::Type)~ (i.e. functions accepting only ~self~ object as argument) can be passed as arguments of other higher-order functions. Despite this limitation, a lot of useful functional programming patterns are supported by Dok. 
+
+In Dok functions can see the environment where they are defined (i.e. their lexical scope), so they supports closures. This is useful also for actions like ~Any*!forEach~ because they can change the variables of their parent environment.
+
+Dok does not supports currying of functions (i.e. a function in Dok accepts a tuple as argument and return a result of a certain type that is not a function itself), and it does not support functions returned as results of other functions. Functional code using these advanced patterns is instead written using meta-programming tecninques, i.e. generating (DSL) code.  
+
+Some example of higher-order functions usage:
+
+ #+BEGIN_SRC fundamental :tangle yes
+ Assert {
+
+   Any*.filter(condition::Fun(From::Self, To::Bool)) --> Self* {   
+     #: Create a sequence with only the elements respecting the filter condition.
+   }
+
+   Any*.map(do::Fun(From::Self, To::Type)) --> To* {   
+     #: Create a sequence applying to every element the `do` transformation
+   }
+
+   Assert {
+     x::= (1, 2, 3, 4, 5, 6)*
+    
+     x.filter({self > 3}) == (4, 5, 6)*
+     x.filter({self > 4}).map({self.String}) == ("5", "6")*
+     #:NOTE: the anynomous function can work only on implicit `self` argument 
+
+     # Instead of `({...})` an alternative syntax for specifying anonymous functions is 
+ 
+     x.filter {
+       self > 3
+     } == (4, 5, 6)* 
+   }
+ }
+ #+END_SRC
 ** Incremental update of function result
    :PROPERTIES:
    :CUSTOM_ID: incremental-updates-listeners
@@ -1456,75 +1638,6 @@ Assert {
   io!printLn(p.totEarns.String)
 }
 #+END_SRC
-** Nested functions
-  A function can have nested functions, visible only inside its scope.
-  They share the same =self= object.
-
-  A nested function can use =self= properties, and the arguments of its
-  parent function, but not local variables, because they can change
-  values, and it is not clear the final behaviour. In case it is better
-  pass local variables of the parent function as explicit arguments of the
-  nested function.
-
-  Mainly for testing porpouse it is possible accessing the nested
-  functions, passing also the parameters of the parent function, that are
-  usually implicit during normal nested function invocation.
-
-#+BEGIN_SRC fundamental :tangle yes
-Assert {
-  P --> (
-    p::Int
-
-    f(x::Int) --> Int {
-      g(y::Int) --> Int { 
-        x + y + self.p
-      }
-      g(x * 2)
-    }
- )
-
- c::P
- c.p:= 5
-
- c.f(2) == 2 + 4 + 5
- c.f(2).g(3) == 2 + (2 + 3) + 5
-}
-#+END_SRC
-** Higher order functions
-In Dok functions can be passed as arguments. This allows a lot of useful functional programming patterns. 
-
-In Dok functions can see the environment where they are defined (i.e. their lexical scope), so they supports closures. This is useful also for actions like ~Any*!forEach~ because they can change the variables of their parent environment.
-
-Dok does not supports currying of functions (i.e. a function in Dok accepts a tuple as argument and return a result of a certain type that is not a function itself), and it does not support functions returned as results of other functions. Functional code using these advanced patterns is written in Dok using meta-programming tecninques, i.e. generating (DSL) code.  
-
-Some example of higher-order functions usage:
-
- #+BEGIN_SRC fundamental :tangle yes
- Assert {
-
-   Any*.filter(condition::Fun(From::Self, To::Bool)) --> Self* {   
-     #: Create a sequence with only the elements respecting the filter condition.
-   }
-
-   Any*.map(do::Fun(From::Self, To::Type)) --> To* {   
-     #: Create a sequence applying to every element the `do` transformation
-   }
-
-   Assert {
-     x::= (1, 2, 3, 4, 5, 6)*
-    
-     x.filter({self > 3}) == (4, 5, 6)*
-     x.filter({self > 4}).map({self.String}) == ("5", "6")*
-     #:NOTE: the inline created functions can work only on implicit `self` parameter 
-
-     # Instead of `({...})` an alternative syntax for specifying functions is 
- 
-     x.filter {
-       self > 3
-     } == (4, 5, 6)* 
-   }
- }
- #+END_SRC
 * Nested transactions semantic (TR)
   :PROPERTIES:
   :CUSTOM_ID: nested-transaction-semantic
