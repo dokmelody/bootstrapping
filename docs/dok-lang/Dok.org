@@ -1,4 +1,4 @@
-#+DATE: 2019-04-23
+#DATE: 2019-04-23
 #+TITLE: Dok Programming Language v0.1
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
@@ -581,6 +581,24 @@ Only most specific leaf subtypes can be instantied directly, all other parents o
   )
 } 
 #+END_SRC
+** Overriding
+Nested type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[type_conformance]]).
+
+For making explicit that a property or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
+
+In case an overriding method want call the parent method, it can use the syntax ~self.super()~. ~super~ is a reserved keyword.
+
+Note that also ~this~ is a reserved keyword, and ~self.this()~ call the current method.
+
+~super~ is also used for acessing the ~self~ property inside a nested lexical scope. See this example:
+
+#+BEGIN_SRC fundamental :tangle no
+Assert {
+  l1::= (1, 2, 3, 4, 5, 6)*
+  l2::= (8, 10, 50)*
+  l1.filter({l2.any({ self == super * 2 })}) == (4, 5)*  
+}
+#+END_SRC
 ** Type references
 If there are no name clashes in the types, Dok can use short type names like ~B~ instead of ~/A/B~. The rules are:
 - =/Self/T/G= for referring to some nested internal variant type,
@@ -1126,6 +1144,9 @@ Assert {
 } 
 #+END_SRC
 ** Type conformance
+  :PROPERTIES:
+  :CUSTOM_ID: type_conformance
+  :END:
 A type =B= is comformant to type =A= when you can pass a value of type =B= instead of a value of type =A= as argument of a function or of a property without breaking implicit and explicit code contracts, and without generating run-time type errors.
 
 Type conformance is tricky in OOP languages with generic types because safe but conservative type checking rules can be in conflict with expressive OOP code, and on the contrary too much liberal rules can lead to unsafe code with type errors at run-time. It is tricky also because some rules can involve global code analysis and not local analysis. At current stage I'm not sure if the Dok approach is good-enough, only time and usage wil tell. The approarch is inspired to the ideas of cite:Castagna:1995:CCC:203095.203096 and Eiffel cite:meyer1997object.
@@ -1339,6 +1360,10 @@ Assert {
  properties must return always the same result. So the access to private
  properties are only internal hidden optimizations without external
  side-effects.
+** Recursion
+Functions can be recursive. Tail call recursive functions are guarantee to not waste memory because they are equivalent to imperative loops.
+
+~this~ is a reserved word, and ~this(x, y)~ calls the current function.
 ** Binary operators
   Operators are functions that can be used infix. 
   They must start with a symbolic character like ~=+!-.~ and so on.
@@ -2519,6 +2544,7 @@ Assert {
    because they are associated to code, not to function semantic
 
 * TODO Concurrency
+* TODO Knil
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
@@ -2868,7 +2894,7 @@ def factorials():
         n, f = n + 1, f * (n + 1)
 #+END_EXAMPLE
 
-In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations. For example calling ~FunWithState~ inside ~mapWithState~. 
+In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations. For example calling ~EvalWithState~ inside ~map~. 
 
 #+BEGIN_SRC fundamental :tangle yes
 
@@ -2882,21 +2908,29 @@ In Dok we have no lazy evaluation but the compiler is free to produce efficient 
 
 Assert {
 
-  FunWithState(From::Any, To::Any) --> (
+  EvalWithState(From::Any, To::Any) --> (
     #: A function that during evaluation can mantain an internal state
 
     !eval(x::From) --> To
   )
 
-  Any*.map(fun::FunWithState(From: Any)) --> fun.To* {
-    @Compiler
-    #: The resulting collector can be of different type respect the self container.
-    #:NOTE: the implementation is optimized by the compiler according different
-    #       rules
+  Any*.map(fun::EvalWithState(From: Self)) --> fun.To* {
+    #:NOTE: the implementation can be optimized by the compiler according differen rules, 
+    #       and it can became a stream-like implemantation.
+
+    r::= fun.To*
+    repeat {
+      while {
+        x1::= self.get 
+      }
+      x2:= fun!eval(x1)
+      r!add(x2)
+    }
+    r
   }
 
   Int*.factorial --> Int* { 
-   f::FunWihtState(From:Int, To:Int):(
+   f::EvalWihtState(From:Int, To:Int):(
      _n::= 0
      _f::= 1
      !eval(x:Int) -> Int {
