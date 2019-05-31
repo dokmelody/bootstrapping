@@ -126,6 +126,9 @@ Assert {
 }
 #+END_SRC
 * Design philosophy
+  :PROPERTIES:
+  :CUSTOM_ID: design-philosophy
+  :END:
 Dok is a data transformation and metaprogramming (i.e. code is data) language.
 
 Dok design follows these guidelines:
@@ -490,58 +493,13 @@ Assert {
     a[1] == a.get(i)
   }
 #+END_SRC
-*** ~Stream~
-In Dok a container has usually only a finite number of elements, because Dok has no pervasive supports for lazy evaluation like Haskell or codada types like Idris. In Dok containers with potentially infinite elements are managed using streams, or producer/consumer oriented DSL.
-
-Dok follows this approach because it simplifies the semantic of the code (i.e. lazy semantic can obfuscate the run-time behavior of code), and because it should be explicit in the code when there are streams instead of normal containers.
-
-#+BEGIN_SRC fundamental :tangle yes
-
-  Stream(Of::Any) --> (
-    #: Produce a potentially infinite stream of values of the same type
-    @Abstract
- 
-    !next --> Self {
-      #: Prepare the stream for the next value.
-      #  Fail if the stream is fully consumed
-      @Abstract
-    } 
-     
-    get --> Self.Of {
-      #: Get the current element of the stream
-      @Abstract
-    }
-  )
-
-  Assert {
-
-    OddNumbers --> Stream(Of:Int) (
-      curr::= 0
- 
-      !next -> { self.curr: ~ + 2 }
-
-      get -> Int { self.curr }
-    )
-
-    r::= 0 
-    s::= OddNumbers
-    repeat {
-      while { s.get < 8 }
-      r:= r + s.get
-      s!next
-    }
-
-    r == 0 + 2 + 4 + 6
-  }
-}
-#+END_SRC
 ** ~T*~ ~T+~
-~T*~ is the type of a value containing zero or more instances of ~T~ type. ~T+~ is like ~T*~ but it had to contain at least one instance, i.e. it can not be empty.
+ ~T*~ is the type of a value containing zero or more instances of ~T~ type. ~T+~ is like ~T*~ but it had to contain at least one instance, i.e. it can not be empty.
 
-In Dok ~T*~ concrete type can be something like ~List(T)~, ~Stream(T)~, ~Array(T)~. 
-Then the compiler can infer the minimal and more efficient data structure to use according the real usage in the code and/or hints of the programmer. 
+ In Dok ~T*~ concrete type can be something like ~List(T)~, ~Stream(T)~, ~Array(T)~. 
+ Then the compiler can infer the minimal and more efficient data structure to use according the real usage in the code and/or hints of the programmer. 
 
-This compact form is used because it simplifies the specification of syntax/grammars.
+ This compact form is used because it simplifies the specification of syntax/grammars.
 * Object Oriented Programming (OOP)
 Dok supports object-oriented programming (OOP), but in a different way
  respect traditional OOP languages (also because every OOP has his unique philosophy). The type relationships used by Dok are:
@@ -1559,6 +1517,12 @@ Assert {
      x.filter({self > 3}) == (4, 5, 6)*
      x.filter({self > 4}).map({self.String}) == ("5", "6")*
      #:NOTE: the inline created functions can work only on implicit `self` parameter 
+
+     # Instead of `({...})` an alternative syntax for specifying functions is 
+ 
+     x.filter {
+       self > 3
+     } == (4, 5, 6)* 
    }
  }
  #+END_SRC
@@ -2542,9 +2506,163 @@ Assert {
    the parent). Doing so if the caller expects some properties for the result, these properties are met also from the subtype.
  - =@Usually=, =@Assert= of the are not considered any more applicable
    because they are associated to code, not to function semantic
+* Map-Reduce programming model
+   :PROPERTIES:
+   :CUSTOM_ID: map-reduce
+   :END:
+TODO generalize adopting idea from cite:wickham_split-apply-combine_2011
 
+According cite:dean_mapreduce:_2008 "MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate key/value pairs, and a reduce function that merges all intermediate values associated with the same intermediate key." 
+
+Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[knil]] for more details about management of relational and graph databases, using the map-reduce model.
+
+According Dok [[design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
+
+In case of complex data transformations, in Dok map-reduce and functional data transformation algorithms are preferred to logical and declarative queries (e.g. SQL), because in many cases writing and comprehending this type of code is easier, and there is already a support for analyzing and optimizing them.
+
+** ~map~
+~map~ applies a side-effect free function to every element of a container, and return a container with the modified elements. 
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  (1, 2, 3)*.map({ self * 2 }) == (2, 4, 6)*
+
+  l::= (1, 2, 3)*.map {
+    r::= (10, 20)*.map {
+      self + super
+      #:NOTE: `super` is the `self` of the parent lexical scope
+    }
+    r.sum
+  }   
+
+  l == ((11 + 21), (12 + 22), (13 + 23))*
+}
+#+END_SRC
+** ~!forEach~
+~!forEach~ repeat an action for each element of a container. It returns no result, and its implicit result are the changes to the parent state. In case of failure the entire ~forEach~ will fail.
+
+#+BEGIN_SRC fundamental :tangle yes
+
+Assert {
+  Int*.mySum --> Int {
+    s::= 0
+    self!forEach { 
+      s:= s + self 
+    }
+    s
+  }
+
+  (1, 2, 3)*.mySum == 6
+}
+#+END_SRC
+
+~!forEachTry(action)~ is equivalent to ~!forEach { try { action } }~
+** Fold/Reduce
+~fold~ in Haskell corresponds to the ~reduce~ part of the map-reduce programming model. Dok does not support directly fold-like functions. The reduce part is supported using ~do~ and ~!forEach~, like in this example:
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  (1,2,3)*.do {
+    s::= 0
+    self!forEach {
+      s:= s + self
+    }
+    s
+  } == 6
+}
+#+END_SRC
+
+This code is pure because transaction logic has no side-effects, but it has an imperative form. Dok favours code with explicit state, instead of state passed as function argument like in Haskell fold.
+** Streams
+   :PROPERTIES:
+   :CUSTOM_ID: streams
+   :END:
+In Dok a container has usually only a finite number of elements, because Dok has no pervasive supports for lazy evaluation like Haskell or codada types like Idris. In Dok containers with potentially infinite elements are managed using streams.
+
+Dok follows this approach because it simplifies the semantic of the code (i.e. lazy semantic can obfuscate the run-time behavior of code).
+
+Streams are containers, so they supports also map-reduce programming model. At the same time containers supports stream-based API, and many container convenience functions are written using this API, so they have a nice behaviour in case of big-data structures, because they consume the right amount of data.
+
+#+BEGIN_SRC fundamental :tangle yes
+
+  Stream(Of::Any) --> (
+    #: Produce a potentially infinite stream of values of the same type
+    @Abstract
+ 
+    !next --> Self {
+      #: Prepare the stream for the next value.
+      #  Not call at the beginning of the stream.
+      @Abstract
+    } 
+     
+    get --> Self.Of {
+      #: Get the current element of the stream.
+      #  Fail if there are no any more elements.
+      @Abstract
+    }
+  )
+
+  Assert {
+
+    OddNumbers --> Stream(Of:Int) (
+      _curr::= 0
+ 
+      !next -> { self._curr: ~ + 2 }
+
+      get -> Int { self._curr }
+    )
+
+    r::= 0 
+    s::= OddNumbers
+    repeat {
+      while { s.get < 8 }
+      r:= r + s.get
+      s!next
+    }
+
+    r == 0 + 2 + 4 + 6
+  }
+}
+#+END_SRC
+** Convenience functions
+The usual functions on containers like ~filter~, ~take~ and so on are defined. For example:
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  
+  Any*.filter(cond::Fun(From::Self, To::Bool)) --> Self* {
+    r::= Self*
+    self!forEachTry {
+      self.cond
+      r!add(self)
+    }
+    r
+  }
+
+  (1, 2, 3, 4)*.filter(isEven) == (2, 4)* 
+
+  Any*!takeWhile(cond::Fun(From::Self, To::Bool)) --> Self* {
+    #: Consume a stream not completely, but until `cond` is respected.
+
+    r::= Self*
+    repeat {
+      while { self.get.cond }
+      r!add(self.get)
+      self!next
+    }
+    r
+  }
+
+  (1, 2, 3, 4)*.filter({self < 3}) == (1, 2)*
+}
+#+END_SRC
 * TODO Concurrency
+TODO see also [[map-reduce]]
 * TODO Knil
+  :PROPERTIES:
+  :CUSTOM_ID: knil
+  :END:
+
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
