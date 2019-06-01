@@ -71,7 +71,7 @@ Assert {
     4.factorial1 == 4.factorial2 == 4.factorial3
   }
 
-  Expr(To::Any) --> (
+  Expr(To::Type) --> (
     #: This is a new type `Expr` used for representing expressions.
     #  The param `To` represent the result of the expression evaluation.
 
@@ -352,7 +352,7 @@ Assert {
      )
    )
 
-   Any --> Maybe(Of::Any) {
+   Any --> Maybe(Of::Self) {
      #: Automatic conversion to Maybe.
      Maybe/Just(self)
    }
@@ -385,7 +385,7 @@ Assert {
      y.just == y == 5
    }
 
-   # Because `Maybe` is used a lot, the compact form `Any?` can be used instead
+   # Because `Maybe` is used a lot, the compact form `Type?` can be used instead
 
    Assert {
      x::Int?
@@ -448,7 +448,7 @@ Assert {
       }
    )
 
-   # Because list is used a lot it can use the compact `Any*` form
+   # Because list is used a lot it can use the compact `Type*` form
    # and the compact ``(x, y, ...)*`` form
 
    Assert {
@@ -914,7 +914,7 @@ Assert {
    :CUSTOM_ID: unnamed-properties
    :END:
 Variables with name =_= are considered unnamed. They are used usually in DSL and metaprogramming code when something has certain properties but it can be ignored because it is never used, for example in parsers for denoting text to parse but discard.
-** Type constructors
+** Value constructors
 Values must be initialized: all fields must be set to an initial
 value, and type invariant must be respected. 
 
@@ -1108,7 +1108,16 @@ Assert {
   )
 }
 #+END_SRC
+** Base types
+~Any~ is the base type from which every type derive:
+- every method of ~Any~ is a method of all other types
+- for every type ~x.is(Any)~ is true
+
+~Type~ represents a generic type in Dok. So an instance of ~Type~ is a type, while an instance of ~Any~ is a value. ~Type~ is mainly used for [[#generics]].
 ** Generic/parametric types
+  :PROPERTIES:
+  :CUSTOM_ID: generics
+  :END:
 Type params are used for defining a (generic/parametric) type template,
 that can be used for defining different instances of the same type using
 different parameters. 
@@ -1532,7 +1541,7 @@ Assert {
       self._curr  
     }
 
-    !next {
+    !next --> {
       #: Advance the counter
  
       self._curr:= self_curr + 1
@@ -1659,7 +1668,7 @@ Some example of higher-order functions usage:
    :END:
 Anonymous functions are services functions with a defined body, but without a name. They are usually used as arguments of higher-order functions.
 
-Anonymous functions are of type ~Fun(From::Any, To::Any)~ and they have only the ~self~ object, but no arguments. 
+Anonymous functions are of type ~Fun(From::Type, To::Type)~ and they have only the ~self~ object, but no arguments. 
 
 They supports closures so they can see the variables of the parent lexical scope.
 
@@ -2137,7 +2146,7 @@ The release is managed by compiler plugins because:
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  CRef(Of::Any) --> (
+  CRef(Of::Type) --> (
      !!share --> Self {
        #: Create a copy of the reference, sharing the same content.
        #  A modification of the contained content, change the content
@@ -2781,11 +2790,11 @@ Streams are containers, so they supports also map-reduce programming model. At t
 
 #+BEGIN_SRC fundamental :tangle yes
 
-  Stream(Of::Any) --> (
+  Stream(Of::Type) --> (
     #: Produce a potentially infinite stream of values of the same type
     @Abstract
  
-    !next --> Self {
+    !next --> {
       #: Prepare the stream for the next value.
       #  Not call at the beginning of the stream.
       @Abstract
@@ -3207,7 +3216,7 @@ def factorials():
         n, f = n + 1, f * (n + 1)
 #+END_EXAMPLE
 
-In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations. For example calling ~EvalWithState~ inside ~map~. 
+In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations.
 
 #+BEGIN_SRC fundamental :tangle yes
 
@@ -3221,42 +3230,19 @@ In Dok we have no lazy evaluation but the compiler is free to produce efficient 
 
 Assert {
 
-  EvalWithState(From::Any, To::Any) --> (
-    #: A function that during evaluation can mantain an internal state
+  FactorialStream --> Stream(Of: Int) (
+    _n = 0
+    _f = 1
 
-    !eval(x::From) --> To
-  )
-
-  Any*.map(fun::EvalWithState(From: Self)) --> fun.To* {
-    #:NOTE: the implementation can be optimized by the compiler according differen rules, 
-    #       and it can became a stream-like implemantation.
-
-    r::= fun.To*
-    repeat {
-      while {
-        x1::= self.get 
-      }
-      x2:= fun!eval(x1)
-      r!add(x2)
+    !next --> {
+      self._n:= ~ + 1
+      self._f:= ~ * self._n
+    } 
+     
+    get --> Int { 
+      self._f
     }
-    r
-  }
-
-  Int*.factorial --> Int* { 
-   f::EvalWihtState(From:Int, To:Int):(
-     _n::= 0
-     _f::= 1
-     !eval(x:Int) -> Int {
-        r::= self._f
-        self._n!increment
-        self._f:= self._f * self._n
-        r
-     }
-   )
-   self.map(f)
-  }
-  #:NOTE: this code works in a correct way also if `Self` is a stream
-  #       because it is all managed by the compilation rules
+  )
 }
 #+END_SRC
 
@@ -3308,7 +3294,7 @@ In Dok:
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
 
- Graph(E::Any, V::Any) --> (
+ Graph(E::Type, V::Type) --> (
    @Abstract
 
    .Edge --> (
