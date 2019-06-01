@@ -76,7 +76,7 @@ Assert {
     #  The param `To` represent the result of the expression evaluation.
 
     /Int(To:Int) --> (x::Int)
-    # This is `Expr/Int` nested variant subtype 
+    # This is `Expr/Int` type variant
     # with the `Expr/Int.x` field of type `Int`
   
     /Bool(To:Bool) --> (b::Bool)
@@ -181,64 +181,10 @@ Assert {
  "three".is(String)
 }
 #+END_SRC
-** Records
-   :PROPERTIES:
-   :CUSTOM_ID: records
-   :END:
-A record is a compound value. It is a set of property-name and property-value associations. 
-#+BEGIN_SRC fundemantal :tangle yes
-Assert {   
-  x::= (i::= 1, s::= "one")
-  x.is(Record)
-
-  x.i == 1
-  x.i.is(Int)
-
-  x.s.is(String)
-  x.s == "one"
-}
-
-Assert {
-  P --> (x::Int, y::Int )
-
-  G --> (p::P, l::Int)
-
-  p1::= P(x:= 1, y: 2) 
-  g1::= G(p: p1, l: 3)
-
-  g1.p.x == 1 && g1.p.y == 2 && g1.l == 3
-
-  p1.x:= 4 
-  #:NOTE: we are saying this `p1:= P(x: 4, y: 2)`
- 
-  p1.x == 4 && p1.y == 2
-
-  g1.p.x == 1 
-  g1.p.x !== p1.x
-  #:NOTE: the variable ``g1`` is unchanged because it is associated to the same old value.
-  #       In a traditional object-oriented programming language, ``g1.p`` contains a reference to ``p1`` 
-  #       and so changing ``p1`` affect also ``g1.p.x``.
-}
-
-Assert {
-  P --> (p::Int)
-  S --> (s::P)
-
-  x::S
-  x.s.p:= 0
-  #:NOTE: this is equivalent to `x:= S(s: P(p: 0))`
-  #       because in Dok I have only values and not references
-
-  x.s.p == 0
-  x.s == P(p: 0)
-  x == S(s: P(p: 0))
- 
-  x == S(P(0))
-  #:NOTE: in case of single fields it is possible omitting the names
-}
-#+END_SRC
 ** Variables
-Dok uses mutable variables like imperative languages, but whenever possible a mutable variable contains values and not references. Doing so there are no reference aliasing problems because the value of a mutable variable depends only from the instructions executed in the same static context of the variable, and not by how at run-time the references are managed.
+A variable is a name used as unique identifier inside an environment and associated (always inside the environment) to a value. The associated value can be changed, so the name variable.
+
+Dok uses mutable variables like imperative languages but they are associated to values and not references. Doing so there are no reference aliasing problems because the value of a mutable variable depends only from the instructions executed in the same static (lexical) context of the variable, and not from the more complex run-time behaviour.
 
 As in functional-programming languages values are used also for managing complex data structures as containers, and not only for basic values like int or string.
 
@@ -280,6 +226,74 @@ Assert {
   # here `x` is not anymore visible (lexical scoping)
 } 
 #+END_SRC
+** Records
+   :PROPERTIES:
+   :CUSTOM_ID: record
+   :END:
+A record is a compound value: it contains associations between field names and field values. Fields in records are like variables in an environment. 
+
+#+BEGIN_SRC fundemantal :tangle yes
+Assert {   
+  x::= (i::= 1, s::= "one")
+  x.is(Record)
+
+  x.i == 1
+  x.i.is(Int)
+
+  x.s.is(String)
+  x.s == "one"
+}
+
+Assert {
+  P --> (x::Int, y::Int )
+  # `P` is a type of record with fields of the specified types.
+
+  G --> (p::P, l::Int)
+  # `G` is the type of a record having the field `p` with type `P`
+
+  p1::= P(x:= 1, y: 2) 
+  g1::= G(p: p1, l: 3)
+  # create two record values of type `P` and `G`
+
+  g1.p.x == 1 && g1.p.y == 2 && g1.l == 3
+  # access value of fields
+
+  p1.x:= 4 
+  #:NOTE: we are saying this `p1:= P(x: 4, y: 2)`
+ 
+  p1.x == 4 && p1.y == 2
+
+  g1.p.x == 1 
+  g1.p.x !== p1.x
+  #:NOTE: the variable ``g1`` is unchanged because it is associated to the same old value.
+  #       In a traditional object-oriented programming language, ``g1.p`` contains a reference to ``p1`` 
+  #       and so changing ``p1`` affect also ``g1.p.x``.
+}
+
+Assert {
+  P --> (p::Int)
+  S --> (s::P)
+
+  x::S
+  x.s.p:= 0
+  #:NOTE: this is equivalent to `x:= S(s: P(p: 0))`
+  #       because in Dok I have only values and not references
+
+  x.s.p == 0
+  x.s == P(p: 0)
+  x == S(s: P(p: 0))
+ 
+  x == S(P(0))
+  #:NOTE: in case of single fields it is possible omitting the names
+}
+#+END_SRC
+** Tuples
+   :PROPERTIES:
+   :CUSTOM_ID: tuple
+   :END:
+A tuple is like a [[record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
+
+Tuples are used mainly as arguments of functions, because functions can be called without specifying the argument name, e.g. ~10.mod(2)~.
 ** Containers as values (Persistent Data Structures)
 Like in functional programming languages, also compound types (e.g. records, containers, etc..) are values.
 
@@ -287,7 +301,7 @@ Containers that are values are called Persistent Data Structures and there are v
 
 The semantic of persistent data structures simplifies the reasoning on code behavior because it suffices to see the scope where a container is used, instead of taking in account also aliasing and its global run-time behaviour.
 
-In case of need Dok supports also references and in-place mutable containers, but they are rarely used.
+Dok supports also references and in-place mutable containers, but they are rarely used.
 
 This is an usage example:
 
@@ -501,54 +515,103 @@ Assert {
 
  This compact form is used because it simplifies the specification of syntax/grammars.
 * Object Oriented Programming (OOP)
-Dok supports object-oriented programming (OOP), but in a different way
- respect traditional OOP languages (also because every OOP has his unique philosophy). The type relationships used by Dok are:
-- nested type variants like ~S/T~ where ~S~ is a variant of the parent type ~T~. They are similar to algebraic sum type in functional programming languages.
-- nested types like ~S.T~ where ~T~ is a distinct type defined inside the namespace of type ~T~.
-- polymorphic interface types like ~T --> S~ where type ~T~ supports/implements the interface ~S~, so ~T.is(S)~ and it can be used where ~S~ is expected
-- hierarchy of types like ~T && S~ where type ~T~ had to support also interface ~S~. 
-** Nested type variants
+Dok supports object-oriented-programming (OOP) but trying to unify it with functional-programming (FP) concepts. You can find (more or less) every OOP feature also in Dok, with the main difference that Dok favours objects as values and not as references.
+
+The terms used from Dok are a mix of OOP and FP terms:
+- type: identify a domain of values having some common logical or physical (i.e. physical storage format) characteristics.
+- value: instance of a type, i.e. a value inside the domain of the type.
+- record: a compound value containing fields. It is like an environment, where fields are variables.
+- tuple: a record where the position of the fields matters.
+- object: like a record, but it can contains also non-mutable methods.
+- method: like a field of an object, but it can have arguments and it have some code that is executed for returning the value associated to it. 
+- function: a method of an object that is referentially transparent (i.e. pure) respect its arguments, the fields and methods of the objects and the variable values of the environment where its object is defined.
+- action:  a method of an object that can update the fields of the objects or the variables of the lexical context in which it is defined. It can optionally also return a value.
+- interface: an object-type with some abstract properties that can be supported from other concrete object-types. 
+- variant type: given a parent object-type, it can have one or more variant types supporting all the methods of the parent type, overriding some of them, or adding new methods. The variant types unifies the OOP idea of inheritance with the FP idea of sum types with variants.
+- inner type: it is a type defined inside the namespace of a parent object-type, and usually defining concepts making sense only related to the owner type. In OOP it is called inner class.
+
+This is a graph for giving an informal idea:
+
+#+BEGIN_SRC dot :file dot_success.png :cmdline -Kdot -Tpng
+digraph {
+  Variable -> Type[label="has"];
+  Variable -> Name[label="identified-by"];
+  Variable -> Value[label="contains"];
+
+  Environment -> Variable[label="contains"];
+
+  Record -> RecordType[label="instance-of"];
+  Record -> Environment[label="is-a"];
+
+  Field -> Variable[label="is-a"];
+  Record -> Field[label="contains"];
+
+  CompoundType -> Type[label="is-a"];
+  BasicType -> Type[label="is-a"];
+  Int -> BasicType[label="is-a"];
+  String -> BasicType[label="is-a"];
+  ObjectType -> RecordType[label="is-a"];
+  ObjectType -> Interface[label="implements"];
+  Interface -> ObjectType[label="is-a"];
+
+  VariantType -> ObjectType[label="is-variant-of"];
+  Object -> ObjectType[label="instance-of"];
+
+  RecordType -> CompoundType[label="is-a"];
+  TupleType -> RecordType[label="is-a"];
+  Tuple -> Record[label="is-a"];
+  Tuple -> TupleType[label="instance-of"];
+
+  Object -> Method[label="has"];
+  Object -> Field[label="has"];
+  Function -> Method[label="is-a"];
+  Action -> Method[label="is-a"];
+
+  Value -> Type[label="instance-of"];
+}
+#+END_SRC
+** Type variants
    :PROPERTIES:
    :CUSTOM_ID: type-definition
    :END:
-Nested type variants are specified using an hierarchy of nested variant subtypes (i.e. algebraic sum types) and specifying only the differences respect their parent type. So it is a mix of algebraic data types like in functional programming languages and OOP types. 
+Type variants are specified using an hierarchy of variant types (i.e. algebraic sum types) and specifying only the differences respect their parent type. So it is a mix of algebraic data types like in functional programming languages and OOP sub-class.
 
-Subtypes must respect the same implicit and explicit contracts of the parent type, because every time a parent type is expected, a specific subtype can be sent instead.
+Type variants must respect the same implicit and explicit contracts of the parent type, because every time a parent type is expected, a specific variant can be sent instead.
 
-Only most specific leaf subtypes can be instantied directly, all other parents of the hiearchy are implicitely assumed =Abstract=.
+Only most specific leaf type variants can be instanced directly, all other parents of the hieararchy are implicitly assumed =Abstract=.
 
 #+BEGIN_SRC fundemantal :tangle yes
 @Assert { 
   T --> ( 
     a::Int
-    # this is a property of the type, and its value can change at run-time
+    # this is a field of the type, and its value can change at run-time
  
     f --> String
     # this is a function of the type, and its value can not change at run-time
-    # It is abstract, and it will be specified for subtypes.
+    # It is abstract, and it will be specified for variant types.
 
     HelloWorld --> String { "Hello World!" }
     # this is a static function because it starts with an upper case letter, 
     # and it is associated to `Self` type, instead of `self` object.
 
     /A --> ( f -> String { "T/A" } )
-    #:NOTE: `T/A` is a subtype variant of `T`
+    #:NOTE: `T/A` is a type variant of `T`
 
     /B --> ( f -> String { "T/B" } )
-    #:NOTE: `T/B` is another subtype variant of `T`
+    #:NOTE: `T/B` is another type variant of `T`
   )
 } 
 #+END_SRC
 ** Overriding
-Nested type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[type_conformance]]).
+Type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[type_conformance]]).
 
-For making explicit that a property or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
+For making explicit that a field or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
 
 In case an overriding method want call the parent method, it can use the syntax ~self.super()~. ~super~ is a reserved keyword.
 
 Note that also ~this~ is a reserved keyword, and ~self.this()~ call the current method.
 
-~super~ is also used for acessing the ~self~ property inside a nested lexical scope. See this example:
+~super~ is also used for acessing the ~self~ field inside a nested lexical scope. See this example:
 
 #+BEGIN_SRC fundamental :tangle no
 Assert {
@@ -591,7 +654,7 @@ Types can be extended adding new properties, methods and nested variant types to
  P -> ( 
 
    q::Int
-   #:NOTE: we added a new property to the type
+   #:NOTE: we added a new field to the type
 
    g --> Int {
      #:NOTE: we added a new function to the type 
@@ -599,12 +662,12 @@ Types can be extended adding new properties, methods and nested variant types to
    }
 
    /T -> (
-     #:NOTE: we are extending `P/T` nested variant subtype
+     #:NOTE: we are extending `P/T` type variant
      l::Int
    )
 
    /W --> (
-     #:NOTE: we are adding a new nested variant subtype to ``P``
+     #:NOTE: we are adding a new type variant to ``P``
      w::String
    )
  )
@@ -663,7 +726,7 @@ From a certain point of view if values are instances of types (i.e. the type des
 *** Definition
  In Dok interfaces are types with the ~@Abstract~ annotation. 
  They can contain default implementations for their functions, 
- but they can not contain nested variant subtypes.
+ but they can not contain type variants.
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -850,7 +913,7 @@ Assert {
    :CUSTOM_ID: unnamed-properties
    :END:
 Properties with name =_= are considered unnamed:
-- there can be more than one property with this name
+- there can be more than one field with this name
 - it can never be referenced explicitely in the code, because =self._=
   does not make sense as call
 - they are used usually in DSL and metaprogramming code when something has certain properties but it can be ignored because it is never used, for example in parsers for denoting text to parse but discard
@@ -865,10 +928,10 @@ Assert {
    Point --> (
      x::Double
      y::Double
-     #:NOTE: this property is declared, but not initialized to a default value.
+     #:NOTE: this field is declared, but not initialized to a default value.
 
      name::= String
-     #:NOTE: in this case the property is by default initialized to its default value, the empty string.
+     #:NOTE: in this case the field is by default initialized to its default value, the empty string.
 
      !cartesian(x::Double, y::Double) --> Self {
        @Constructor
@@ -928,9 +991,9 @@ Assert {
  # call the default constructor
 #+END_SRC
 ** Inner types
-Functions and types can contains inner types that are not subtypes/variants of the parent type.
+Functions and types can contains inner types that are not variants of the parent type.
 
-If their name starts with =_= they are private types, otherwise they can be acessed also outside the type, using the namespace of the parent type and (in case) also of the function containing it.
+If their name starts with =_= they are private types, otherwise they can be accessed also outside the type, using the namespace of the parent type and (in case) also of the function containing it.
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -986,10 +1049,10 @@ Assert {
   # a type is itself
  
   T/V.is(T)
-  # a subtype/variant is also its parent type
+  # a type variant is also its parent type
 
   !(T.is(T/V))
-  # a parent type is not one of its subtypes/variants
+  # a parent type is not one of its type variants
 
   T.is(S)
   # a type is also the interface its support
@@ -1065,7 +1128,7 @@ after type instance. For example if we create a =Map= from =String= to
 =Int=, these two params never change after we created the =Map=, while
 the content of the =Map= can change.
 
-Subtypes variants can not have type parameters. They can only reuse the
+Type variants can not have type parameters. They can only reuse the
 type params of the parent type. This simplifies the semantic of the
 language.
 
@@ -1105,11 +1168,11 @@ Assert {
   :PROPERTIES:
   :CUSTOM_ID: type_conformance
   :END:
-A type =B= is comformant to type =A= when you can pass a value of type =B= instead of a value of type =A= as argument of a function or of a property without breaking implicit and explicit code contracts, and without generating run-time type errors.
+A type =B= is comformant to type =A= when you can pass a value of type =B= instead of a value of type =A= as argument of a function or of a field without breaking implicit and explicit code contracts, and without generating run-time type errors.
 
 Type conformance is tricky in OOP languages with generic types because safe but conservative type checking rules can be in conflict with expressive OOP code, and on the contrary too much liberal rules can lead to unsafe code with type errors at run-time. It is tricky also because some rules can involve global code analysis and not local analysis. At current stage I'm not sure if the Dok approach is good-enough, only time and usage wil tell. The approarch is inspired to the ideas of cite:Castagna:1995:CCC:203095.203096 and Eiffel cite:meyer1997object.
 
-OOP code does not problem typing problems if during specialization (i.e. nested variant or interface implementation):
+OOP code does not problem typing problems if during specialization (i.e. type variant or interface implementation):
 - a method has less specific params (i.e. contravariant), because it can still accept the most specific params
 - the invariants of the parent type/interface are still respected, because a client calling it had to count on them
 - the result of a method is more specific (i.e. variant) respect the parent method, because all the contracts of the parent are still respected
@@ -1125,7 +1188,7 @@ The approach of Dok is:
 The code that can pose problems during global analysis can be determined also from local analysis, but rejecting it in a conservative way can be too much limitating. So it will be rejected only when it is really used in bad way in a specific code-base. 
 
 Code that can pose problems is called CAT-call:
-- an entity can be a property, a local variable, or a parameter of a method
+- an entity can be a field, a local variable, or a parameter of a method
 - an entity is polymorphic when its exact type can not be determined at compile time but only a run-time
 - a call is polymorphic when the selector (e.g. ~self~) is polymorphic, and so the real called method is known only at run-time and compile-time 
 - a method is changing availability or type (CAT) if some redefinition in nested variant types or interface implementation changes the type of any of its arguments in a more specific type (i.e. variant instead of contravariant)
@@ -1285,9 +1348,9 @@ In cite:bruce2003some there is the "expression problem" that is a relatively sim
   :PROPERTIES:
   :CUSTOM_ID: functions
   :END:
-In Dok a function is a referential transparent method of an object which value depends from the ~self~ object, the arguments of the function and the function body. 
+In Dok a function is a referential transparent method of an object which result depends from the ~self~ object, from the arguments of the function and from the function body. 
 
-In Dok every function must be a method of a type, so it must have the ~self~ object, i.e. there can not be functions with only arguments, but without a ~self~ object.
+In Dok every function must be a method of a type, i.e. there can not be functions with only arguments, but without a ~self~ object.
 
 #+BEGIN_SRC fundemantal :tangle yes
 Assert {
@@ -1593,6 +1656,30 @@ Some example of higher-order functions usage:
    }
  }
  #+END_SRC
+** Anonymous functions
+   :PROPERTIES:
+   :CUSTOM_ID: anonymous-function
+   :END:
+Anonymous functions are services functions with a defined body, but without a name. They are usually used as arguments of higher-order functions.
+
+Anonymous functions are of type ~Fun(From::Any, To::Any)~ and they have only the ~self~ object, but no arguments. 
+
+They supports closures so they can see the variables of the parent lexical scope.
+
+An example:
+ #+BEGIN_SRC fundamental :tangle yes
+ Assert {
+   limit::= 3
+   x::= (1, 2, 3, 4, 5, 6)*
+    
+   x.filter({self > limit}) == (4, 5, 6)*
+ }
+ #+END_SRC
+** Anonymous actions
+   :PROPERTIES:
+   :CUSTOM_ID: anonymous-action
+   :END:
+Anonymous actions are like a [[anonymous-function]] but they can change the variables of their lexical-scope and the properties of ~self~ object.
 ** Incremental update of function result
    :PROPERTIES:
    :CUSTOM_ID: incremental-updates-listeners
@@ -2612,10 +2699,10 @@ Assert {
  - if =@Require= is redefined, then it must be weaker than the condition
    of the parent type, and its definition replaces completely the
    definition of the parent type (i.e. it is put in logical or, with the
-   definition of the parent). Doing so any caller respecting the parent condition for sure respect also the subtype condition.
+   definition of the parent). Doing so any caller respecting the parent condition for sure respect also the type variant condition.
  - if =@Ensure= in redefined, then its definition extend the conditions
    of the parent type (i.e. it is put in logical and, with the definition of
-   the parent). Doing so if the caller expects some properties for the result, these properties are met also from the subtype.
+   the parent). Doing so if the caller expects some properties for the result, these properties are met also from the type variant.
  - =@Usually=, =@Assert= of the are not considered any more applicable
    because they are associated to code, not to function semantic
 * Map-Reduce programming model
@@ -2806,11 +2893,11 @@ Assert {
 
     someFun(
       x::Int
-      #: this is the description of the `x` property,
+      #: this is the description of the `x` field,
       #  that continues on this second line.
 
       y::Int
-      #: this is the description of `y` property
+      #: this is the description of `y` field
     ) --> Int {
       #:RESULT: this is the description of the returned value/result of the function.
 
@@ -3181,14 +3268,14 @@ More complex cases in Dok will be solved using Actors or the Bloom approach. So 
 Familia cite:zhang_familia:_2017 is a programming language that tries unifying interfaces, type classes, and family polymorphism and many other related advanced concepts of functional and object-oriented type systems in a rather simple but powerful type system. Dok type systems has the same aim, but I know the subject a lot less respect the two authors. So it is usefull comparing Dok with Familia for validating (at least informally) Dok againts a well designed and advanced programming language.
 
 As said also Dok tries to join functional and object oriented type systems concepts, using:
-- ~S/T~ nested variant subtypes (i.e. a form a algebrait types)
-- ~S.T~ nested subtypes (i.e. distinct types defined inside the namespace of the parent type)
+- ~S/T~ type variant (i.e. a form a algebrait types)
+- ~S.T~ inner type (i.e. distinct types defined inside the namespace of the parent type)
 - ~T && S~ interface hierarchy (i.e. a form of interface multiple inheritance where for example an interface ~T~ can be implemented only if it respects also an interface ~S~)  
 - ~T -> S~ type conversion (i.e. interface implementation, or conversion between isomorphic/compatible concrete types)
 
 In Familia the term =interface= is used for concepts/class as defined in math-oriented language, while =class= is used for concrete implementation of an interface. In Dok there are only types: some types plays the role of interface/class, while other of concrete implementation.
 
-A =Familia class= is not a type but only the implementation/instance of an interface. On the contrary in Dok an implementation of an interface is a type and it can be used in all places an interface is used. Also nested subtypes and nested variants can be used in all places a type is expected. Canonical Dok code will use some types always as interfaces and other implementation types only as implementations, so in a lot of code the behaviour is similar to Familia, but this is not mandatory in Dok. For example is case of nested variant subtypes it is useful defining in a compact an hierarchy of types, and manage them both as implementation and interface. 
+A =Familia class= is not a type but only the implementation/instance of an interface. On the contrary in Dok an implementation of an interface is a type and it can be used in all places an interface is used. Also inner and variant types can be used in all places a type is expected. Canonical Dok code will use some types always as interfaces and other implementation types only as implementations, so in a lot of code the behaviour is similar to Familia, but this is not mandatory in Dok. For example is case of variant type it is useful defining in a compact an hierarchy of types, and manage them both as implementation and interface. 
 
 Familia supports a form of on-site variance. Dok uses the Eiffel catcall approach and a global analysis of code is performed for checking if the types are conformants or they can introduce errors at run-time. This aspect of Dok is up to date not well tested or well thought.
 
@@ -3263,9 +3350,9 @@ Assert {
 #+END_SRC
 
 In Dok:
-- it is more clear that ~Graph~ had to implement also ~Graph.Edge~ and ~Graph.Vertex~ because they are its nested subtypes
+- it is more clear that ~Graph~ had to implement also ~Graph.Edge~ and ~Graph.Vertex~ because they are its variant type
 - the content of edges and vertexs can be parametric on another type, but this detail is simply not managed from Familia example
-- this example justifies both nested subtypes and type conversions concepts
+- this example justifies both variant type and type conversions concepts
 
 Dok uses only polymorphic dispatch based on the ~self~ type and the types of the arguments. It has no ad-hoc dispatch. In practice whenever possible the Dok compilers will try to convert run-time polymorphic dispatch into a simplified dispatch using global analysis of code. This global analysis is done also for finding typing errors. On the contrary Familia uses a mix of dynamic dispatch only on the self parameter, and class-ad-hoc dispatch based on an implicit or explicit implementation class. Dok approarch is simpler for the programmer, but more analysis must be done for understanding if it suffices and it has the same security and power of Familia method.
 
