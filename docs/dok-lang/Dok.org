@@ -291,7 +291,7 @@ Assert {
    :PROPERTIES:
    :CUSTOM_ID: tuple
    :END:
-A tuple is like a [[record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
+A tuple is like a [[#record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
 
 Tuples are used mainly as arguments of functions, because functions can be called without specifying the argument name, e.g. ~10.mod(2)~.
 ** Containers as values (Persistent Data Structures)
@@ -570,6 +570,10 @@ digraph {
   Value -> Type[label="instance-of"];
 }
 #+END_SRC
+
+#+RESULTS:
+[[file:dot_success.png]]
+
 ** Type variants
    :PROPERTIES:
    :CUSTOM_ID: type-definition
@@ -603,7 +607,7 @@ Only most specific leaf type variants can be instanced directly, all other paren
 } 
 #+END_SRC
 ** Overriding
-Type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[type_conformance]]).
+Type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[#type_conformance]]).
 
 For making explicit that a field or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
 
@@ -1517,7 +1521,7 @@ Assert {
    :PROPERTIES:
    :CUSTOM_ID: pure-actions
    :END:
- A pure action is a rollbackable action (according the [[nested-transaction-semantic]]) that can change the properties of the `self` object, the variables of its parent lexical scope and that can return a value of the declared type. If no return type is specified, then the action return no value.
+ A pure action is a rollbackable action (according the [[#nested-transaction-semantic]]) that can change the properties of the `self` object, the variables of its parent lexical scope and that can return a value of the declared type. If no return type is specified, then the action return no value.
 
 Whenever possible as suggested by cite:meyer1997object in the command-query-separation principle, a pure action should return nothing, but only change the environment. The effects of the action can be then inspected using functions of the ~self~ object. But there can be API requiring actions returning values.
 
@@ -1601,7 +1605,7 @@ Assert {
   :PROPERTIES:
   :CUSTOM_ID: nested-action
   :END:
-A nested actions is like a [[nested-function]] but it can change the variables of the parent function, and the properties of the object of the parent function.
+A nested actions is like a [[#nested-function]] but it can change the variables of the parent function, and the properties of the object of the parent function.
 
 In case action is invoked inside a domain specific language in which the order of execution is not deterministic and so it is not clear the order of changes of the parent variables and properties, the compiler will signal an error. The rational is that nested actions are support actions, and so their semantic/effect must be clear.
 
@@ -1679,7 +1683,7 @@ An example:
    :PROPERTIES:
    :CUSTOM_ID: anonymous-action
    :END:
-Anonymous actions are like a [[anonymous-function]] but they can change the variables of their lexical-scope and the properties of ~self~ object.
+Anonymous actions are like a [[#anonymous-function]] but they can change the variables of their lexical-scope and the properties of ~self~ object.
 ** Incremental update of function result
    :PROPERTIES:
    :CUSTOM_ID: incremental-updates-listeners
@@ -2713,9 +2717,9 @@ TODO generalize adopting idea from cite:wickham_split-apply-combine_2011
 
 According cite:dean_mapreduce:_2008 "MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate key/value pairs, and a reduce function that merges all intermediate values associated with the same intermediate key." 
 
-Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[knil]] for more details about management of relational and graph databases, using the map-reduce model.
+Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[#knil]] for more details about management of relational and graph databases, using the map-reduce model.
 
-According Dok [[design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
+According Dok [[#design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
 
 In case of complex data transformations, in Dok map-reduce and functional data transformation algorithms are preferred to logical and declarative queries (e.g. SQL), because in many cases writing and comprehending this type of code is easier, and there is already a support for analyzing and optimizing them.
 
@@ -2856,7 +2860,7 @@ Assert {
 }
 #+END_SRC
 * TODO Concurrency
-TODO see also [[map-reduce]]
+TODO see also [[#map-reduce]]
 * TODO Knil
   :PROPERTIES:
   :CUSTOM_ID: knil
