@@ -515,8 +515,18 @@ Assert {
 
  This compact form is used because it simplifies the specification of syntax/grammars.
 * Object Oriented Programming (OOP)
-Dok supports object-oriented-programming (OOP) but trying to unify it with functional-programming (FP) concepts. You can find (more or less) every OOP feature also in Dok, with the main difference that Dok favours objects as values and not as references.
+Dok joins object-oriented-programming (OOP) with some functional-programming (FP) concepts. The main differences respect traditional OOP are that in Dok:
+- objects are values (like in FP) and not references (as in OOP)
+- concrete objects are used (mainly) for representing hierarchical data (e.g. source code, documents, etc..), and so more like FP sum types than OOP subclasses
+- inner class (inner types in Dok terms) are used a lot more than in traditional OOP, because they introduce service types describing parts of hierarchical data
 
+Like in OOP and FP, concrete types can support abstract interfaces representing abstract concepts.
+
+The design guidelines are:
+- OOP conceps are used for representing physical hierarchical data, and for defining an hierarchy of logical interfaces 
+- FP concepts are used for using less error-prone values instead of references, and for using functions as arguments of other high-level functions, maximizing code reuse
+- more advanced FP features are replaced from the usage of meta-programming
+** OOP terms
 The terms used from Dok are a mix of OOP and FP terms:
 - type: identify a domain of values having some common logical or physical (i.e. physical storage format) characteristics.
 - value: instance of a type, i.e. a value inside the domain of the type.
