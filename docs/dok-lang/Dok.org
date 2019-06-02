@@ -131,29 +131,24 @@ Assert {
   :END:
 Dok is a data transformation and metaprogramming (i.e. code is data) language.
 
-Dok design follows these guidelines:
+Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
+- high-level code can be used as specification of low-level code
+- many different branch implementations of the same parent code can be derived for supporting different run-time environments and usage scenario
+- meta-annotations and compiler plugins can be used for deriving automatically low-level code from high-level code
+- a complex problem can be partitioned in rather orthogonal aspects
+
+Summing up: in Dok source code is a first class citizen so there can be user-customizable compiler plugins for analyzing and transforming it or for injecting (low-level) functionalities.
+
+Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
+
+Dok programming language design follows these guidelines:
 - whenever possible values are preferred to references
 - nested transaction semantic joins some of the benefit of functional programming (code with a predictable semantic) with imperative programming (convenience of local mutable state) 
 - every part of a Dok application can be meta-annotated and then manipulated by metaprogramming code
 - simple types can be extended with contracts (i.e. logical properties)
 - Dok compiler is fully extensible from developers
 - advanced features of the language are introduced using metaprogramming compilation rules that are user modifiable
-- advanced Dok code is compiled to Dokk that is a kernel version of Dok with a simplified C-like semantic, where the cost of the operations is intuitive
 - effects of metaprogramming analysis and transformation rules must be always inspectable from the user using the DokMelody IDE
-
-Dok programs can follow an Aspect Oriented Programming (AOP) approach:
-- a complex problem can be partitioned in rather orthogonal aspects
-- each aspect can be implemented extending previous code with the details of the aspect, and/or adding meta-annotations, and/or adding compiler plugins that can analyze globally the program and inject functionalities
-
-Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
-- high-level code does not contain irrelevant low-level details, and so it is more compact and comprehensible respect complete code with all implementation details
-- low-level code can extend or implement parent high-level code specifying the missing low-level details
-- high-level code is the specification and low-level code is the implementation
-- different low-level implementations of the same high-level specification can be created, for supporting different run-time environments or system constraints (e.g. real-time systems, systems with small data sets that can stay in RAM, systems with big data sets requiring a DBMS, and so on)
-
-Using the same techniques for progressive refinements, Dok programs can support different branches of the same code base, i.e. derive different version of an application from the same code base.
-
-Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
 
 Dok syntax guidelines are:
 - code must be readable from left to right (e.g. ~x.f.g(y)~ instead of ~g (f x) y~)
