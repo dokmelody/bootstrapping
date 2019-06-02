@@ -1,5 +1,5 @@
-#DATE: 2019-04-23
-#+TITLE: Dok Programming Language v0.1
+#DATE: 2019-06-02
+#+TITLE: Dok Programming Language v0.1.2
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
 #+CREATOR: Emacs Org mode
