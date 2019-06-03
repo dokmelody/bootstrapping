@@ -32,5 +32,6 @@ in runCommand "dummy" {
        wget
        tetex
        bibtex2html
+       graphviz
     ];
 } ""

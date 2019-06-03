@@ -1,5 +1,5 @@
-#DATE: 2019-04-23
-#+TITLE: Dok Programming Language v0.1
+#DATE: 2019-06-02
+#+TITLE: Dok Programming Language v0.1.2
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
 #+CREATOR: Emacs Org mode
@@ -71,7 +71,7 @@ Assert {
     4.factorial1 == 4.factorial2 == 4.factorial3
   }
 
-  Expr(To::Any) --> (
+  Expr(To::Type) --> (
     #: This is a new type `Expr` used for representing expressions.
     #  The param `To` represent the result of the expression evaluation.
 
@@ -131,29 +131,24 @@ Assert {
   :END:
 Dok is a data transformation and metaprogramming (i.e. code is data) language.
 
-Dok design follows these guidelines:
+Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
+- high-level code can be used as specification of low-level code
+- many different branch implementations of the same parent code can be derived for supporting different run-time environments and usage scenario
+- meta-annotations and compiler plugins can be used for deriving automatically low-level code from high-level code
+- a complex problem can be partitioned in rather orthogonal aspects
+
+Summing up: in Dok source code is a first class citizen so there can be user-customizable compiler plugins for analyzing and transforming it or for injecting (low-level) functionalities.
+
+Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
+
+Dok programming language design follows these guidelines:
 - whenever possible values are preferred to references
 - nested transaction semantic joins some of the benefit of functional programming (code with a predictable semantic) with imperative programming (convenience of local mutable state) 
 - every part of a Dok application can be meta-annotated and then manipulated by metaprogramming code
 - simple types can be extended with contracts (i.e. logical properties)
 - Dok compiler is fully extensible from developers
 - advanced features of the language are introduced using metaprogramming compilation rules that are user modifiable
-- advanced Dok code is compiled to Dokk that is a kernel version of Dok with a simplified C-like semantic, where the cost of the operations is intuitive
 - effects of metaprogramming analysis and transformation rules must be always inspectable from the user using the DokMelody IDE
-
-Dok programs can follow an Aspect Oriented Programming (AOP) approach:
-- a complex problem can be partitioned in rather orthogonal aspects
-- each aspect can be implemented extending previous code with the details of the aspect, and/or adding meta-annotations, and/or adding compiler plugins that can analyze globally the program and inject functionalities
-
-Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
-- high-level code does not contain irrelevant low-level details, and so it is more compact and comprehensible respect complete code with all implementation details
-- low-level code can extend or implement parent high-level code specifying the missing low-level details
-- high-level code is the specification and low-level code is the implementation
-- different low-level implementations of the same high-level specification can be created, for supporting different run-time environments or system constraints (e.g. real-time systems, systems with small data sets that can stay in RAM, systems with big data sets requiring a DBMS, and so on)
-
-Using the same techniques for progressive refinements, Dok programs can support different branches of the same code base, i.e. derive different version of an application from the same code base.
-
-Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
 
 Dok syntax guidelines are:
 - code must be readable from left to right (e.g. ~x.f.g(y)~ instead of ~g (f x) y~)
@@ -291,7 +286,7 @@ Assert {
    :PROPERTIES:
    :CUSTOM_ID: tuple
    :END:
-A tuple is like a [[record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
+A tuple is like a [[#record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
 
 Tuples are used mainly as arguments of functions, because functions can be called without specifying the argument name, e.g. ~10.mod(2)~.
 ** Containers as values (Persistent Data Structures)
@@ -311,23 +306,23 @@ Assert {
   m1::= Map(From: Int, To: Int) 
   #:NOTE: `Map` is a value in Dok. In this case we are starting from the empty Map.
 
-  m1[1]:= 1
+  m1(1):= 1
   #:NOTE: this can be expanded into ``m1:= m1.insert(1, 1)``, 
   #       and it returns a new version of the ``Map`` value and assign it to the mutable variable
 
-  m1[2]:= 2 
-  m1[3]:= 3
+  m1(2):= 2 
+  m1(3):= 3
 
   m2::= m1 
   #:NOTE: we are copying values, not references, so it is like a clone
   #       from a semantic point of vie, 
   #       also if internally Dok will use more efficient approarch
 
-  m1[2]=4
+  m1(2):= 4
   #:NOTE: this can be expanded into ``m1: m1.insert(2, 4)`` 
   #       and return a new version of the `Map` value
 
-  m2[2] == 2
+  m2(2) == 2
   #:NOTE: `m2` is not affected by `m1` change because it is still the original value
 } 
 #+END_SRC
@@ -352,7 +347,7 @@ Assert {
      )
    )
 
-   Any --> Maybe(Of::Any) {
+   Any --> Maybe(Of::Self) {
      #: Automatic conversion to Maybe.
      Maybe/Just(self)
    }
@@ -385,7 +380,7 @@ Assert {
      y.just == y == 5
    }
 
-   # Because `Maybe` is used a lot, the compact form `Any?` can be used instead
+   # Because `Maybe` is used a lot, the compact form `Type?` can be used instead
 
    Assert {
      x::Int?
@@ -415,8 +410,8 @@ Assert {
 
       get(i::Int) --> Of {
         @Abstract
-        @UseBracketArraySyntax
-        #:NOTE: list elements can be retrieved with ``someList[pos]``
+        @UseArraySyntax
+        #:NOTE: list elements can be retrieved with ``someList(pos)``
         #       where ``pos`` is an `Int` starting from ``0``.
       }
 
@@ -425,8 +420,8 @@ Assert {
 
         @Abstract
 
-        @UseBracketArraySyntax
-        #:NOTE: support ``someList[0]:= someValue``
+        @UseArraySyntax
+        #:NOTE: support ``someList(0):= someValue``
       }
 
       !append(toTail::Of) --> Self {
@@ -448,7 +443,7 @@ Assert {
       }
    )
 
-   # Because list is used a lot it can use the compact `Any*` form
+   # Because list is used a lot it can use the compact `Type*` form
    # and the compact ``(x, y, ...)*`` form
 
    Assert {
@@ -463,17 +458,17 @@ Assert {
 
      y::= (3, 4, 5)*
      y.is(List(Int))
-     y[0] == y.head == 3
-     y[1] == 4
-     y[10] == Nothing
+     y(0) == y.head == 3
+     y(1) == 4
+     y(10) == Nothing
     
-     y[3] == Nothing
+     y(3) == Nothing
      y!append(6)
-     y[3] == 6
+     y(3) == 6
      y!set(3, 7)
-     y[3] == 7
-     y[3]:= 8
-     y[3] == 8
+     y(3) == 7
+     y(3):= 8
+     y(3) == 8
   } 
 #+END_SRC
 
@@ -487,14 +482,14 @@ Assert {
     get(i::Int) --> Of { 
       @Abstract
 
-      @UseBracketArraySyntax
+      @UseArraySyntax
  
       @Require { i >=Self.from && i < Self.to } 
     }
 
     !set(i::Int, value::Of) --> Self {
         @Abstract
-        @UseBracketArraySyntax
+        @UseArraySyntax
 
         @Require { i >= Self.from && i < Self.to }
     }
@@ -502,9 +497,9 @@ Assert {
 
   Assert {
     a::Array(from: 1, to: 10, Of: String)
-    a[0]:= "Zero"
-    a[1]:= "One"
-    a[1] == a.get(i)
+    a(0):= "Zero"
+    a(1):= "One"
+    a(1) == a.get(i)
   }
 #+END_SRC
 ** ~T*~ ~T+~
@@ -515,8 +510,18 @@ Assert {
 
  This compact form is used because it simplifies the specification of syntax/grammars.
 * Object Oriented Programming (OOP)
-Dok supports object-oriented-programming (OOP) but trying to unify it with functional-programming (FP) concepts. You can find (more or less) every OOP feature also in Dok, with the main difference that Dok favours objects as values and not as references.
+Dok joins object-oriented-programming (OOP) with some functional-programming (FP) concepts. The main differences respect traditional OOP are that in Dok:
+- objects are values (like in FP) and not references (as in OOP)
+- concrete objects are used (mainly) for representing hierarchical data (e.g. source code, documents, etc..), and so more like FP sum types than OOP subclasses
+- inner class (inner types in Dok terms) are used a lot more than in traditional OOP, because they introduce service types describing parts of hierarchical data
 
+Like in OOP and FP, concrete types can support abstract interfaces representing abstract concepts.
+
+The design guidelines are:
+- OOP conceps are used for representing physical hierarchical data, and for defining an hierarchy of logical interfaces 
+- FP concepts are used for using less error-prone values instead of references, and for using functions as arguments of other high-level functions, maximizing code reuse
+- more advanced FP features are replaced from the usage of meta-programming
+** OOP terms
 The terms used from Dok are a mix of OOP and FP terms:
 - type: identify a domain of values having some common logical or physical (i.e. physical storage format) characteristics.
 - value: instance of a type, i.e. a value inside the domain of the type.
@@ -570,6 +575,10 @@ digraph {
   Value -> Type[label="instance-of"];
 }
 #+END_SRC
+
+#+RESULTS:
+[[file:dot_success.png]]
+
 ** Type variants
    :PROPERTIES:
    :CUSTOM_ID: type-definition
@@ -603,7 +612,7 @@ Only most specific leaf type variants can be instanced directly, all other paren
 } 
 #+END_SRC
 ** Overriding
-Type variants can override properties and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[type_conformance]]).
+Type variants can override fields and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[#type_conformance]]).
 
 For making explicit that a field or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
 
@@ -634,7 +643,7 @@ If there are no name clashes in the types, Dok can use short type names like ~B~
    :PROPERTIES:
    :CUSTOM_ID: type-extension
    :END:
-Types can be extended adding new properties, methods and nested variant types to them.
+Types can be extended adding new fields, methods and nested variant types to them.
 
 #+BEGIN_SRC fundamental :tangle yes
 @Assert {
@@ -884,21 +893,18 @@ An Haskell type alias like ~type Age = Int~ in Dok is:
   not (z.isMajor)
 } 
 #+END_SRC
-** Properties vs Functions
-Properties can be changed at run-time. 
-
-On the contrary function declarations can not be changed at run-time,
-because semantically the function code is part of the contract of the
+** Fields vs methods
+Fields can be changed at run-time. On the contrary methods can not be changed at run-time,
+because semantically the body code is part of the contract of the
 application, and from a practical point of view, a too much dynamic
 system is slower (the compiler can not apply some optimizations).
-** Protected properties
+** Private fields and methods
    :PROPERTIES:
-   :CUSTOM_ID: protected-properties
+   :CUSTOM_ID: private-properties
    :END:
- Properties starting with =_= are used for defining protected properties
- that are implementation only. They can be accessed only from functions
- of the type, and from types defined in the same module, but not acessed
- directly from the external.
+ Fields and methods starting with =_= are private, i.e. they can be accessed only from functions
+ of the type, and from types defined in the same module, but not accessed
+ directly from the external. So they contains internal low-level implementation details.
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -908,17 +914,13 @@ Assert {
     _y::Int
   )
 #+END_SRC
-** Unnamed properties
+** Unnamed variables
    :PROPERTIES:
    :CUSTOM_ID: unnamed-properties
    :END:
-Properties with name =_= are considered unnamed:
-- there can be more than one field with this name
-- it can never be referenced explicitely in the code, because =self._=
-  does not make sense as call
-- they are used usually in DSL and metaprogramming code when something has certain properties but it can be ignored because it is never used, for example in parsers for denoting text to parse but discard
-** Type constructors
-Values must be initialized: all properties must be set to an initial
+Variables with name =_= are considered unnamed. They are used usually in DSL and metaprogramming code when something has certain properties but it can be ignored because it is never used, for example in parsers for denoting text to parse but discard.
+** Value constructors
+Values must be initialized: all fields must be set to an initial
 value, and type invariant must be respected. 
 
 Every type can have special functions, called constructors, for creating and initializing a value.
@@ -940,7 +942,7 @@ Assert {
 
        self.x:= x
        self.y:= y
-       #:NOTE: for being a valid creation procedure all not initialized properties must be set to an initial value, otherwise the compiler will signal an error
+       #:NOTE: for being a valid creation procedure all not initialized fields must be set to an initial value, otherwise the compiler will signal an error
 
        self
      }
@@ -969,7 +971,7 @@ Assert {
        @Constructor
 
        #:NOTE: An alternative way to specify a creation procedure. 
-       # In this case instead of modifying directly the ``self`` properties, it is returned a value of type ``Self``.   
+       # In this case instead of modifying directly the ``self`` fields, it is returned a value of type ``Self``.   
 
        r::Self
        r!polar(r, t)
@@ -978,8 +980,8 @@ Assert {
  )
 
  p1::= Point(x: 10, y: 20) 
- # instead of calling a constructor, set explicitely properties.
- # Type invariants must be respected and all properties defined, 
+ # instead of calling a constructor, set explicitely fields.
+ # Type invariants must be respected and all fields defined, 
  # like in case of a normal constructor 
 
  p2::Point 
@@ -1010,7 +1012,7 @@ Assert {
          # This is a ``P.B`` type. It is visible only inside this function.
          # It can view the arguments of the function ``f``, and they are considered const/immutables.
          #
-         # It can view the properties of the ``self`` value, and they are considered const/immutables.
+         # It can view the fields of the ``self`` value, and they are considered const/immutables.
        )
 
        y::= .A()
@@ -1111,7 +1113,16 @@ Assert {
   )
 }
 #+END_SRC
+** Base types
+~Any~ is the base type from which every type derive:
+- every method of ~Any~ is a method of all other types
+- for every type ~x.is(Any)~ is true
+
+~Type~ represents a generic type in Dok. So an instance of ~Type~ is a type, while an instance of ~Any~ is a value. ~Type~ is mainly used for [[#generics]].
 ** Generic/parametric types
+  :PROPERTIES:
+  :CUSTOM_ID: generics
+  :END:
 Type params are used for defining a (generic/parametric) type template,
 that can be used for defining different instances of the same type using
 different parameters. 
@@ -1123,7 +1134,7 @@ explicit contracts.
 Params starting with upper case letter are associated to types. 
 Params starting with lower case letters to values.
 
-Type params can be seen as properties of a value, that do not change
+Type params can be seen as fields of a value, that do not change
 after type instance. For example if we create a =Map= from =String= to
 =Int=, these two params never change after we created the =Map=, while
 the content of the =Map= can change.
@@ -1379,15 +1390,15 @@ Assert {
  A function can not modify the value of its arguments. They are const
  (read-only) variables.
 
- A function can not modify the properties of the =self= object. They are
+ A function can not modify the fields of the =self= object. They are
  const (read-only) variables.
 
- A function can change (only) the private properties of its =self= object.
+ A function can change (only) the private fields of its =self= object.
  They can change them for caching results, or other optimizations. But
  the function code must mantain referential transparency: calling a
  function with the same arguments, and with the same non private
- properties must return always the same result. So the access to private
- properties are only internal hidden optimizations without external
+ fields must return always the same result. So the access to private
+ fields are only internal hidden optimizations without external
  side-effects.
 ** Recursion
 Functions can be recursive. Tail call recursive functions are guarantee to not waste memory because they are equivalent to imperative loops.
@@ -1476,7 +1487,7 @@ Assert {
        # > setName(n::String) --> Self 
 
        self.name:= n
-       # properties of ``self`` can be changed from pure actions.
+       # fields of ``self`` can be changed from pure actions.
     }
 
     addMrToTheName --> Self {
@@ -1517,7 +1528,7 @@ Assert {
    :PROPERTIES:
    :CUSTOM_ID: pure-actions
    :END:
- A pure action is a rollbackable action (according the [[nested-transaction-semantic]]) that can change the properties of the `self` object, the variables of its parent lexical scope and that can return a value of the declared type. If no return type is specified, then the action return no value.
+ A pure action is a rollbackable action (according the [[#nested-transaction-semantic]]) that can change the fields of the `self` object, the variables of its parent lexical scope and that can return a value of the declared type. If no return type is specified, then the action return no value.
 
 Whenever possible as suggested by cite:meyer1997object in the command-query-separation principle, a pure action should return nothing, but only change the environment. The effects of the action can be then inspected using functions of the ~self~ object. But there can be API requiring actions returning values.
 
@@ -1535,7 +1546,7 @@ Assert {
       self._curr  
     }
 
-    !next {
+    !next --> {
       #: Advance the counter
  
       self._curr:= self_curr + 1
@@ -1601,9 +1612,9 @@ Assert {
   :PROPERTIES:
   :CUSTOM_ID: nested-action
   :END:
-A nested actions is like a [[nested-function]] but it can change the variables of the parent function, and the properties of the object of the parent function.
+A nested actions is like a [[#nested-function]] but it can change the variables of the parent function, and the fields of the object of the parent function.
 
-In case action is invoked inside a domain specific language in which the order of execution is not deterministic and so it is not clear the order of changes of the parent variables and properties, the compiler will signal an error. The rational is that nested actions are support actions, and so their semantic/effect must be clear.
+In case action is invoked inside a domain specific language in which the order of execution is not deterministic and so it is not clear the order of changes of the parent variables and fields, the compiler will signal an error. The rational is that nested actions are support actions, and so their semantic/effect must be clear.
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -1662,7 +1673,7 @@ Some example of higher-order functions usage:
    :END:
 Anonymous functions are services functions with a defined body, but without a name. They are usually used as arguments of higher-order functions.
 
-Anonymous functions are of type ~Fun(From::Any, To::Any)~ and they have only the ~self~ object, but no arguments. 
+Anonymous functions are of type ~Fun(From::Type, To::Type)~ and they have only the ~self~ object, but no arguments. 
 
 They supports closures so they can see the variables of the parent lexical scope.
 
@@ -1679,13 +1690,13 @@ An example:
    :PROPERTIES:
    :CUSTOM_ID: anonymous-action
    :END:
-Anonymous actions are like a [[anonymous-function]] but they can change the variables of their lexical-scope and the properties of ~self~ object.
+Anonymous actions are like a [[#anonymous-function]] but they can change the variables of their lexical-scope and the fields of ~self~ object.
 ** Incremental update of function result
    :PROPERTIES:
    :CUSTOM_ID: incremental-updates-listeners
    :END:
 Incremental update is used for updating the result of a function without recalcuting it from scratch,
-but modifying its previous cached result according the last changes in the object properties.
+but modifying its previous cached result according the last changes in the object fields.
 
 According the type of updates and the cost of incremental calculation the compiler or the run-time system can decide to recalc the result from scratch. So incremental update application is not mandatory. 
 
@@ -2088,7 +2099,7 @@ Assert {
     repeat {
       while { i < self.length }
 
-      c::= self[i]
+      c::= self(i)
        
       try { 
         c >= '0'
@@ -2282,7 +2293,7 @@ The release is managed by compiler plugins because:
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  CRef(Of::Any) --> (
+  CRef(Of::Type) --> (
      !!share --> Self {
        #: Create a copy of the reference, sharing the same content.
        #  A modification of the contained content, change the content
@@ -2682,7 +2693,7 @@ Assert {
   s == "2 + 2 = 2 = 2"
 
 
-  # DSL can have properties. They are managed like type params, and not object properties,
+  # DSL can have fields. They are managed like type params, and not object fields,
   # i.e. they are params of `Self` type and not of `self` object.
 
   ExprWithBase(base::Int) --> (
@@ -2712,7 +2723,7 @@ Assert {
       repeat {
         @MaxRepetitions { s.length }
         while { i < s.length }
-        n:= n + s[i].Int * b
+        n:= n + s(i).Int * b
         b:= b * Self.base
         i:= i + 1
       }
@@ -2855,9 +2866,9 @@ TODO generalize adopting idea from cite:wickham_split-apply-combine_2011
 
 According cite:dean_mapreduce:_2008 "MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate key/value pairs, and a reduce function that merges all intermediate values associated with the same intermediate key." 
 
-Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[knil]] for more details about management of relational and graph databases, using the map-reduce model.
+Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[#knil]] for more details about management of relational and graph databases, using the map-reduce model.
 
-According Dok [[design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
+According Dok [[#design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
 
 In case of complex data transformations, in Dok map-reduce and functional data transformation algorithms are preferred to logical and declarative queries (e.g. SQL), because in many cases writing and comprehending this type of code is easier, and there is already a support for analyzing and optimizing them.
 
@@ -2926,11 +2937,11 @@ Streams are containers, so they supports also map-reduce programming model. At t
 
 #+BEGIN_SRC fundamental :tangle yes
 
-  Stream(Of::Any) --> (
+  Stream(Of::Type) --> (
     #: Produce a potentially infinite stream of values of the same type
     @Abstract
  
-    !next --> Self {
+    !next --> {
       #: Prepare the stream for the next value.
       #  Not call at the beginning of the stream.
       @Abstract
@@ -2998,7 +3009,7 @@ Assert {
 }
 #+END_SRC
 * TODO Concurrency
-TODO see also [[map-reduce]]
+  TODO see also [[#map-reduce]]
 * TODO Knil
   :PROPERTIES:
   :CUSTOM_ID: knil
@@ -3297,7 +3308,7 @@ Assert {
 
      self!cells!map({
        pc::= self!agent/PC
-       pc!inventory[Item/Gold]:= ~ * 1.1
+       pc!inventory(Item/Gold):= ~ * 1.1
        pc!hunger:= ~ - 0.1
        #:NOTE: nested transaction semantic manage null types and other failed tests implicitely
      })
@@ -3352,7 +3363,7 @@ def factorials():
         n, f = n + 1, f * (n + 1)
 #+END_EXAMPLE
 
-In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations. For example calling ~EvalWithState~ inside ~map~. 
+In Dok we have no lazy evaluation but the compiler is free to produce efficient stream-like implementation of some Dok code annotated in the correct way. In Dok there are no codata types, and we process streams of values using stream-oriented functions and annotations.
 
 #+BEGIN_SRC fundamental :tangle yes
 
@@ -3366,42 +3377,19 @@ In Dok we have no lazy evaluation but the compiler is free to produce efficient 
 
 Assert {
 
-  EvalWithState(From::Any, To::Any) --> (
-    #: A function that during evaluation can mantain an internal state
+  FactorialStream --> Stream(Of: Int) (
+    _n = 0
+    _f = 1
 
-    !eval(x::From) --> To
-  )
-
-  Any*.map(fun::EvalWithState(From: Self)) --> fun.To* {
-    #:NOTE: the implementation can be optimized by the compiler according differen rules, 
-    #       and it can became a stream-like implemantation.
-
-    r::= fun.To*
-    repeat {
-      while {
-        x1::= self.get 
-      }
-      x2:= fun!eval(x1)
-      r!add(x2)
+    !next --> {
+      self._n:= ~ + 1
+      self._f:= ~ * self._n
+    } 
+     
+    get --> Int { 
+      self._f
     }
-    r
-  }
-
-  Int*.factorial --> Int* { 
-   f::EvalWihtState(From:Int, To:Int):(
-     _n::= 0
-     _f::= 1
-     !eval(x:Int) -> Int {
-        r::= self._f
-        self._n!increment
-        self._f:= self._f * self._n
-        r
-     }
-   )
-   self.map(f)
-  }
-  #:NOTE: this code works in a correct way also if `Self` is a stream
-  #       because it is all managed by the compilation rules
+  )
 }
 #+END_SRC
 
@@ -3453,7 +3441,7 @@ In Dok:
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
 
- Graph(E::Any, V::Any) --> (
+ Graph(E::Type, V::Type) --> (
    @Abstract
 
    .Edge --> (
