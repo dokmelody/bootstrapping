@@ -1813,6 +1813,148 @@ Assert {
   i == 100
 }
 #+END_SRC
+** =if=
+~if~ evaluates/executes the ~then~ branch if the condition inside the ~if~ part is respected, otherwise it executes the ~else~ branch if it is specified. If used in [[#design-by-contracts]] formulas it is equivalent to logical implication ~A ==> B~.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  x::= 10
+
+  y::= if {
+    x > 5
+  } then {
+    x * 2
+  } else {
+    10
+  }
+
+  y == 20
+
+  z::= ""
+  try {
+    y:= if {
+      x > 20
+    } then {
+      x * 2
+    }
+    z:= "success"
+  } else {
+    z:= "failure"
+  }
+
+  z == "failure"
+  # because a failing `if` without a `else` branch has no result if used as expression
+
+  z:= "rollback"
+  try {
+    if {
+      x > 20
+    } then {
+      z:= "success"
+    }
+  } else {
+    z:= "failure"
+  }
+
+  z == "rollback"
+  # no "failure" because the `then` branch was simply ignored
+
+  z:= "rollback"
+  try {
+    if {
+      x > 20
+    } then {
+      z:= "success"
+    } else {
+      z:= "else"
+    }
+  } else {
+    z:= "failure"
+  }
+
+  z == "else"
+  # the `if` branch is failing, so the `then` branch was ignored, and the `else` branch was called
+}
+#+END_SRC
+** =iff=
+~iff~ stays for "if and only if" and when used in [[#design-by-contracts]] is equivalent to logical double implication ~A <==> B~.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  x::= 10
+  y::= x * 2
+  z::= ""
+
+  iff {
+    x > 5
+    z!append("1") 
+  } iff {
+    y > 10
+    z!append(", 2")
+  } iff {
+    y == x * 2
+    z!append(", 3")    
+  } 
+
+  z == "1, 2, 3"
+  # because every branch is succesfull and it is executed in sequence 
+  
+  z:= ""
+  iff {
+    x > 10
+    z!append("1") 
+  } iff {
+    y > 20
+    z!append(", 2")
+  } iff {
+    y == x * 2
+    z!append(", 3")    
+  } 
+
+  z == ""
+  # becase every branch failed, and all effects were rollbacked, 
+  # but without global failure
+   
+  z:= ""
+  try {
+    iff {
+      x > 5
+      z!append("1") 
+    } iff {
+      y > 10
+      z!append(", 2")
+    } iff {
+      y == x * 10
+      z!append(", 3")    
+    } 
+  } else {
+    z:= "failure!"
+  }
+
+  z == "failure"
+  # because one of the branches (the third) returned a different fail/success state respect the others,
+  # so the main transaction failed and all effects were rollbacked 
+ 
+
+}
+#+END_SRC
+In case ~iff~ is a sequence of actions then:
+- all branches must fail or succedee
+- if all branches fail then no actions will be executed, but the global ~iff~ will not fail
+- if all branches succedee then all actions will be executed following their order of definition
+- if some branch fail and other branch succedee then all actions will be rollbacked and the global ~iff~ will fail
+
+In case ~iff~ is a sequence of expressions then:
+- if all expressions fails then the global ~iff~ will fail too because there is no result to report
+- if all expressions succedee but they do not return the same result, then also the global ~iff~ will fail
+- if some expressions succedee and other fails, then also the global ~iff~ will fail
+- if all expressions succedee and they report the same result, then the global ~iff~ suceedee and return the common result
+
+In case of ~iff~ is a sequence of expressions with actions inside:
+- actions will be executed following the declaration order
+- the same rules of ~iff~ as sequence of expressions will be used
 ** =a && b=
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -2436,6 +2578,8 @@ Every DSL block has a:
 
 For example we can produce an HTML representation of some code (target-DSL), and we can process some SVG content (guest-DSL), inside a comment (host-DSL), inside Dok code (host-DSL). The Dok compiler architecture will try to manage all these combinations, and it will advise the user when some combination is not supported.
 
+Types, objects and other programming elements defined in the guest-DSL are indicated as ~$someElement~ in the host-DSL, for indicating that ~someElement~ must be transformed in the corresponding ~someElement~ of the host-DSL according the rules of the compiler plugin. At the same time in the guest-DSL programming language elements defined in the host-DSL or other guest-DSL are indicated using ~$anotherElement~ notation.
+
 #+BEGIN_SRC fundemantal :tangle yes
 Assert {
 
@@ -2588,6 +2732,8 @@ Assert {
 
 }
 #+END_SRC
+
+
 ** Macro 
 Dok uses metaprogramming also for adding to the language powerful and useful constructs and reducing boilerplate code.
 *** ~@Case~
@@ -2645,8 +2791,8 @@ Dok uses a design by contracts (DbC) cite:meyer1997object and refinement types c
 - whenever possible these properties are checked at compile-time and the programmer can give hints for their proof
 - other properties can be tested at run-time during testing
 
-The scope is using simple types but with descriptive properties.
-
+Contracts can be written using the [[#nested-transaction-semantic]] that is rather expressible and side-effect free.
+** Example
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
 
@@ -2660,21 +2806,18 @@ Assert {
       }
 
       @Ensure {
-        result >= 0
-        #:NOTE: ``result`` is a special variable, associated to the result of the function
+        $result >= 0
+        #:NOTE: ``$result`` is a special variable, associated to the result of the function
       }
     }
   )
 #+END_SRC
-
- - =result= identifies the result of the function
- - =oldSelf.someProperty= is the counterpart of =self.someProperty=, and
+** Special identifiers
+ - =$result= identifies the result of the function
+ - =$oldSelf.someProperty= is the counterpart of =self.someProperty=, and
    identifies the value of =someProperty= before the execution of an
    action modifying the state of =self=
-
- Dok contracts are about the semantic/specification of a function/type. 
- The represent business-logic constraints. If the code change (e.g. subtyping) they remain usually still applicable.
- 
+** Who must respect contracts
  Dok contracts are:
  - =@Require= for conditions that must be respected from the caller of
    the code. If a =@Require= condition is not respected, then there is an
@@ -2693,18 +2836,17 @@ Assert {
    the condition is not respected, the algorithm is still valid, but it
    can run slowly, because it is designed and optimized assuming
    that =@Usually= condition is true.
-*** Contracts conformance during subtyping
-
- - types implementing interfaces must respect the contracts of the interface
- - if =@Require= is redefined, then it must be weaker than the condition
-   of the parent type, and its definition replaces completely the
-   definition of the parent type (i.e. it is put in logical or, with the
-   definition of the parent). Doing so any caller respecting the parent condition for sure respect also the type variant condition.
- - if =@Ensure= in redefined, then its definition extend the conditions
-   of the parent type (i.e. it is put in logical and, with the definition of
-   the parent). Doing so if the caller expects some properties for the result, these properties are met also from the type variant.
- - =@Usually=, =@Assert= of the are not considered any more applicable
-   because they are associated to code, not to function semantic
+** Contracts conformance during subtyping
+- types implementing interfaces must respect the contracts of the interface
+- if =@Require= is redefined, then it must be weaker than the condition
+  of the parent type, and its definition replaces completely the
+  definition of the parent type (i.e. it is put in logical or, with the
+  definition of the parent). Doing so any caller respecting the parent condition for sure respect also the type variant condition.
+- if =@Ensure= in redefined, then its definition extend the conditions
+  of the parent type (i.e. it is put in logical and, with the definition of
+  the parent). Doing so if the caller expects some properties for the result, these properties are met also from the type variant.
+- =@Usually=, =@Assert= of the are not considered any more applicable
+  because they are associated to code, not to function semantic
 * Map-Reduce programming model
    :PROPERTIES:
    :CUSTOM_ID: map-reduce
