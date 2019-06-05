@@ -3170,12 +3170,23 @@ Knil types are tagged with`$SomeKinlType` inside Dok, and Dok types are tagged w
 
 Knil types are seen as containers of tuples in Dok, so they can be queried using a [[#map-reduce]] proramming model.
 ** Weak vs strong references
-In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with strong a reference to the original object to clone, because it is part of it, so you had to clone also its parts. 
+In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with a strong reference because it is part of it.
 
 In case of Knil and Dok we have clear distinctions between strong and weak references:
-- every tuple inside a Knil table is an entity and every foreign key pointing to another entity is for sure a weak reference, i.e. a link to a distinct entity
-- every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references)
-- a compound value can have references to Knil entities, in particular in case of a noSQL data processing, but these are managed as values like ~Ref(SomeForeignKey)~ and so they act like weak references to the referenced entity
+- every tuple inside a Knil table is an entity and every foreign key pointing to is for sure a weak reference (i.e. for sure the first tuple is not part of the second) 
+- every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references) and they are represented using Dok values, used in attributes of Knil tuples
+- compound Dok values have an inherent strong reference semantic, because they have no shared parts 
+- a Dok value can have references to external Knil entities, but these are inherently weak references because they have a form like ~Ref(SomeForeignKey)~ 
+
+An example: a Book can have an author and it can be composed of chapters. The Book is a Dok value with an "author" field pointing to a Knil entity of type Person. This is clearly a weak reference because if you clone a book you don't clone also the author (i.e. the author is not part of the book). The chapters of the book are instead part of it. So they are fields of the Dok Book value. A Book can have also some chapters shared with other books. In this case you can create Knil entities of type SharedChapter and insert weak references to them in the Book value. They will be weak references, and if you modify a shared chapter on a book also other books referencing the same Knil chapter will see the effects. 
+
+So the weak vs strong reference problem is automatically solved in Dok and Knil:
+- everything you put in a Knil relation will be a weak reference
+- everything you describe with a Dok type will be a strong reference
+- references to Knil entities will always be weak references
+- usage of Dok values will always be strong references
+- you can reference Knil entities inside Dok values, and they will be weak references
+- you can use Dok values in Knil entities, and they will be strong references
 ** Knil functions
    :PROPERTIES:
    :CUSTOM_ID: knil-functions
@@ -3396,7 +3407,7 @@ cite:darwen_third_1995 describes the (ultimate) requirements, in form of prescri
 
 An important difference with cite:darwen_third_1995 is that in Knil queries are expressed not in a relational programming model (RM), but in Dok, so using a noSQL approach. A graph DBMS is (more or less) equivalent to a key-value store DBMS and to old network DBMS which were in vogue before the invention of relational DBMS. In all these models the physical structure of the database is explicit and it can be adapted to the type of queries that must be done. 
 
-According cite:meijer_co-relational_nodate coSQL are the dual of RM, i.e. many properties are the opposite of the relational counterpart. There are not conflicts between the two models because instead they complement each other. Many benefit of one model are not present in the other and vice-versa. For example:
+According cite:meijer_co-relational_nodate coSQL are the dual of RM, i.e. many properties are the opposite of the relational counterpart. There are no conflicts between the two models because instead they complement each other. Many benefit of one model are not present in the other and vice-versa. For example:
 - in RM also common queries can requires slow joins, while in coSQL data structures can use specific data structures and explicit references for speeding-up them
 - in RM updates are fast because only few tuples must be modified, while in coSQL updates can involve the update of complex data structures with linked references
 - RM can support every type of query using always the same schema based on joins, filters (i.e. relational algebra), while in coSQL every data structures can have its characteristics
@@ -3431,7 +3442,6 @@ Note that also in case of compilation to relational DBMS, some coSQL pass can be
 In case Knil databases can be imported from already existing DBMS and Dok code managing them can be converted to code updating the production DBMS.
 
 TODO study C# Entity framework that can instruct LINQ on how mapping to already existing DBMS
-
 * Knil for ontologies and knowledge-bases
    :PROPERTIES:
    :CUSTOM_ID: knil-kb
@@ -3786,6 +3796,20 @@ Every Dok file starts with an header like ~@DokV1 { ... }~ and so code written i
 Ideally for every new major version of the language, there should be an automatic code
 converter from the old version to the new version, for having a uniform code base.
 * Comparison with other languages
+** Hybrid OOP, FP and metaprogramming approach
+Dok tries to join OOP, FP and metaprogramming paradigms in a pragmatic way: taking the best idea and not using aspects that can cause problems.
+
+So Dok supports FP but monads, effects and other complex FP patterns are not technically possible because functions can only be arguments of higher-order functions, but not results of other functions. In these cases metaprogramming had to be used. Metaprogramming is favoured because it can analyze and transform code and so it is more powerful.
+
+Dok has no lazy evaluation like Haskell or co-recursion like Idris, but for these cases it uses streams that are more simple also if less elegant/powerful.
+
+Dok supports metaprogramming but only at compile-time (i.e. not a run-time), and all the application source-code must be known in advance. In this way global analysis and advanced/agressive optimizations can be performed. Metaprogramming can be used for extending the language/compiler, but the run-time behavior remain simple. Dok libraries can have advanced features like some FP libraries, but with the advantage of global analysis and code transformation.
+
+Dok supports OOP but objects are values and not references like in mainstream OOP. This simplifies a lot reasoning on code, and it is inspired to FP paradigm.
+
+Dok interfaces are like in mainstream OOP, because concrete types can supports abstract interfaces using inheritance. But inheritance for concrete types is very different from inheritance of mainstream OOP language: it is more similar to FP sum types. Every subtype is seen as a variant of the parent type, and type hierarchy is seen as a way for describing compound/hierarchical values.
+
+Dok supports database relational concepts but only databases schema had to be in normalized relational form. Instead relational data is processed using a [[#map-reduce]] approach, without any further reference to relational model, SQL-like languages, and normalization of data.
 ** Lisp
 Dok uses nested records, while Lisp uses nested list. In Dok arguments can be named, in Lisp usually no, also if there are extensions for supporting names and properties.
 
