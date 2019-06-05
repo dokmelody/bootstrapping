@@ -1,4 +1,4 @@
-#DATE: 2019-06-05
+#+DATE: 2019-06-05
 #+TITLE: Dok Programming Language v0.1.3
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
