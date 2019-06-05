@@ -3014,6 +3014,9 @@ Assert {
   :END:
   TODO see also [[#map-reduce]]
 * Knil for relational databases 
+   :PROPERTIES:
+   :CUSTOM_ID: knil-rm
+   :END:
 Knil is a Dok DSL for specifying relational and graph databases. The name stays for "link" but  written in reverse.
 
 The Knil schema and queries can be high level and inefficient specifications that can be optimized in the final phases of application development. So the majority of these chapters are about clear specification of database semantic.
@@ -3828,6 +3831,9 @@ Ideally for every new major version of the language, there should be an automati
 converter from the old version to the new version, for having a uniform code base.
 * Comparison with other languages
 ** Hybrid OOP, FP and metaprogramming approach
+  :PROPERTIES:
+  :CUSTOM_ID: comparison-with-oop-fp
+  :END:
 Dok tries to join OOP, FP and metaprogramming paradigms in a pragmatic way: taking the best idea and not using aspects that can cause problems.
 
 So Dok supports FP but monads, effects and other complex FP patterns are not technically possible because functions can only be arguments of higher-order functions, but not results of other functions. In these cases metaprogramming had to be used. Metaprogramming is favoured because it can analyze and transform code and so it is more powerful.
