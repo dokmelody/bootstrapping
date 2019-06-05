@@ -1,5 +1,5 @@
 #DATE: 2019-06-02
-#+TITLE: Dok Programming Language v0.1.2
+#+TITLE: Dok Programming Language v0.1.3
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
 #+CREATOR: Emacs Org mode
@@ -2866,7 +2866,7 @@ TODO generalize adopting idea from cite:wickham_split-apply-combine_2011
 
 According cite:dean_mapreduce:_2008 "MapReduce is a programming model and an associated implementation for processing and generating large data sets. Users specify a map function that processes a key/value pair to generate a set of intermediate key/value pairs, and a reduce function that merges all intermediate values associated with the same intermediate key." 
 
-Dok favours a map-reduce paradigm for transforming (large) data sets. See also [[#knil]] for more details about management of relational and graph databases, using the map-reduce model.
+Dok favours a map-reduce paradigm for transforming (large) data sets. 
 
 According Dok [[#design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
 
@@ -3013,10 +3013,592 @@ Assert {
   :CUSTOM_ID: concurrency
   :END:
   TODO see also [[#map-reduce]]
-* TODO Knil
-  :PROPERTIES:
-  :CUSTOM_ID: knil
-  :END:
+* Knil for relational databases 
+Knil is a Dok DSL for specifying relational and graph databases. The name stays for "link" but  written in reverse.
+
+The Knil schema and queries are meant to be high level specifications, then according application requirements and used queries the Knil compiler with the help of the user can derive a concrete database.
+
+#+BEGIN_SRC dot :file knil1.png :cmdline -Kdot -Tpng
+digraph {
+  node [shape=box fontname=Arial];
+
+  um [label="Application domain\nHigh-level data model"] 
+  kr [label="Knil relations"]
+  dt [label="Dok types"]
+  dq [label="Dok queries\nin map-reduce style"]
+  kb [label="Knil ontologies"]
+  rt  [label="Run-time environments"]
+  rt1 [label="Relational DBMS"]
+  rt2 [label="Key-value store\nGraph DBMS"]
+  rt3 [label="Map-Reduce engine"]
+
+  um -> kb[label="to"];
+  um -> kr[label="to"];
+  kb -> kr[label="compile-to"];
+  kr -> dt[label="compile-to"];
+
+  subgraph cluster_1 {
+    {rank=same dt dq}
+    dt -> dq[label="used-from"];
+  }
+
+  dt -> rt [label="compiled-to"];
+  dq -> rt [label="compiled-to"];
+ 
+  subgraph cluster_2 {
+    rt -> rt1[label="can-be"];
+    rt -> rt2[label="can-be"];
+    rt -> rt3[label="can-be"];
+  }
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:knil1.png]]
+** Relational databases schema
+This an example of a relational database schema, defined using the Knil DSL. The syntax is very similar to Dok, but the semantic is diferent because in Knil objects are entities and not values.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  @Knil {
+    @Id("schema1")..
+    Book --> (
+      isbnCode::$String @Key
+      # `@Key` says that a Book is an entity identified uniquely from `isbnCode` value
+      # that must be unique, i.e. it is its primary-key.
+      #
+      # `$String` is used instead of `String` because it is a type defined in Dok
+      # and not in Knil and in particular String is not an entity, but a value.
+
+      title::$String
+
+      worthPoints::$Int
+      #: how usefull that this book is sold (e.g. marketing, margins, etc..)
+    )
+    # this code is expanded by the Knil compiler to something like
+    # > Knil -> (.Book --> (isbnCode::String, title::String, worthPoints::Int))
+    # The `Knil` namespace is used  for avoiding to export 
+    # directly the `Book` type, that should be not accessible by normal Dok code, 
+    # but only from code using `$Book`.
+    
+    Vendor --> (
+      name::$String
+      #:NOTE: there is no @Key annotation so an automatic UUID field
+      #       is added for identifying Vendor entities.
+    )
+
+    Country --> (
+      name::$String @Key
+    )
+
+    Sell --> (
+      ~:Vendor
+      # this stays for
+      # > vendor:Vendor
+      #
+      #:NOTE: the usage of `Vendor` instead of `$Vendor` identifies
+      #       a Knil type, that is in this case an entity/reference,
+      #       so the vendor` field will be a foreign key (i.e. a reference)
+      #       to an entity of type `Vendor`.
+
+      ~::Book
+      in::Country
+      on::$Date
+    )
+    ..@
+  }
+}
+#+END_SRC
+** Integrity constraints
+   :PROPERTIES:
+   :CUSTOM_ID: knil-integrity-constraints
+   :END:
+Integrity constraints are conditions that are guarantee to be true before a database transaction, and that must be respected at the end of a database transaction. 
+
+TODO many important details yet to decide/design
+
+#+BEGIN_SRC fundamental :tangle yes
+@Assert {
+  @Knil {
+    S -> (
+      city::$String
+      status::Int
+
+      @Require {
+        if { 
+          self.city == "London" 
+        } then { 
+          self.status == 20 
+        }
+      }
+    )
+
+    @Require {
+      S.forall { 
+        s1::= self.status
+        if {
+          s1 > 0
+        } then {
+          S.any({ self.status < s1 })
+        }
+      }
+    }
+  }
+}
+#+END_SRC
+
+~@Require~ is used instead of ~@Ensure~ because the constraint is seen from the point of view of the user adding info to the database. But ~@Ensure~ can be used because in this case is perfectly compatible, i.e. it is same requirement seen from the point of view of the reader of the database. 
+** Knil tuples as entities
+Knil tuples are entities and their primary key is their reference. If a tuple is changed then all tuples on other tables referecing it, will see the changes. This is the contrary of value based semantic used in Dok.
+
+Entities are objects with an identity and that can be directly referenced by other objects. They can mutate state. According cite:darwen_third_1995 entities are tuples inside relations:
+- theirs primary key is their identifier
+- theirs attributes are their state
+- they can be referenced by other tuples (i.e. entities) using foreign keys
+
+As usual for distinguish between entities and values:
+- entities can change while values are imutables
+- entities can have an history (i.e. LOG) of changes
+- entities can be created and destroyed, while values always exists
+** Knil tuples as values
+Strictly speaking Knil tuples are normal Dok values. They act like mutable entities only because they are stored inside a key-value store (i.e. the DBMS) where the key is the primary key of the tuple, and the value is the tuple itself.
+
+For example ~Person(id: 1, name: "Massimo")~ is a value distinct from the value ~Person(id: 1, name: "Max")~, but inside a DB container there can be only one association between ~id: 1~ and a value of type ~Person~, so when you update the DB you are updating the entity referenced by the key ~id: 1~. So it is the DB container giving to entities a mutable state. 
+** Exchange of information between Knil and Dok
+Knil types are tagged with`$SomeKinlType` inside Dok, and Dok types are tagged with `$SomeDokType` inside Kniil. The tag is important for the user reading the code because they have different semantic. It is important also for the the Knil compiler that can manage them in ad-hoc way.
+
+Knil types are seen as containers of tuples in Dok, so they can be queried using a [[#map-reduce]] proramming model.
+** Weak vs strong references
+In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with strong a reference to the original object to clone, because it is part of it, so you had to clone also its parts. 
+
+In case of Knil and Dok we have clear distinctions between strong and weak references:
+- every tuple inside a Knil table is an entity and every foreign key pointing to another entity is for sure a weak reference, i.e. a link to a distinct entity
+- every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references)
+- a compound value can have references to Knil entities, in particular in case of a noSQL data processing, but these are managed as values like ~Ref(SomeForeignKey)~ and so they act like weak references to the referenced entity
+** Knil functions
+   :PROPERTIES:
+   :CUSTOM_ID: knil-functions
+   :END:
+Knil relations can be seen as types in Dok, so normal Dok functions can be added to these types.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  @Knil {
+    @Include("schema1")
+
+    Sell.worthPoints --> $Int { self.book.worthPoint }
+    # "denormalize" the `Book.worthPoints` making it accessible directly from `Sell` entity.
+    # Doing so code can become more OOP than relational based because there are less 
+    # explicit joins in the code respect pure relational code.
+  }
+
+  average::= $Sell.map({self.worthPoints}).average.String
+  stdout!printLn("Average points: ".append(average))
+}   
+#+END_SRC
+** Knil queries
+   :PROPERTIES:
+   :CUSTOM_ID: knil-queries
+   :END:
+The relations defined in Knil can be used as Dok containers (i.e. relations) and all their elements (i.e. tuples) can be retrieved, filtered and transformed by Dok code. 
+
+Functional Dok code is used instead of SQL or logical queries for these reasons:
+- functional code is extremely expressive for filtering and transforming data
+- queries become normal Dok code that can be composed and transformed like normal code
+- queries become parametric because they can be the result of a normal Dok function with arguments
+
+A query become a Dok function. Its result should be a scalar tuple, while the self object must contains the params of the query and other foreign keys. So the result should not return "relations" but only a unique scalar type uniquely identified from the self object. A virtual relation associated to the query can be (ideally) constructed joining the self object of the function and its result. 
+
+Despite the apparent suggestion that queries are building virtual relations, this is not the case. Knil relations follow the relational paradigm, described in [[#knil-relational-to-graph]], but queries use a coSQL paradigm based on [[#map-reduce]] programming model, because in queries we are not interested in normalized relations, but in obtaining the result in some useful form for processing it.
+
+Note that according [[#knil-optimizations]] these queries can be initially only a specification of the required result, while an efficient versions can be derived later.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  @Knil {
+    @Include("schema1")
+
+    Sell.worthPoints --> $Int { self.book.worthPoint }
+
+    #:NOTE: this query can be defied also outside Knil DSL,
+    #       in this case Knil types became like `$Sell` and Dok types remain normals 
+    (~::Vendor, in::Country, on::$Date).worthPoints --> $Int {
+      Sell.filter {
+        self.vendor == vendor
+        self.in == in
+        self.on == on
+      } . map({self.worthPoint}).sum
+    }
+    # this is like a virtual relation
+    # > WorthPoints --> (~::Vendor, in::Country, on::$Date, worthPoints::$Int)
+  }
+}   
+#+END_SRC
+** Aggregates
+   :PROPERTIES:
+   :CUSTOM_ID: knil-aggregates
+   :END:
+Like in case of [[#knil-queries]] aggregates are calculated using functional-like Dok code. The reasons are the same: powerlful and composable code.
+
+In case of grouping queries, the result of the query function is usually a Dok Map type, mappping group keys to group result. 
+
+These high-level queries can be further optimized rewriting them in more low-level code according the physical database format.
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  @Knil {
+
+    Supplier --> (
+      name::$String
+      status::$Int
+      city::$String
+    )
+
+    Part --> (
+      name::$String
+      color::$Color
+      weight::$Weight
+      city::$String
+    )
+ 
+    Order --> (
+      ~::Supplier @Key
+      ~::Part @Key
+      quantity::Quantity
+    )
+
+    @Example {
+      # SQL grouping by supplier id, but it does not return the suppliers with 0 (i.e. missing) products.
+      # The corresponding query with also missing suppliers is a lot more complicated.
+      SELECT supplier_id, COUNT(*) AS coun_of_orders
+      FROM Order
+      GROUP BY supplier_id
+    }
+
+    Supplier.countOfOrders --> $Map(From: Supplier, To: $Int) {
+      #: The number of orders for each supplier, including suppliers with no order
+
+      Supplier!do{
+        r::= $Map()
+        Supplier!forEach({r(self):= 0})
+        Order!forEach {
+          r(self.supplier):= ~ + 1
+        }
+        r
+    }
+
+    Supplier.countOfOrders2 --> $Map(From: Supplier, To: $Int) {
+      #: A variant of `Supplier.countOfOrders` that is more compact, 
+      #  but that is slow if executed naively without applying agressive rewriting optimizations.
+
+      Supplier.map({(self, Order.filter({self.supplier == super}).length)}).Map
+    }
+  }
+}
+#+END_SRC
+** Recursive queries
+   :PROPERTIES:
+   :CUSTOM_ID: knil-recursion
+   :END:
+A query is recursive when tuples that are in their solution at a certain execution step are used for finding new tuples to insert in the result.
+
+In case of simple recursion rules the best approach is using [[#knil-kb]] because rules are simple but expressive and an efficient implementation can be derived.
+
+Recursive queries are written using Dok recursive functions, and they are compiled from Knil in hopefully efficient code, but this is not guarantee.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  @Example {
+    # This is an example of multiple linear recursive query.
+    # `SG` stays for same-generation.
+    # The code is written in Datalog.
+
+    SG(x, y):- Parent(x, w), Parent(y, v), SG(w, v).
+    SG(x, y):- Child(w, x), Child(v, y), SG(w, v).
+    SG(x, y):- Cousin(x, w), SG(w, y).
+    SG(x, y):- Sibiling(x, y).
+  }
+
+  @Knil {
+    Person --> (
+      name::$String
+    )
+
+    Parent --> (
+      parent::Person @Key
+      child::Person @Key
+    )
+  }
+
+  (x::$Person, y::$Person).areSibilings --> Bool {
+    $Parent.filteri({self.child == x}).any {
+      $Parent.filter {
+        self.child == y && self.parent == super.parent
+      }
+     
+  }
+
+  (x::$Person, y::$Person).areCousins --> Bool {
+    $Parent.any {
+      self.child == x
+      p::= self.parent
+      $Parent.any {
+        self.child == y
+	      (p, self.parent).areSibillings
+      }
+    }
+  }
+
+  (x::$Person, y::$Person).areSameGeneration --> Bool {
+    try {
+      (x,y).areSibilings
+    } else {
+      $Parent.any {
+        self.child == x
+	      w::= self.parent
+        $Parent.any {
+	        self.child == y
+	        v::= self.parent
+	        (w, v).areSameGeneration
+	      }
+      }
+    } else {
+      $Parent.any {
+        self.parent == x
+	      w::= self.child
+        $Parent.any {
+	        self.parent == y
+	        v::= self.child
+	        (w, v).areSameGeneration
+	    }
+   }
+   } else {
+     $Person.any {
+       w::= self
+       (x, w).areCousins
+       (w, y).areSameGeneration
+     }  
+   }
+  }
+}
+#+END_SRC
+** Relational vs graph-databases
+   :PROPERTIES:
+   :CUSTOM_ID: knil-relational-to-graph
+   :END:
+cite:darwen_third_1995 describes the (ultimate) requirements, in form of prescriptions and proscriptions, for a truly relational programming language with object-oriented features. Many of these are respected also in Dok and Knil, in particular:
+- only tuples inside relations are entities, and their primary key is their reference
+- objects (i.e. instances of class) are values and not entity/references
+- OOP classes are used only as domain types of relation attributes, i.e. objects are values associated to relations attributes and not stand-alone entities
+- database schema should be in relational normal form, for enforcing many integrity constraints by construction 
+- database queries follow the close world assumption: if there is no fact then the fact is not true
+
+An important difference with cite:darwen_third_1995 is that in Knil queries are expressed not in a relational programming model (RM), but in Dok, so using a noSQL approach. A graph DBMS is (more or less) equivalent to a key-value store DBMS and to old network DBMS which were in vogue before the invention of relational DBMS. In all these models the physical structure of the database is explicit and it can be adapted to the type of queries that must be done. 
+
+According cite:meijer_co-relational_nodate coSQL are the dual of RM, i.e. many properties are the opposite of the relational counterpart. There are not conflicts between the two models because instead they complement each other. Many benefit of one model are not present in the other and vice-versa. For example:
+- in RM also common queries can requires slow joins, while in coSQL data structures can use specific data structures and explicit references for speeding-up them
+- in RM updates are fast because only few tuples must be modified, while in coSQL updates can involve the update of complex data structures with linked references
+- RM can support every type of query using always the same schema based on joins, filters (i.e. relational algebra), while in coSQL every data structures can have its characteristics
+- in RM usually child entities points to parent entities, while in coSQL parent entities usually contain list of references to children entities
+- in RM entities have explicit identity identifier, while in coSQL entities have usually an implicit identity given by the storage mechanism (e.g. RAM, disk, etc..)
+- in RM queries are optimized by the engine, while in coSQL is usually the programmer writing already optimized query, and adapting the data format if some frequent queries are too much slow
+- RM assumes closed-world principle, while often coSQL databases open-world principle 
+- in RM results of queries should be other relations, while in coSQL there can be streams of ordered tuples
+- distributed RM systems can not scale as coSQL because RM transactions requires heavier synchronization protocols, while in coSQL there can transactions with successive repair actions in case of conflicts
+
+Because it is difficult living without the characteristics of coSQL DBMS in Dok and Knil you can use them, in particular when you start querying the RM databases and transforming data. This solves also object-relational impedance mismatch problems (see cite:wiki002), because you process information using a [[#map-reduce]] programming model that is perfectly natural in Dok. 
+** Optimizing DBMS applications
+   :PROPERTIES:
+   :CUSTOM_ID: knil-optimizations
+   :END:
+Thanks to [[#design-philosophy]] Dok supports iterative specializations of the code from high-level to low-level. This approach is useful also for DBMS applications:
+- relational and fully normalized database schema are initially specified
+- high-level queries are initially used
+- when the requirements of the applications are well understood (e.g. active queries, stream of events, different queries sharing some common computations, etc..) an optimized low-level version of the schema and queries can be specified
+- the high-level schema and queries will play the role of specifications for the low-level versions
+- all links between high-level and low-level details will be mantained by DokMelody IDE
+
+Knil compiler plugins and meta-annotations in the code can (partially) automatize the derivation of low-level coSQL implementations.
+** Supporting multiple DBMS engine 
+   :PROPERTIES:
+   :CUSTOM_ID: knil-multiple-engines
+   :END:
+Using the same approach of [[#knil-optimizations]] Knil can compile schema and queries to different DBMS engines like map-reduce, relationals, OLAP, and so on.
+
+Note that also in case of compilation to relational DBMS, some coSQL pass can be performed or explicitely denormalizating the schema, or internally from the DBMS engine. So coSQL view of data can never be completely avoided. But this is not a problem in Dok and Knil because we have a layered development process.
+** Supporting already existing databases on production DBMS
+In case Knil databases can be imported from already existing DBMS and Dok code managing them can be converted to code updating the production DBMS.
+
+TODO study C# Entity framework that can instruct LINQ on how mapping to already existing DBMS
+
+* Knil for ontologies and knowledge-bases
+   :PROPERTIES:
+   :CUSTOM_ID: knil-kb
+   :END:
+An ontology (cite:wiki_ontology) is a common vocabulary of concepts to use for describing (complex) knowledge-bases.
+
+Dok can use ontologies for:
+- querying data using an expressive vocabulary of concepts and relations
+- tagging and classifying internal and external data
+- linking internal and external data according the type of relationship
+- importing/exporting data to/from interna/external services using a standard logical format (e.g. like formats in https://schema.org)
+- integrating different sources of data
+- managing complex knowledge-bases 
+** Ontologies for tagging data
+Ontologies can be used for tagging content: tags are additional meta-info because the content makes sense also without them.
+
+Note: in case of internal Knil data, the tags can be specified for convenience together with the main content, but they remains meta-info and not direct part of the content..
+
+Tags have an open-world principle database semantic (i.e. what is not known to be true is simply unknown), while relational databases have a closed-world principle  (i.e. what is not known to be true must be false).
+** Ontologies for knowledge-bases
+Ontologies can be used for describing complex knowledge-bases capturing concepts of a certain domain (e.g. medical, legal, etc..). In this way from extensional facts (i.e. the explicit facts stored in the database), intensional facts can be derived according the rules of the knowledge-base.
+
+Queries and navigation in the knowledge-base can be done using a rich vocabulary, and database systems can play the role of expert systems.
+
+Knowledge-bases can have a closed-world semantic if they are considered as complete databases for internal facts, or with open-world semantic if they are an initial attempt to capture the majority of information but not all.
+** Schema specification
+Ontologies for knowledge-bases and for tagging are supported by Knil and Dok using the same mechanisms.
+
+Schema are specified as typed facts. There can be zero, one or more facts for each relation, so there are no cardinality constraints. Additional constraints had to be specified apart. Relations can have properties like symmetric, transitive closure and so on. Hopefully the majority of useful concepts can be captured in this way.
+
+These are different examples of schema with extensive documentation about the Knil notation:
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  @Knil {
+      
+    Any knows Any
+    Any hasEnemy Any   
+    Any hasFriend Any
+
+    x hasEnemy y && y hasFriend z ==> x hasEnemy z # chain derivation
+    x hasEnemy y ==> y hasEnemy x # symmetric (i.e. its the inverse of itself)
+    x hasFriend y ==> y hasFriend x    # symmetric
+    x hasFriend y ==> x knows y        # sub-property
+
+    Person hasHusband Person
+    Person hasWife Person
+    Person married Person
+
+    Person.Status --> (
+      #:NOTE: these subclass are distinct by construction, according Dok semantic
+      #       So they must put inside a "Status" tag, because otherwise they can conflict
+      #       with other ways to partition a `Person` type.  
+      /Married
+      /Single
+    )
+
+    x hasHusband y ==> x married y
+    x married y ==> x is Person.Status/Married # `is` is a built-in relation
+    not (x is Person.Status/Married) ==> x is Person.Status/Single # closed world rule
+
+    Person hasParent Person
+    Person parentOf Person
+    Person hasGrandparent Person
+
+    x hasParent y <==> y parentOf x        # inverse
+    x hasParent y ==> not (x parentOf y)   # disjoint
+    x hasParent y ==> not (y hasParent x)  # irreflexivity
+  
+    x hasParent y && y hasParent z ==> x hasGrandparent z  # chain
+
+    #:NOTE: I ignore reflexivity because in an open-world this does not make sense,
+    #       and also in many queries, i.e. I can specify one of the two conditions and it is ok
+
+    Place connectedTo Place
+
+    x connectedTo y && y connectedTo z ==> x connectedTo z # transitive closure
+
+    Person.ParentalStatus --> (
+      /Parent
+      /Child
+      /Grandfather
+    )
+
+    Person is Person.ParentalStatus of Person 
+    x parentOf y && y parentOf z ==> x is Grandfather of z
+
+    # n-ary relations
+
+    Person hasMarried Person at $Date
+    #:NOTE: the chains and rules can be only on the first two elements, the other elements are additional info
+    #:NOTE: complex derivation rules had to be written using explicit Dok code as in case of relational DBRel
+
+    # This is an example of classification, for being able to write queries 
+    # on significant class of objects.
+
+    Pizza.Topping --> (
+      /Fish
+      /Meat
+    )
+
+    Pizza has Pizza.Topping
+
+    Pizza.Ingredients --> (
+       /Vegetarian
+       /NonVegetarian
+    )
+
+    Pizza is Pizza.Ingredients
+
+    not (x has Topping/Fish) && not (x has Topping/Meat) ==> x is Pizza.Ingredients/Vegetarian
+    not (x is Pizza.Ingredients/Vegetarian) ==> x is Pizza.Ingredients/NonVegetarian
+}
+#+END_SRC
+
+TODO see if there must be some flag for open and closed world ontologies
+
+TODO this is still an incomplete specification, it will be completed during implementation, and real usage scenario.
+** Compilation from ontologies to Knil relations
+Knil relations used in ontologies can be compiled to Knil relations used for the relational world. Then normal Dok code working on these tables can be used or querying the ontology. 
+
+The Knil compiler will manage automatically the logical derivation of intensional facts, e.g. transitive closure and so on. Intensional facts are not explicitely materialized, because this can require too much storage, but efficient queries are instead derived from original queries for taking in account the derived facts.
+
+Efficient rules will be derived in best-effort-mode from the Knil compiler, and it will advise if this is not possible. So it is not guarantee that every Knil rule schema and related query on it will be efficient to execute, but it is possible for the user being informed and finding in case some work arounds.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  Person hasParent Person
+  Person parentOf Person
+  
+  # n-ary relation    
+  Person hasMarried Person at $Date
+
+  # these Knil declarations of ontological facts are compiled to these Knil relations
+  # (and so they can be managed by relational database too)
+  @Example {
+      Person.HasParent --> (
+        subject::Person @Key
+        object::Person @Key
+      )
+
+      Person.ParentOf --> (
+        subject::Person @Key
+        object::Person @Key
+      )
+
+      (Person, Person).hasParent --> $Bool
+      (Person, Person).parentOf --> $Bool
+
+      Person.HasMarriedAtDate --> (
+        subject::Person @Key
+        object::Person  @Key
+        at::$Date       @Key      
+      )
+    }
+  }
+}
+#+END_SRC
+** Differences with OWL 2
+Knil for ontologies aims to be at the same expressive power and efficiency of OWL 2 QL (cite:hitzler2009owl), but with the added support of transitive closure for relations. 
+
+Respect OWL 2, Knil has some limited support for n-ary relations.
+** Differences with Datalog
+Datalog code is more powerful than many ontological and description-logic based languages, but it can also be slower to execute for certain type of queries. It can also be more verbose than some ontological languages.
+
+Dok can be used or deriving intensional facts with a complex business logic, instead of Datalog, while Knil can be used for the majority of simple to declare business rules. 
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
