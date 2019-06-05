@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-06-05 mer 03:48 -->
+<!-- 2019-06-05 mer 11:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dok Programming Language v0.1.3</title>
@@ -248,53 +248,53 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd40c27f">License</a></li>
-<li><a href="#orgc754671">Current status</a></li>
-<li><a href="#org7295472">Quick tour</a></li>
+<li><a href="#orgabeb646">License</a></li>
+<li><a href="#org44902b3">Current status</a></li>
+<li><a href="#orgf8e934e">Quick tour</a></li>
 <li><a href="#design-philosophy">Design philosophy</a></li>
 <li><a href="#values">Values</a>
 <ul>
-<li><a href="#org536edf1">Primitive values</a></li>
-<li><a href="#org26cc7fa">Variables</a></li>
+<li><a href="#org3992ecd">Primitive values</a></li>
+<li><a href="#org2ce5edd">Variables</a></li>
 <li><a href="#record">Records</a></li>
 <li><a href="#tuple">Tuples</a></li>
-<li><a href="#org97fff6d">Containers as values (Persistent Data Structures)</a></li>
-<li><a href="#org8874d78">Common containers</a></li>
-<li><a href="#org1b34ffc"><code>T*</code> <code>T+</code></a></li>
+<li><a href="#orge6868ba">Containers as values (Persistent Data Structures)</a></li>
+<li><a href="#orgcfa2465">Common containers</a></li>
+<li><a href="#org7d47d87"><code>T*</code> <code>T+</code></a></li>
 </ul>
 </li>
-<li><a href="#orgdf3752f">Object Oriented Programming (OOP)</a>
+<li><a href="#org7789dd3">Object Oriented Programming (OOP)</a>
 <ul>
-<li><a href="#org998c6c4">OOP terms</a></li>
+<li><a href="#org0c02895">OOP terms</a></li>
 <li><a href="#type-definition">Type variants</a></li>
-<li><a href="#orgaff734c">Overriding</a></li>
-<li><a href="#org4560b5f">Type references</a></li>
+<li><a href="#orge3b70f2">Overriding</a></li>
+<li><a href="#orge31b0cf">Type references</a></li>
 <li><a href="#type-extension">Type extension</a></li>
-<li><a href="#org6adb99e">Type conversion</a></li>
+<li><a href="#orge1f7119">Type conversion</a></li>
 <li><a href="#interfaces">Interfaces</a></li>
 <li><a href="#type-alias">Type aliases</a></li>
-<li><a href="#org5c1af79">Fields vs methods</a></li>
+<li><a href="#orgf9a3456">Fields vs methods</a></li>
 <li><a href="#private-properties">Private fields and methods</a></li>
 <li><a href="#unnamed-properties">Unnamed variables</a></li>
-<li><a href="#org0289085">Value constructors</a></li>
-<li><a href="#org2652e16">Inner types</a></li>
-<li><a href="#orgd1e296e">Type inspection</a></li>
-<li><a href="#org0ef6c3d">Type checking</a></li>
-<li><a href="#org839d6a6">Type anchoring</a></li>
-<li><a href="#org662faa7">Base types</a></li>
+<li><a href="#org08bd2cb">Value constructors</a></li>
+<li><a href="#org4346de0">Inner types</a></li>
+<li><a href="#orgaed0eb9">Type inspection</a></li>
+<li><a href="#org58715d6">Type checking</a></li>
+<li><a href="#orge5ba632">Type anchoring</a></li>
+<li><a href="#orgc4a31fe">Base types</a></li>
 <li><a href="#generics">Generic/parametric types</a></li>
 <li><a href="#type_conformance">Type conformance</a></li>
 </ul>
 </li>
 <li><a href="#functions">Functions</a>
 <ul>
-<li><a href="#org4eac79a">Recursion</a></li>
-<li><a href="#org1f26738">Binary operators</a></li>
+<li><a href="#orge9aac20">Recursion</a></li>
+<li><a href="#orgb41feb1">Binary operators</a></li>
 <li><a href="#update-action">Update actions</a></li>
 <li><a href="#pure-actions">Pure actions</a></li>
 <li><a href="#nested-function">Nested functions</a></li>
 <li><a href="#nested-action">Nested actions</a></li>
-<li><a href="#orgeddfedc">Higher order functions</a></li>
+<li><a href="#org89b491f">Higher order functions</a></li>
 <li><a href="#anonymous-function">Anonymous functions</a></li>
 <li><a href="#anonymous-action">Anonymous actions</a></li>
 <li><a href="#incremental-updates-listeners">Incremental update of function result</a></li>
@@ -302,68 +302,68 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#nested-transaction-semantic">Nested transactions semantic (TR)</a>
 <ul>
-<li><a href="#org385d4d4">False conditions</a></li>
+<li><a href="#orga32e775">False conditions</a></li>
 <li><a href="#try-action"><code>try</code> action</a></li>
-<li><a href="#org982b7d8"><code>if</code></a></li>
-<li><a href="#org53cf334"><code>iff</code></a></li>
-<li><a href="#orgada80c0"><code>a &amp;&amp; b</code></a></li>
-<li><a href="#orgef99f18"><code>@NoFail</code></a></li>
+<li><a href="#org7a53641"><code>if</code></a></li>
+<li><a href="#orgf2d43fb"><code>iff</code></a></li>
+<li><a href="#org0fb02a2"><code>a &amp;&amp; b</code></a></li>
+<li><a href="#org0cc17f6"><code>@NoFail</code></a></li>
 <li><a href="#repeat-action"><code>repeat</code> action</a></li>
-<li><a href="#org97d4d26"><code>Fail</code> info</a></li>
+<li><a href="#org3b1f735"><code>Fail</code> info</a></li>
 <li><a href="#exceptions">Exceptions</a></li>
 </ul>
 </li>
 <li><a href="#impure-statements">Impure statements</a>
 <ul>
-<li><a href="#org02070ab">Always committed actions</a></li>
+<li><a href="#org0c4bbf4">Always committed actions</a></li>
 <li><a href="#resource_management">Resource management</a></li>
 <li><a href="#references">References</a></li>
-<li><a href="#orgc49faff">In-place mutable data structures</a></li>
+<li><a href="#org4c5b673">In-place mutable data structures</a></li>
 </ul>
 </li>
 <li><a href="#attribute-grammars">Attribute grammars (AG)</a>
 <ul>
-<li><a href="#org05cf9ce">Bootm-up attributes</a></li>
-<li><a href="#org4e82673">Top-down attributes</a></li>
-<li><a href="#org2400268">Special attributes</a></li>
+<li><a href="#org47a9b84">Bootm-up attributes</a></li>
+<li><a href="#org0e9dddf">Top-down attributes</a></li>
+<li><a href="#org17bc286">Special attributes</a></li>
 </ul>
 </li>
 <li><a href="#metaprogramming">Metaprogramming</a>
 <ul>
-<li><a href="#org14ec6cf">Generating code values</a></li>
-<li><a href="#org19cecf2">Analyzing code values</a></li>
-<li><a href="#org18a107e">Annotations</a></li>
-<li><a href="#orgc85d9d7">Nested Domain Specific Languages (DSL)</a></li>
-<li><a href="#org112bc27">Macro</a></li>
+<li><a href="#org5b8a5e0">Generating code values</a></li>
+<li><a href="#org41fee9b">Analyzing code values</a></li>
+<li><a href="#org75627d8">Annotations</a></li>
+<li><a href="#org4633d15">Nested Domain Specific Languages (DSL)</a></li>
+<li><a href="#org815a5a8">Macro</a></li>
 <li><a href="#AOP">Aspect Oriented Programming (AOP)</a></li>
 </ul>
 </li>
 <li><a href="#design-by-contracts">Design by contracts and refinement types</a>
 <ul>
-<li><a href="#org745288b">Example</a></li>
-<li><a href="#org24b5c51">Special identifiers</a></li>
-<li><a href="#org993db20">Who must respect contracts</a></li>
-<li><a href="#org448084b">Contracts conformance during subtyping</a></li>
+<li><a href="#orgfa3a2a4">Example</a></li>
+<li><a href="#orge8312fa">Special identifiers</a></li>
+<li><a href="#orgac18494">Who must respect contracts</a></li>
+<li><a href="#org6082b53">Contracts conformance during subtyping</a></li>
 </ul>
 </li>
 <li><a href="#map-reduce">Map-Reduce programming model</a>
 <ul>
-<li><a href="#org0f6cfd6"><code>map</code></a></li>
-<li><a href="#org0049f97"><code>!forEach</code></a></li>
-<li><a href="#orgeeeab95">Fold/Reduce</a></li>
+<li><a href="#org3d7ea4d"><code>map</code></a></li>
+<li><a href="#orgbc45315"><code>!forEach</code></a></li>
+<li><a href="#orgd2e2285">Fold/Reduce</a></li>
 <li><a href="#streams">Streams</a></li>
-<li><a href="#org756016e">Convenience functions</a></li>
+<li><a href="#org89f9d0d">Convenience functions</a></li>
 </ul>
 </li>
 <li><a href="#concurrency"><span class="todo TODO">TODO</span> Concurrency</a></li>
-<li><a href="#org0cc94af">Knil for relational databases</a>
+<li><a href="#org5c0269e">Knil for relational databases</a>
 <ul>
-<li><a href="#orge180670">Relational databases schema</a></li>
+<li><a href="#org6f4f0f8">Relational databases schema</a></li>
 <li><a href="#knil-integrity-constraints">Integrity constraints</a></li>
-<li><a href="#org42d479d">Knil tuples as entities</a></li>
-<li><a href="#org19bccf7">Knil tuples as values</a></li>
-<li><a href="#org8f4e740">Exchange of information between Knil and Dok</a></li>
-<li><a href="#org15d7aa9">Weak vs strong references</a></li>
+<li><a href="#org262fe91">Knil tuples as entities</a></li>
+<li><a href="#orga0f5580">Knil tuples as values</a></li>
+<li><a href="#org9bb0e45">Exchange of information between Knil and Dok</a></li>
+<li><a href="#org612ec45">Weak vs strong references</a></li>
 <li><a href="#knil-functions">Knil functions</a></li>
 <li><a href="#knil-queries">Knil queries</a></li>
 <li><a href="#knil-aggregates">Aggregates</a></li>
@@ -371,53 +371,55 @@ for the JavaScript code in this tag.
 <li><a href="#knil-relational-to-graph">Relational vs graph-databases</a></li>
 <li><a href="#knil-optimizations">Optimizing DBMS applications</a></li>
 <li><a href="#knil-multiple-engines">Supporting multiple DBMS engine</a></li>
-<li><a href="#orge177190">Supporting already existing databases on production DBMS</a></li>
+<li><a href="#orgb675d02">Supporting already existing databases on production DBMS</a></li>
+<li><a href="#orgec47a88"><span class="todo TODO">TODO</span> Database transactions</a></li>
 </ul>
 </li>
 <li><a href="#knil-kb">Knil for ontologies and knowledge-bases</a>
 <ul>
-<li><a href="#org7be75f1">Ontologies for tagging data</a></li>
-<li><a href="#org2ef9228">Ontologies for knowledge-bases</a></li>
-<li><a href="#org14f66a0">Schema specification</a></li>
-<li><a href="#org3eb3325">Compilation from ontologies to Knil relations</a></li>
-<li><a href="#org4139be4">Differences with OWL 2</a></li>
-<li><a href="#orgbc1ad24">Differences with Datalog</a></li>
+<li><a href="#org4ba2296">Ontologies for tagging data</a></li>
+<li><a href="#org4a1a104">Ontologies for knowledge-bases</a></li>
+<li><a href="#orgbccd423">Schema specification</a></li>
+<li><a href="#org047426b">Compilation from ontologies to Knil relations</a></li>
+<li><a href="#org3e28e8c">Differences with OWL 2</a></li>
+<li><a href="#org488f4b1">Differences with Datalog</a></li>
 </ul>
 </li>
-<li><a href="#org11178b4">Dok semantic</a></li>
-<li><a href="#orgd9a193e">Source code documentation</a></li>
+<li><a href="#orgcf788e0">Dok semantic</a></li>
+<li><a href="#orgc508b24">Source code documentation</a></li>
 <li><a href="#editing-macro">Editing macro</a></li>
 <li><a href="#dokmelody-ide">DokMelody IDE</a></li>
 <li><a href="#modules-and-packages">Modules and packages</a>
 <ul>
-<li><a href="#org206d35d">Modules</a></li>
-<li><a href="#org759411d">Packages</a></li>
-<li><a href="#org55cf7cb">Build system</a></li>
-<li><a href="#org60c6ca8">Retro-compatibility</a></li>
+<li><a href="#org3682ff4">Modules</a></li>
+<li><a href="#org54e4cd8">Packages</a></li>
+<li><a href="#org4aabe87">Build system</a></li>
+<li><a href="#org95727bd">Retro-compatibility</a></li>
 </ul>
 </li>
-<li><a href="#org8d3944b">Comparison with other languages</a>
+<li><a href="#orgd4608ff">Comparison with other languages</a>
 <ul>
-<li><a href="#org89b4633">Lisp</a></li>
-<li><a href="#org514cb79">Haskell</a></li>
-<li><a href="#orga4cef69">Idris</a></li>
-<li><a href="#orge2ead05">Comparison with <code>Familia</code> type system</a></li>
-<li><a href="#orge7dc759">Open-Closed principle</a></li>
-<li><a href="#org26d2fb0">Eiffel inheritance</a></li>
-<li><a href="#org16c9fa9">Separation of concerns</a></li>
+<li><a href="#org37b36e9">Hybrid OOP, FP and metaprogramming approach</a></li>
+<li><a href="#org77303a3">Lisp</a></li>
+<li><a href="#org9d78a2b">Haskell</a></li>
+<li><a href="#org9b983b1">Idris</a></li>
+<li><a href="#org12894f0">Comparison with <code>Familia</code> type system</a></li>
+<li><a href="#org7e64f3d">Open-Closed principle</a></li>
+<li><a href="#orgdb4e54b">Eiffel inheritance</a></li>
+<li><a href="#org29b1749">Separation of concerns</a></li>
 </ul>
 </li>
-<li><a href="#orgae12048">Bibliography</a></li>
+<li><a href="#org72236de">Bibliography</a></li>
 </ul>
 </div>
 </div>
 <p>
-#DATE: 2019-06-02
+#DATE: 2019-06-05
 </p>
 
-<div id="outline-container-orgd40c27f" class="outline-2">
-<h2 id="orgd40c27f">License</h2>
-<div class="outline-text-2" id="text-orgd40c27f">
+<div id="outline-container-orgabeb646" class="outline-2">
+<h2 id="orgabeb646">License</h2>
+<div class="outline-text-2" id="text-orgabeb646">
 <p>
 This manual is released under <code>SPDX-License-Identifier: CC-BY-4.0</code>
 </p>
@@ -427,9 +429,9 @@ Copyright (C) 2019 Massimo Zaniboni - mzan@dokmelody.org
 </p>
 </div>
 </div>
-<div id="outline-container-orgc754671" class="outline-2">
-<h2 id="orgc754671">Current status</h2>
-<div class="outline-text-2" id="text-orgc754671">
+<div id="outline-container-org44902b3" class="outline-2">
+<h2 id="org44902b3">Current status</h2>
+<div class="outline-text-2" id="text-org44902b3">
 <p>
 The design of the language is a work in progress and all can change.
 </p>
@@ -439,9 +441,9 @@ There is no compiler or interpreter of the language, so it is all vaporware. I'm
 </p>
 </div>
 </div>
-<div id="outline-container-org7295472" class="outline-2">
-<h2 id="org7295472">Quick tour</h2>
-<div class="outline-text-2" id="text-org7295472">
+<div id="outline-container-orgf8e934e" class="outline-2">
+<h2 id="orgf8e934e">Quick tour</h2>
+<div class="outline-text-2" id="text-orgf8e934e">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
 
@@ -550,7 +552,7 @@ There is no compiler or interpreter of the language, so it is all vaporware. I'm
 </div>
 </div>
 </div>
-<div id="outline-container-org53f433b" class="outline-2">
+<div id="outline-container-orgf651af5" class="outline-2">
 <h2 id="design-philosophy">Design philosophy</h2>
 <div class="outline-text-2" id="text-design-philosophy">
 <p>
@@ -598,7 +600,7 @@ Dok syntax guidelines are:
 </ul>
 </div>
 </div>
-<div id="outline-container-org5d43c3a" class="outline-2">
+<div id="outline-container-orgcd7079d" class="outline-2">
 <h2 id="values">Values</h2>
 <div class="outline-text-2" id="text-values">
 <p>
@@ -611,9 +613,9 @@ For example <code>3</code> is a value of type <code>Int</code>, while <code>2 + 
 Values are immutables.
 </p>
 </div>
-<div id="outline-container-org536edf1" class="outline-3">
-<h3 id="org536edf1">Primitive values</h3>
-<div class="outline-text-3" id="text-org536edf1">
+<div id="outline-container-org3992ecd" class="outline-3">
+<h3 id="org3992ecd">Primitive values</h3>
+<div class="outline-text-3" id="text-org3992ecd">
 <p>
 Int, Float, String and so on are primitive values. They can not be further decomposed.
 </p>
@@ -631,9 +633,9 @@ Int, Float, String and so on are primitive values. They can not be further decom
 </div>
 </div>
 </div>
-<div id="outline-container-org26cc7fa" class="outline-3">
-<h3 id="org26cc7fa">Variables</h3>
-<div class="outline-text-3" id="text-org26cc7fa">
+<div id="outline-container-org2ce5edd" class="outline-3">
+<h3 id="org2ce5edd">Variables</h3>
+<div class="outline-text-3" id="text-org2ce5edd">
 <p>
 A variable is a name used as unique identifier inside an environment and associated (always inside the environment) to a value. The associated value can be changed, so the name variable.
 </p>
@@ -687,7 +689,7 @@ As in functional-programming languages values are used also for managing complex
 </div>
 </div>
 </div>
-<div id="outline-container-orgb30cbf7" class="outline-3">
+<div id="outline-container-orgf2df400" class="outline-3">
 <h3 id="record">Records</h3>
 <div class="outline-text-3" id="text-record">
 <p>
@@ -752,7 +754,7 @@ Assert {
 </div>
 </div>
 </div>
-<div id="outline-container-orgcac4591" class="outline-3">
+<div id="outline-container-orgbe20b85" class="outline-3">
 <h3 id="tuple">Tuples</h3>
 <div class="outline-text-3" id="text-tuple">
 <p>
@@ -764,9 +766,9 @@ Tuples are used mainly as arguments of functions, because functions can be calle
 </p>
 </div>
 </div>
-<div id="outline-container-org97fff6d" class="outline-3">
-<h3 id="org97fff6d">Containers as values (Persistent Data Structures)</h3>
-<div class="outline-text-3" id="text-org97fff6d">
+<div id="outline-container-orge6868ba" class="outline-3">
+<h3 id="orge6868ba">Containers as values (Persistent Data Structures)</h3>
+<div class="outline-text-3" id="text-orge6868ba">
 <p>
 Like in functional programming languages, also compound types (e.g. records, containers, etc..) are values.
 </p>
@@ -816,13 +818,13 @@ This is an usage example:
 </div>
 </div>
 </div>
-<div id="outline-container-org8874d78" class="outline-3">
-<h3 id="org8874d78">Common containers</h3>
-<div class="outline-text-3" id="text-org8874d78">
+<div id="outline-container-orgcfa2465" class="outline-3">
+<h3 id="orgcfa2465">Common containers</h3>
+<div class="outline-text-3" id="text-orgcfa2465">
 </div>
-<div id="outline-container-org580faf4" class="outline-4">
-<h4 id="org580faf4"><code>Maybe</code></h4>
-<div class="outline-text-4" id="text-org580faf4">
+<div id="outline-container-orgd513deb" class="outline-4">
+<h4 id="orgd513deb"><code>Maybe</code></h4>
+<div class="outline-text-4" id="text-orgd513deb">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
    Maybe(Of::Type) --&gt; (
@@ -891,9 +893,9 @@ This is an usage example:
 </div>
 </div>
 </div>
-<div id="outline-container-org214fe5b" class="outline-4">
-<h4 id="org214fe5b"><code>List</code></h4>
-<div class="outline-text-4" id="text-org214fe5b">
+<div id="outline-container-orgc624fcf" class="outline-4">
+<h4 id="orgc624fcf"><code>List</code></h4>
+<div class="outline-text-4" id="text-orgc624fcf">
 <div class="org-src-container">
 <pre class="src src-fundamental"> List(Of::Type] --&gt; (
    #: List is a container containing a finite sequence of values of the same type
@@ -975,9 +977,9 @@ This is an usage example:
 </div>
 </div>
 
-<div id="outline-container-orgab6fc67" class="outline-4">
-<h4 id="orgab6fc67"><code>Array</code></h4>
-<div class="outline-text-4" id="text-orgab6fc67">
+<div id="outline-container-org8bb71c1" class="outline-4">
+<h4 id="org8bb71c1"><code>Array</code></h4>
+<div class="outline-text-4" id="text-org8bb71c1">
 <div class="org-src-container">
 <pre class="src src-fundamental">Array(from::Int, to::Int, Of::Type) --&gt; (
   #:NOTE: Stores consecutive elements in a (rather) efficient way
@@ -1011,9 +1013,9 @@ Assert {
 </div>
 </div>
 </div>
-<div id="outline-container-org1b34ffc" class="outline-3">
-<h3 id="org1b34ffc"><code>T*</code> <code>T+</code></h3>
-<div class="outline-text-3" id="text-org1b34ffc">
+<div id="outline-container-org7d47d87" class="outline-3">
+<h3 id="org7d47d87"><code>T*</code> <code>T+</code></h3>
+<div class="outline-text-3" id="text-org7d47d87">
 <p>
 <code>T*</code> is the type of a value containing zero or more instances of <code>T</code> type. <code>T+</code> is like <code>T*</code> but it had to contain at least one instance, i.e. it can not be empty.
 </p>
@@ -1029,9 +1031,9 @@ This compact form is used because it simplifies the specification of syntax/gram
 </div>
 </div>
 </div>
-<div id="outline-container-orgdf3752f" class="outline-2">
-<h2 id="orgdf3752f">Object Oriented Programming (OOP)</h2>
-<div class="outline-text-2" id="text-orgdf3752f">
+<div id="outline-container-org7789dd3" class="outline-2">
+<h2 id="org7789dd3">Object Oriented Programming (OOP)</h2>
+<div class="outline-text-2" id="text-org7789dd3">
 <p>
 Dok joins object-oriented-programming (OOP) with some functional-programming (FP) concepts. The main differences respect traditional OOP are that in Dok:
 </p>
@@ -1054,9 +1056,9 @@ The design guidelines are:
 <li>more advanced FP features are replaced from the usage of meta-programming</li>
 </ul>
 </div>
-<div id="outline-container-org998c6c4" class="outline-3">
-<h3 id="org998c6c4">OOP terms</h3>
-<div class="outline-text-3" id="text-org998c6c4">
+<div id="outline-container-org0c02895" class="outline-3">
+<h3 id="org0c02895">OOP terms</h3>
+<div class="outline-text-3" id="text-org0c02895">
 <p>
 The terms used from Dok are a mix of OOP and FP terms:
 </p>
@@ -1086,7 +1088,7 @@ This is a graph for giving an informal idea:
 </div>
 </div>
 
-<div id="outline-container-orgffec4c0" class="outline-3">
+<div id="outline-container-org09cebff" class="outline-3">
 <h3 id="type-definition">Type variants</h3>
 <div class="outline-text-3" id="text-type-definition">
 <p>
@@ -1126,9 +1128,9 @@ Only most specific leaf type variants can be instanced directly, all other paren
 </div>
 </div>
 </div>
-<div id="outline-container-orgaff734c" class="outline-3">
-<h3 id="orgaff734c">Overriding</h3>
-<div class="outline-text-3" id="text-orgaff734c">
+<div id="outline-container-orge3b70f2" class="outline-3">
+<h3 id="orge3b70f2">Overriding</h3>
+<div class="outline-text-3" id="text-orge3b70f2">
 <p>
 Type variants can override fields and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see <a href="#type_conformance">Type conformance</a>).
 </p>
@@ -1159,9 +1161,9 @@ Note that also <code>this</code> is a reserved keyword, and <code>self.this()</c
 </div>
 </div>
 </div>
-<div id="outline-container-org4560b5f" class="outline-3">
-<h3 id="org4560b5f">Type references</h3>
-<div class="outline-text-3" id="text-org4560b5f">
+<div id="outline-container-orge31b0cf" class="outline-3">
+<h3 id="orge31b0cf">Type references</h3>
+<div class="outline-text-3" id="text-orge31b0cf">
 <p>
 If there are no name clashes in the types, Dok can use short type names like <code>B</code> instead of <code>/A/B</code>. The rules are:
 </p>
@@ -1177,7 +1179,7 @@ use this from when for example there is a name clash on <code>G</code> type name
 </ul>
 </div>
 </div>
-<div id="outline-container-org16835c8" class="outline-3">
+<div id="outline-container-orgb85900b" class="outline-3">
 <h3 id="type-extension">Type extension</h3>
 <div class="outline-text-3" id="text-type-extension">
 <p>
@@ -1224,9 +1226,9 @@ Types can be extended adding new fields, methods and nested variant types to the
 </div>
 </div>
 </div>
-<div id="outline-container-org6adb99e" class="outline-3">
-<h3 id="org6adb99e">Type conversion</h3>
-<div class="outline-text-3" id="text-org6adb99e">
+<div id="outline-container-orge1f7119" class="outline-3">
+<h3 id="orge1f7119">Type conversion</h3>
+<div class="outline-text-3" id="text-orge1f7119">
 <p>
 In Dok it is possible converting between types.
 </p>
@@ -1272,7 +1274,7 @@ In Dok it is possible converting between types.
 </div>
 </div>
 </div>
-<div id="outline-container-org069a095" class="outline-3">
+<div id="outline-container-org7698d21" class="outline-3">
 <h3 id="interfaces">Interfaces</h3>
 <div class="outline-text-3" id="text-interfaces">
 <p>
@@ -1285,9 +1287,9 @@ They are a powerful abstraction mechanism because a lot of generic code can be w
 From a certain point of view if values are instances of types (i.e. the type describe the characteristics of the value), then types are instances of interfaces (i.e. the interface describes the characteristic of the type). From another point of view interfaces are like additional types associated to a value. So from the point of view of the value they are a form of multiple inheritance.
 </p>
 </div>
-<div id="outline-container-orga812a8d" class="outline-4">
-<h4 id="orga812a8d">Definition</h4>
-<div class="outline-text-4" id="text-orga812a8d">
+<div id="outline-container-org20bef85" class="outline-4">
+<h4 id="org20bef85">Definition</h4>
+<div class="outline-text-4" id="text-org20bef85">
 <p>
 In Dok interfaces are types with the <code>@Abstract</code> annotation. 
 They can contain default implementations for their functions, 
@@ -1347,9 +1349,9 @@ but they can not contain type variants.
 </div>
 </div>
 </div>
-<div id="outline-container-orgaa2e45b" class="outline-4">
-<h4 id="orgaa2e45b">Interfaces hieararchy</h4>
-<div class="outline-text-4" id="text-orgaa2e45b">
+<div id="outline-container-org4786fcc" class="outline-4">
+<h4 id="org4786fcc">Interfaces hieararchy</h4>
+<div class="outline-text-4" id="text-org4786fcc">
 <p>
 An interface can require that the type supporting it will support also one or more other interfaces.
 </p>
@@ -1376,9 +1378,9 @@ Monoid &amp;&amp; Semigroup --&gt; (
 </div>
 </div>
 </div>
-<div id="outline-container-org11e4409" class="outline-4">
-<h4 id="org11e4409">Interface instances</h4>
-<div class="outline-text-4" id="text-org11e4409">
+<div id="outline-container-orgf5fbb2b" class="outline-4">
+<h4 id="orgf5fbb2b">Interface instances</h4>
+<div class="outline-text-4" id="text-orgf5fbb2b">
 <p>
 A type <code>A</code> implements an interface <code>B</code> through the specification of a conversion from <code>A</code> to <code>B</code>. 
 </p>
@@ -1409,7 +1411,7 @@ c1 &lt; c2
 </div>
 </div>
 </div>
-<div id="outline-container-orgb91b848" class="outline-4">
+<div id="outline-container-orgc380e45" class="outline-4">
 <h4 id="interfaces-constraint">Interface constraints</h4>
 <div class="outline-text-4" id="text-interfaces-constraint">
 <p>
@@ -1428,7 +1430,7 @@ A type constraint can specify one or more interface constraints
 </div>
 </div>
 </div>
-<div id="outline-container-org57c1ec8" class="outline-3">
+<div id="outline-container-orgfa608d4" class="outline-3">
 <h3 id="type-alias">Type aliases</h3>
 <div class="outline-text-3" id="text-type-alias">
 <p>
@@ -1478,9 +1480,9 @@ An Haskell type alias like <code>type Age = Int</code> in Dok is:
 </div>
 </div>
 </div>
-<div id="outline-container-org5c1af79" class="outline-3">
-<h3 id="org5c1af79">Fields vs methods</h3>
-<div class="outline-text-3" id="text-org5c1af79">
+<div id="outline-container-orgf9a3456" class="outline-3">
+<h3 id="orgf9a3456">Fields vs methods</h3>
+<div class="outline-text-3" id="text-orgf9a3456">
 <p>
 Fields can be changed at run-time. On the contrary methods can not be changed at run-time,
 because semantically the body code is part of the contract of the
@@ -1489,7 +1491,7 @@ system is slower (the compiler can not apply some optimizations).
 </p>
 </div>
 </div>
-<div id="outline-container-orgaed82bf" class="outline-3">
+<div id="outline-container-orged6037f" class="outline-3">
 <h3 id="private-properties">Private fields and methods</h3>
 <div class="outline-text-3" id="text-private-properties">
 <p>
@@ -1509,7 +1511,7 @@ directly from the external. So they contains internal low-level implementation d
 </div>
 </div>
 </div>
-<div id="outline-container-org176a0a8" class="outline-3">
+<div id="outline-container-org7d09b94" class="outline-3">
 <h3 id="unnamed-properties">Unnamed variables</h3>
 <div class="outline-text-3" id="text-unnamed-properties">
 <p>
@@ -1517,9 +1519,9 @@ Variables with name <code>_</code> are considered unnamed. They are used usually
 </p>
 </div>
 </div>
-<div id="outline-container-org0289085" class="outline-3">
-<h3 id="org0289085">Value constructors</h3>
-<div class="outline-text-3" id="text-org0289085">
+<div id="outline-container-org08bd2cb" class="outline-3">
+<h3 id="org08bd2cb">Value constructors</h3>
+<div class="outline-text-3" id="text-org08bd2cb">
 <p>
 Values must be initialized: all fields must be set to an initial
 value, and type invariant must be respected. 
@@ -1599,9 +1601,9 @@ Every type can have special functions, called constructors, for creating and ini
 </div>
 </div>
 </div>
-<div id="outline-container-org2652e16" class="outline-3">
-<h3 id="org2652e16">Inner types</h3>
-<div class="outline-text-3" id="text-org2652e16">
+<div id="outline-container-org4346de0" class="outline-3">
+<h3 id="org4346de0">Inner types</h3>
+<div class="outline-text-3" id="text-org4346de0">
 <p>
 Functions and types can contains inner types that are not variants of the parent type.
 </p>
@@ -1642,9 +1644,9 @@ If their name starts with <code>_</code> they are private types, otherwise they 
 </div>
 </div>
 </div>
-<div id="outline-container-orgd1e296e" class="outline-3">
-<h3 id="orgd1e296e">Type inspection</h3>
-<div class="outline-text-3" id="text-orgd1e296e">
+<div id="outline-container-orgaed0eb9" class="outline-3">
+<h3 id="orgaed0eb9">Type inspection</h3>
+<div class="outline-text-3" id="text-orgaed0eb9">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert { 
   x::Int
@@ -1684,9 +1686,9 @@ If their name starts with <code>_</code> they are private types, otherwise they 
 </div>
 </div>
 </div>
-<div id="outline-container-org0ef6c3d" class="outline-3">
-<h3 id="org0ef6c3d">Type checking</h3>
-<div class="outline-text-3" id="text-org0ef6c3d">
+<div id="outline-container-org58715d6" class="outline-3">
+<h3 id="org58715d6">Type checking</h3>
+<div class="outline-text-3" id="text-org58715d6">
 <p>
 <code>x.is(T)</code> can be used also as run-time type checking and "coercion":
 </p>
@@ -1717,9 +1719,9 @@ If their name starts with <code>_</code> they are private types, otherwise they 
 </div>
 </div>
 </div>
-<div id="outline-container-org839d6a6" class="outline-3">
-<h3 id="org839d6a6">Type anchoring</h3>
-<div class="outline-text-3" id="text-org839d6a6">
+<div id="outline-container-orge5ba632" class="outline-3">
+<h3 id="orge5ba632">Type anchoring</h3>
+<div class="outline-text-3" id="text-orge5ba632">
 <p>
 Type constraints are type equations that will be resolved at compile-time. 
 </p>
@@ -1754,9 +1756,9 @@ This concept is inspired to <a class='org-ref-reference' href="#bruce1999semanti
 </div>
 </div>
 </div>
-<div id="outline-container-org662faa7" class="outline-3">
-<h3 id="org662faa7">Base types</h3>
-<div class="outline-text-3" id="text-org662faa7">
+<div id="outline-container-orgc4a31fe" class="outline-3">
+<h3 id="orgc4a31fe">Base types</h3>
+<div class="outline-text-3" id="text-orgc4a31fe">
 <p>
 <code>Any</code> is the base type from which every type derive:
 </p>
@@ -1770,7 +1772,7 @@ This concept is inspired to <a class='org-ref-reference' href="#bruce1999semanti
 </p>
 </div>
 </div>
-<div id="outline-container-org619c3d8" class="outline-3">
+<div id="outline-container-org0b90040" class="outline-3">
 <h3 id="generics">Generic/parametric types</h3>
 <div class="outline-text-3" id="text-generics">
 <p>
@@ -1838,7 +1840,7 @@ is not related to them.
 </div>
 </div>
 </div>
-<div id="outline-container-org12ae3cf" class="outline-3">
+<div id="outline-container-org33806ca" class="outline-3">
 <h3 id="type_conformance">Type conformance</h3>
 <div class="outline-text-3" id="text-type_conformance">
 <p>
@@ -2070,7 +2072,7 @@ In Dok we can use type params as constraints, in a very similar way:
 </div>
 </div>
 </div>
-<div id="outline-container-org5c127ea" class="outline-2">
+<div id="outline-container-orgc78e28b" class="outline-2">
 <h2 id="functions">Functions</h2>
 <div class="outline-text-2" id="text-functions">
 <p>
@@ -2101,9 +2103,9 @@ In Dok every function must be a method of a type, i.e. there can not be function
 </pre>
 </div>
 </div>
-<div id="outline-container-org1b530b4" class="outline-4">
-<h4 id="org1b530b4">Side effects</h4>
-<div class="outline-text-4" id="text-org1b530b4">
+<div id="outline-container-org690aeed" class="outline-4">
+<h4 id="org690aeed">Side effects</h4>
+<div class="outline-text-4" id="text-org690aeed">
 <p>
 A function can declare local variables and types and modify them.
 All these changes are transparent from function callers,
@@ -2132,9 +2134,9 @@ side-effects.
 </p>
 </div>
 </div>
-<div id="outline-container-org4eac79a" class="outline-3">
-<h3 id="org4eac79a">Recursion</h3>
-<div class="outline-text-3" id="text-org4eac79a">
+<div id="outline-container-orge9aac20" class="outline-3">
+<h3 id="orge9aac20">Recursion</h3>
+<div class="outline-text-3" id="text-orge9aac20">
 <p>
 Functions can be recursive. Tail call recursive functions are guarantee to not waste memory because they are equivalent to imperative loops.
 </p>
@@ -2158,9 +2160,9 @@ Functions can be recursive. Tail call recursive functions are guarantee to not w
 </div>
 </div>
 </div>
-<div id="outline-container-org1f26738" class="outline-3">
-<h3 id="org1f26738">Binary operators</h3>
-<div class="outline-text-3" id="text-org1f26738">
+<div id="outline-container-orgb41feb1" class="outline-3">
+<h3 id="orgb41feb1">Binary operators</h3>
+<div class="outline-text-3" id="text-orgb41feb1">
 <p>
 Operators are functions that can be used infix. 
 They must start with a symbolic character like <code>=+!-.</code> and so on.
@@ -2222,7 +2224,7 @@ because order of application is not important.
 </div>
 </div>
 </div>
-<div id="outline-container-orge4abdc2" class="outline-3">
+<div id="outline-container-orga5be926" class="outline-3">
 <h3 id="update-action">Update actions</h3>
 <div class="outline-text-3" id="text-update-action">
 <p>
@@ -2286,7 +2288,7 @@ a new version of the <code>self</code> object.
 </div>
 </div>
 </div>
-<div id="outline-container-orgc88ce8c" class="outline-3">
+<div id="outline-container-orgf154601" class="outline-3">
 <h3 id="pure-actions">Pure actions</h3>
 <div class="outline-text-3" id="text-pure-actions">
 <p>
@@ -2345,7 +2347,7 @@ Whenever possible as suggested by <a class='org-ref-reference' href="#meyer1997o
 </div>
 </div>
 </div>
-<div id="outline-container-org80879e3" class="outline-3">
+<div id="outline-container-org54391e4" class="outline-3">
 <h3 id="nested-function">Nested functions</h3>
 <div class="outline-text-3" id="text-nested-function">
 <p>
@@ -2386,7 +2388,7 @@ A nested function is visible only inside the lexical scope of the function defin
 </div>
 </div>
 </div>
-<div id="outline-container-orgdf19b01" class="outline-3">
+<div id="outline-container-org80886c5" class="outline-3">
 <h3 id="nested-action">Nested actions</h3>
 <div class="outline-text-3" id="text-nested-action">
 <p>
@@ -2416,9 +2418,9 @@ In case action is invoked inside a domain specific language in which the order o
 </div>
 </div>
 </div>
-<div id="outline-container-orgeddfedc" class="outline-3">
-<h3 id="orgeddfedc">Higher order functions</h3>
-<div class="outline-text-3" id="text-orgeddfedc">
+<div id="outline-container-org89b491f" class="outline-3">
+<h3 id="org89b491f">Higher order functions</h3>
+<div class="outline-text-3" id="text-org89b491f">
 <p>
 In Dok only simple functions of type <code>Fun(From::Type, To::Type)</code> (i.e. functions accepting only <code>self</code> object as argument) can be passed as arguments of other higher-order functions. Despite this limitation, a lot of useful functional programming patterns are supported by Dok. 
 </p>
@@ -2464,7 +2466,7 @@ Some example of higher-order functions usage:
 </div>
 </div>
 </div>
-<div id="outline-container-org7a7de11" class="outline-3">
+<div id="outline-container-org3e1831e" class="outline-3">
 <h3 id="anonymous-function">Anonymous functions</h3>
 <div class="outline-text-3" id="text-anonymous-function">
 <p>
@@ -2493,7 +2495,7 @@ An example:
 </div>
 </div>
 </div>
-<div id="outline-container-org2580b46" class="outline-3">
+<div id="outline-container-org9833a28" class="outline-3">
 <h3 id="anonymous-action">Anonymous actions</h3>
 <div class="outline-text-3" id="text-anonymous-action">
 <p>
@@ -2501,7 +2503,7 @@ Anonymous actions are like a <a href="#anonymous-function">Anonymous functions</
 </p>
 </div>
 </div>
-<div id="outline-container-orgb0dc504" class="outline-3">
+<div id="outline-container-orge6ac227" class="outline-3">
 <h3 id="incremental-updates-listeners">Incremental update of function result</h3>
 <div class="outline-text-3" id="text-incremental-updates-listeners">
 <p>
@@ -2555,7 +2557,7 @@ Assert {
 </div>
 </div>
 </div>
-<div id="outline-container-orgb512f74" class="outline-2">
+<div id="outline-container-org72762a6" class="outline-2">
 <h2 id="nested-transaction-semantic">Nested transactions semantic (TR)</h2>
 <div class="outline-text-2" id="text-nested-transaction-semantic">
 <p>
@@ -2581,9 +2583,9 @@ itself</li>
 The idea is that sometime imperative code is more short and "natural" than functional code and at the same time TR semantic makes it robust.
 </p>
 </div>
-<div id="outline-container-org385d4d4" class="outline-3">
-<h3 id="org385d4d4">False conditions</h3>
-<div class="outline-text-3" id="text-org385d4d4">
+<div id="outline-container-orga32e775" class="outline-3">
+<h3 id="orga32e775">False conditions</h3>
+<div class="outline-text-3" id="text-orga32e775">
 <p>
 A code block testing a false condition fails.
 </p>
@@ -2619,7 +2621,7 @@ the code block returns the <code>Bool</code> false to the caller, that can fail 
 </div>
 </div>
 </div>
-<div id="outline-container-orgb138653" class="outline-3">
+<div id="outline-container-orgc92d773" class="outline-3">
 <h3 id="try-action"><code>try</code> action</h3>
 <div class="outline-text-3" id="text-try-action">
 <p>
@@ -2668,9 +2670,9 @@ the code block returns the <code>Bool</code> false to the caller, that can fail 
 </div>
 </div>
 </div>
-<div id="outline-container-org982b7d8" class="outline-3">
-<h3 id="org982b7d8"><code>if</code></h3>
-<div class="outline-text-3" id="text-org982b7d8">
+<div id="outline-container-org7a53641" class="outline-3">
+<h3 id="org7a53641"><code>if</code></h3>
+<div class="outline-text-3" id="text-org7a53641">
 <p>
 <code>if</code> evaluates/executes the <code>then</code> branch if the condition inside the <code>if</code> part is respected, otherwise it executes the <code>else</code> branch if it is specified. If used in <a href="#design-by-contracts">Design by contracts and refinement types</a> formulas it is equivalent to logical implication <code>A ==&gt; B</code>.
 </p>
@@ -2739,9 +2741,9 @@ the code block returns the <code>Bool</code> false to the caller, that can fail 
 </div>
 </div>
 </div>
-<div id="outline-container-org53cf334" class="outline-3">
-<h3 id="org53cf334"><code>iff</code></h3>
-<div class="outline-text-3" id="text-org53cf334">
+<div id="outline-container-orgf2d43fb" class="outline-3">
+<h3 id="orgf2d43fb"><code>iff</code></h3>
+<div class="outline-text-3" id="text-orgf2d43fb">
 <p>
 <code>iff</code> stays for "if and only if" and when used in <a href="#design-by-contracts">Design by contracts and refinement types</a> is equivalent to logical double implication <code>A &lt;==&gt; B</code>.
 </p>
@@ -2836,9 +2838,9 @@ In case of <code>iff</code> is a sequence of expressions with actions inside:
 </ul>
 </div>
 </div>
-<div id="outline-container-orgada80c0" class="outline-3">
-<h3 id="orgada80c0"><code>a &amp;&amp; b</code></h3>
-<div class="outline-text-3" id="text-orgada80c0">
+<div id="outline-container-org0fb02a2" class="outline-3">
+<h3 id="org0fb02a2"><code>a &amp;&amp; b</code></h3>
+<div class="outline-text-3" id="text-org0fb02a2">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
   a::Bool
@@ -2866,9 +2868,9 @@ In case of <code>iff</code> is a sequence of expressions with actions inside:
 </div>
 </div>
 </div>
-<div id="outline-container-orgef99f18" class="outline-3">
-<h3 id="orgef99f18"><code>@NoFail</code></h3>
-<div class="outline-text-3" id="text-orgef99f18">
+<div id="outline-container-org0cc17f6" class="outline-3">
+<h3 id="org0cc17f6"><code>@NoFail</code></h3>
+<div class="outline-text-3" id="text-org0cc17f6">
 <p>
 Nested Transactions are useful for metaprogramming and DSL creation, but they can pose problems because the code can be slower, or it is more difficult calling external C-like libraries.
 </p>
@@ -2883,7 +2885,7 @@ The programmer can annotate code with
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc5bdb8f" class="outline-3">
+<div id="outline-container-org470ecd1" class="outline-3">
 <h3 id="repeat-action"><code>repeat</code> action</h3>
 <div class="outline-text-3" id="text-repeat-action">
 <p>
@@ -2965,9 +2967,9 @@ If there is a fail in a section of the loop outside <code>while</code>, the enti
 because they states properties that must be respected from the code.
 </p>
 </div>
-<div id="outline-container-org5ff17d4" class="outline-4">
-<h4 id="org5ff17d4">Differences with structured programming</h4>
-<div class="outline-text-4" id="text-org5ff17d4">
+<div id="outline-container-org96d1178" class="outline-4">
+<h4 id="org96d1178">Differences with structured programming</h4>
+<div class="outline-text-4" id="text-org96d1178">
 <p>
 In structured programming loops are predictable because they have a
 single exit point, that is also the unique testing condition. But they
@@ -2993,9 +2995,9 @@ they respect the invariants</li>
 </div>
 </div>
 </div>
-<div id="outline-container-org97d4d26" class="outline-3">
-<h3 id="org97d4d26"><code>Fail</code> info</h3>
-<div class="outline-text-3" id="text-org97d4d26">
+<div id="outline-container-org3b1f735" class="outline-3">
+<h3 id="org3b1f735"><code>Fail</code> info</h3>
+<div class="outline-text-3" id="text-org3b1f735">
 <p>
 A failing block of code or function can add more info about the reason of failure. This info can be used for better error-reporting, e.g. in case of user input-validation. Note that on the contrary of <a href="#exceptions">Exceptions</a> these are logical failures expected in the code, and not exceptional one. They are similar to the the Haskell type <code>Either SomeErrorInfo Result</code>.
 </p>
@@ -3047,7 +3049,7 @@ Fail info can be expensive to generate, so it will be effectively generated only
 </div>
 </div>
 </div>
-<div id="outline-container-orgc05626f" class="outline-3">
+<div id="outline-container-org59880f9" class="outline-3">
 <h3 id="exceptions">Exceptions</h3>
 <div class="outline-text-3" id="text-exceptions">
 <p>
@@ -3109,7 +3111,7 @@ So the Dok code is mainly free from exception handling branch, and all these det
 </div>
 </div>
 </div>
-<div id="outline-container-org986b483" class="outline-2">
+<div id="outline-container-orgf15a4e1" class="outline-2">
 <h2 id="impure-statements">Impure statements</h2>
 <div class="outline-text-2" id="text-impure-statements">
 <p>
@@ -3191,9 +3193,9 @@ Impure statements are used for:
 </pre>
 </div>
 </div>
-<div id="outline-container-org02070ab" class="outline-3">
-<h3 id="org02070ab">Always committed actions</h3>
-<div class="outline-text-3" id="text-org02070ab">
+<div id="outline-container-org0c4bbf4" class="outline-3">
+<h3 id="org0c4bbf4">Always committed actions</h3>
+<div class="outline-text-3" id="text-org0c4bbf4">
 <p>
 In case of actions used for logging or code instrumentation or interaction with external world, it is
 useful having actions that are not rollbackable.
@@ -3225,7 +3227,7 @@ useful having actions that are not rollbackable.
 </div>
 </div>
 </div>
-<div id="outline-container-orgbcec03b" class="outline-3">
+<div id="outline-container-org8934f33" class="outline-3">
 <h3 id="resource_management">Resource management</h3>
 <div class="outline-text-3" id="text-resource_management">
 <p>
@@ -3247,7 +3249,7 @@ The release is managed by compiler plugins because:
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf3fa4f5" class="outline-3">
+<div id="outline-container-orgbc1a33d" class="outline-3">
 <h3 id="references">References</h3>
 <div class="outline-text-3" id="text-references">
 <p>
@@ -3300,9 +3302,9 @@ native code.
 </div>
 </div>
 </div>
-<div id="outline-container-orgc49faff" class="outline-3">
-<h3 id="orgc49faff">In-place mutable data structures</h3>
-<div class="outline-text-3" id="text-orgc49faff">
+<div id="outline-container-org4c5b673" class="outline-3">
+<h3 id="org4c5b673">In-place mutable data structures</h3>
+<div class="outline-text-3" id="text-org4c5b673">
 <p>
 Dok persistent data-structures and nested transactions semantic have moderate but not negligible 
 run-time costs. In certain situations it is better using faster data
@@ -3311,7 +3313,7 @@ structures with non rollbackable actions like <code>MutableHashMap</code> and so
 </div>
 </div>
 </div>
-<div id="outline-container-org38e9a68" class="outline-2">
+<div id="outline-container-orgc81dc5e" class="outline-2">
 <h2 id="attribute-grammars">Attribute grammars (AG)</h2>
 <div class="outline-text-2" id="text-attribute-grammars">
 <p>
@@ -3425,9 +3427,9 @@ This example is inspired to <a class='org-ref-reference' href="#saraiva1999purel
 </pre>
 </div>
 </div>
-<div id="outline-container-org05cf9ce" class="outline-3">
-<h3 id="org05cf9ce">Bootm-up attributes</h3>
-<div class="outline-text-3" id="text-org05cf9ce">
+<div id="outline-container-org47a9b84" class="outline-3">
+<h3 id="org47a9b84">Bootm-up attributes</h3>
+<div class="outline-text-3" id="text-org47a9b84">
 <p>
 Bottom-up attributes are similar to Dok functions:
 </p>
@@ -3441,9 +3443,9 @@ The only differences with Dok functions it is that they can depend from top-down
 </p>
 </div>
 </div>
-<div id="outline-container-org4e82673" class="outline-3">
-<h3 id="org4e82673">Top-down attributes</h3>
-<div class="outline-text-3" id="text-org4e82673">
+<div id="outline-container-org0e9dddf" class="outline-3">
+<h3 id="org0e9dddf">Top-down attributes</h3>
+<div class="outline-text-3" id="text-org0e9dddf">
 <p>
 Top-down attributes are assigned from parent nodes to theirs children
 nodes. They are propagated top-down, because it is the parent node <code>P</code> setting their values before the children will be visited.
@@ -3484,9 +3486,9 @@ and it changes only when explicitely specified.
 </p>
 </div>
 </div>
-<div id="outline-container-org2400268" class="outline-3">
-<h3 id="org2400268">Special attributes</h3>
-<div class="outline-text-3" id="text-org2400268">
+<div id="outline-container-org17bc286" class="outline-3">
+<h3 id="org17bc286">Special attributes</h3>
+<div class="outline-text-3" id="text-org17bc286">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
 
@@ -3520,7 +3522,7 @@ and it changes only when explicitely specified.
 </div>
 </div>
 </div>
-<div id="outline-container-orgfd9bdac" class="outline-2">
+<div id="outline-container-orgad8a35a" class="outline-2">
 <h2 id="metaprogramming">Metaprogramming</h2>
 <div class="outline-text-2" id="text-metaprogramming">
 <p>
@@ -3539,9 +3541,9 @@ Dok compiler is customizable by Dok users. Dok code is compiled to Dokk (the dou
 <li>code transformation can be inspected and customized using the <a href="#dokmelody-ide">DokMelody IDE</a></li>
 </ul>
 </div>
-<div id="outline-container-org14ec6cf" class="outline-3">
-<h3 id="org14ec6cf">Generating code values</h3>
-<div class="outline-text-3" id="text-org14ec6cf">
+<div id="outline-container-org5b8a5e0" class="outline-3">
+<h3 id="org5b8a5e0">Generating code values</h3>
+<div class="outline-text-3" id="text-org5b8a5e0">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
   code1::= Dok&lt;&lt;
@@ -3558,9 +3560,9 @@ Dok compiler is customizable by Dok users. Dok code is compiled to Dokk (the dou
 </div>
 </div>
 </div>
-<div id="outline-container-org19cecf2" class="outline-3">
-<h3 id="org19cecf2">Analyzing code values</h3>
-<div class="outline-text-3" id="text-org19cecf2">
+<div id="outline-container-org41fee9b" class="outline-3">
+<h3 id="org41fee9b">Analyzing code values</h3>
+<div class="outline-text-3" id="text-org41fee9b">
 <p>
 Dok code can be analyzed (reflection) at compile-time. 
 </p>
@@ -3596,9 +3598,9 @@ Dok code can be analyzed (reflection) at compile-time.
 </div>
 </div>
 </div>
-<div id="outline-container-org18a107e" class="outline-3">
-<h3 id="org18a107e">Annotations</h3>
-<div class="outline-text-3" id="text-org18a107e">
+<div id="outline-container-org75627d8" class="outline-3">
+<h3 id="org75627d8">Annotations</h3>
+<div class="outline-text-3" id="text-org75627d8">
 <p>
 Annotations are metainfo added to the code. They can be optimazation hints, documentation notes and so on. The real semantic of an annotation depends from the used plugins during code compilation. 
 </p>
@@ -3637,9 +3639,9 @@ Annotations are applied to the entire parent scope owning them.
 </div>
 </div>
 </div>
-<div id="outline-container-orgc85d9d7" class="outline-3">
-<h3 id="orgc85d9d7">Nested Domain Specific Languages (DSL)</h3>
-<div class="outline-text-3" id="text-orgc85d9d7">
+<div id="outline-container-org4633d15" class="outline-3">
+<h3 id="org4633d15">Nested Domain Specific Languages (DSL)</h3>
+<div class="outline-text-3" id="text-org4633d15">
 <p>
 A Domain specific language (DSL) is language with a specific syntax and semantic, useful for modelling and solving problems in a certain domain.
 </p>
@@ -3822,16 +3824,16 @@ Types, objects and other programming elements defined in the guest-DSL are indic
 </div>
 
 
-<div id="outline-container-org112bc27" class="outline-3">
-<h3 id="org112bc27">Macro</h3>
-<div class="outline-text-3" id="text-org112bc27">
+<div id="outline-container-org815a5a8" class="outline-3">
+<h3 id="org815a5a8">Macro</h3>
+<div class="outline-text-3" id="text-org815a5a8">
 <p>
 Dok uses metaprogramming also for adding to the language powerful and useful constructs and reducing boilerplate code.
 </p>
 </div>
-<div id="outline-container-org35d112d" class="outline-4">
-<h4 id="org35d112d"><code>@Case</code></h4>
-<div class="outline-text-4" id="text-org35d112d">
+<div id="outline-container-org7a94f7c" class="outline-4">
+<h4 id="org7a94f7c"><code>@Case</code></h4>
+<div class="outline-text-4" id="text-org7a94f7c">
 <p>
 OOP code repeats the same function definition in many nested variant types. Sometime it is better specifying a function following a FP approach. <code>@Case</code> allows this, and it allows also the repetition of common tests sharing a common pattern, reducing code boiler-plate. 
 </p>
@@ -3871,7 +3873,7 @@ OOP code repeats the same function definition in many nested variant types. Some
 </div>
 </div>
 </div>
-<div id="outline-container-org2568923" class="outline-3">
+<div id="outline-container-org49f4337" class="outline-3">
 <h3 id="AOP">Aspect Oriented Programming (AOP)</h3>
 <div class="outline-text-3" id="text-AOP">
 <p>
@@ -3892,7 +3894,7 @@ Dok favours a layered implementation: from high-level code to low-level code. Wh
 </div>
 </div>
 </div>
-<div id="outline-container-org0a17bae" class="outline-2">
+<div id="outline-container-orgf33a578" class="outline-2">
 <h2 id="design-by-contracts">Design by contracts and refinement types</h2>
 <div class="outline-text-2" id="text-design-by-contracts">
 <p>
@@ -3909,9 +3911,9 @@ Dok uses a design by contracts (DbC) <a class='org-ref-reference' href="#meyer19
 Contracts can be written using the <a href="#nested-transaction-semantic">Nested transactions semantic (TR)</a> that is rather expressible and side-effect free.
 </p>
 </div>
-<div id="outline-container-org745288b" class="outline-3">
-<h3 id="org745288b">Example</h3>
-<div class="outline-text-3" id="text-org745288b">
+<div id="outline-container-orgfa3a2a4" class="outline-3">
+<h3 id="orgfa3a2a4">Example</h3>
+<div class="outline-text-3" id="text-orgfa3a2a4">
 <div class="org-src-container">
 <pre class="src src-fundamental">Assert {
 
@@ -3934,9 +3936,9 @@ Contracts can be written using the <a href="#nested-transaction-semantic">Nested
 </div>
 </div>
 </div>
-<div id="outline-container-org24b5c51" class="outline-3">
-<h3 id="org24b5c51">Special identifiers</h3>
-<div class="outline-text-3" id="text-org24b5c51">
+<div id="outline-container-orge8312fa" class="outline-3">
+<h3 id="orge8312fa">Special identifiers</h3>
+<div class="outline-text-3" id="text-orge8312fa">
 <ul class="org-ul">
 <li><code>$result</code> identifies the result of the function</li>
 <li><code>$oldSelf.someProperty</code> is the counterpart of <code>self.someProperty</code>, and
@@ -3945,9 +3947,9 @@ action modifying the state of <code>self</code></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org993db20" class="outline-3">
-<h3 id="org993db20">Who must respect contracts</h3>
-<div class="outline-text-3" id="text-org993db20">
+<div id="outline-container-orgac18494" class="outline-3">
+<h3 id="orgac18494">Who must respect contracts</h3>
+<div class="outline-text-3" id="text-orgac18494">
 <p>
 Dok contracts are:
 </p>
@@ -3976,9 +3978,9 @@ that <code>@Usually</code> condition is true.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org448084b" class="outline-3">
-<h3 id="org448084b">Contracts conformance during subtyping</h3>
-<div class="outline-text-3" id="text-org448084b">
+<div id="outline-container-org6082b53" class="outline-3">
+<h3 id="org6082b53">Contracts conformance during subtyping</h3>
+<div class="outline-text-3" id="text-org6082b53">
 <ul class="org-ul">
 <li>types implementing interfaces must respect the contracts of the interface</li>
 <li>if <code>@Require</code> is redefined, then it must be weaker than the condition
@@ -3994,7 +3996,7 @@ because they are associated to code, not to function semantic</li>
 </div>
 </div>
 </div>
-<div id="outline-container-org70cada0" class="outline-2">
+<div id="outline-container-orga940d1b" class="outline-2">
 <h2 id="map-reduce">Map-Reduce programming model</h2>
 <div class="outline-text-2" id="text-map-reduce">
 <p>
@@ -4018,9 +4020,9 @@ In case of complex data transformations, in Dok map-reduce and functional data t
 </p>
 </div>
 
-<div id="outline-container-org0f6cfd6" class="outline-3">
-<h3 id="org0f6cfd6"><code>map</code></h3>
-<div class="outline-text-3" id="text-org0f6cfd6">
+<div id="outline-container-org3d7ea4d" class="outline-3">
+<h3 id="org3d7ea4d"><code>map</code></h3>
+<div class="outline-text-3" id="text-org3d7ea4d">
 <p>
 <code>map</code> applies a side-effect free function to every element of a container, and return a container with the modified elements. 
 </p>
@@ -4043,9 +4045,9 @@ In case of complex data transformations, in Dok map-reduce and functional data t
 </div>
 </div>
 </div>
-<div id="outline-container-org0049f97" class="outline-3">
-<h3 id="org0049f97"><code>!forEach</code></h3>
-<div class="outline-text-3" id="text-org0049f97">
+<div id="outline-container-orgbc45315" class="outline-3">
+<h3 id="orgbc45315"><code>!forEach</code></h3>
+<div class="outline-text-3" id="text-orgbc45315">
 <p>
 <code>!forEach</code> repeat an action for each element of a container. It returns no result, and its implicit result are the changes to the parent state. In case of failure the entire <code>forEach</code> will fail.
 </p>
@@ -4071,9 +4073,9 @@ Assert {
 </p>
 </div>
 </div>
-<div id="outline-container-orgeeeab95" class="outline-3">
-<h3 id="orgeeeab95">Fold/Reduce</h3>
-<div class="outline-text-3" id="text-orgeeeab95">
+<div id="outline-container-orgd2e2285" class="outline-3">
+<h3 id="orgd2e2285">Fold/Reduce</h3>
+<div class="outline-text-3" id="text-orgd2e2285">
 <p>
 <code>fold</code> in Haskell corresponds to the <code>reduce</code> part of the map-reduce programming model. Dok does not support directly fold-like functions. The reduce part is supported using <code>do</code> and <code>!forEach</code>, like in this example:
 </p>
@@ -4096,7 +4098,7 @@ This code is pure because transaction logic has no side-effects, but it has an i
 </p>
 </div>
 </div>
-<div id="outline-container-org918c5d6" class="outline-3">
+<div id="outline-container-orge118f18" class="outline-3">
 <h3 id="streams">Streams</h3>
 <div class="outline-text-3" id="text-streams">
 <p>
@@ -4155,9 +4157,9 @@ Streams are containers, so they supports also map-reduce programming model. At t
 </div>
 </div>
 </div>
-<div id="outline-container-org756016e" class="outline-3">
-<h3 id="org756016e">Convenience functions</h3>
-<div class="outline-text-3" id="text-org756016e">
+<div id="outline-container-org89f9d0d" class="outline-3">
+<h3 id="org89f9d0d">Convenience functions</h3>
+<div class="outline-text-3" id="text-org89f9d0d">
 <p>
 The usual functions on containers like <code>filter</code>, <code>take</code> and so on are defined. For example:
 </p>
@@ -4195,7 +4197,7 @@ The usual functions on containers like <code>filter</code>, <code>take</code> an
 </div>
 </div>
 </div>
-<div id="outline-container-org32336f0" class="outline-2">
+<div id="outline-container-org362b134" class="outline-2">
 <h2 id="concurrency"><span class="todo TODO">TODO</span> Concurrency</h2>
 <div class="outline-text-2" id="text-concurrency">
 <p>
@@ -4203,15 +4205,15 @@ TODO see also <a href="#map-reduce">Map-Reduce programming model</a>
 </p>
 </div>
 </div>
-<div id="outline-container-org0cc94af" class="outline-2">
-<h2 id="org0cc94af">Knil for relational databases</h2>
-<div class="outline-text-2" id="text-org0cc94af">
+<div id="outline-container-org5c0269e" class="outline-2">
+<h2 id="org5c0269e">Knil for relational databases</h2>
+<div class="outline-text-2" id="text-org5c0269e">
 <p>
 Knil is a Dok DSL for specifying relational and graph databases. The name stays for "link" but  written in reverse.
 </p>
 
 <p>
-The Knil schema and queries are meant to be high level specifications, then according application requirements and used queries the Knil compiler with the help of the user can derive a concrete database.
+The Knil schema and queries can be high level and inefficient specifications that can be optimized in the final phases of application development. So the majority of these chapters are about clear specification of database semantic.
 </p>
 
 
@@ -4220,11 +4222,43 @@ The Knil schema and queries are meant to be high level specifications, then acco
 </p>
 </div>
 </div>
-<div id="outline-container-orge180670" class="outline-3">
-<h3 id="orge180670">Relational databases schema</h3>
-<div class="outline-text-3" id="text-orge180670">
+<div id="outline-container-org6f4f0f8" class="outline-3">
+<h3 id="org6f4f0f8">Relational databases schema</h3>
+<div class="outline-text-3" id="text-org6f4f0f8">
 <p>
 This an example of a relational database schema, defined using the Knil DSL. The syntax is very similar to Dok, but the semantic is diferent because in Knil objects are entities and not values.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-fundamental">Assert {
+  @Knil {
+    Book --&gt; (
+      isbnCode::$String @Key
+      title::$String
+      worthPoints::$Int
+    )
+
+    Vendor --&gt; (
+      name::$String
+    )
+
+    Country --&gt; (
+      name::$String @Key
+    )
+
+    Sell --&gt; (
+      ~:Vendor
+      ~::Book
+      in::Country
+      on::$Date
+    )
+  }
+}
+</pre>
+</div>
+
+<p>
+The same schema but with explained semantic:
 </p>
 
 <div class="org-src-container">
@@ -4282,7 +4316,7 @@ This an example of a relational database schema, defined using the Knil DSL. The
 </div>
 </div>
 </div>
-<div id="outline-container-org3b76007" class="outline-3">
+<div id="outline-container-org7b46108" class="outline-3">
 <h3 id="knil-integrity-constraints">Integrity constraints</h3>
 <div class="outline-text-3" id="text-knil-integrity-constraints">
 <p>
@@ -4319,19 +4353,17 @@ TODO many important details yet to decide/design
         }
       }
     }
+    #:NOTE: `Require` is used because the constraints is seen from the point of view of the user adding info to the database,
+    #        but we can use also `Ensure` because this is from the point of the user reading data from the database.
   }
 }
 </pre>
 </div>
-
-<p>
-<code>@Require</code> is used instead of <code>@Ensure</code> because the constraint is seen from the point of view of the user adding info to the database. But <code>@Ensure</code> can be used because in this case is perfectly compatible, i.e. it is same requirement seen from the point of view of the reader of the database. 
-</p>
 </div>
 </div>
-<div id="outline-container-org42d479d" class="outline-3">
-<h3 id="org42d479d">Knil tuples as entities</h3>
-<div class="outline-text-3" id="text-org42d479d">
+<div id="outline-container-org262fe91" class="outline-3">
+<h3 id="org262fe91">Knil tuples as entities</h3>
+<div class="outline-text-3" id="text-org262fe91">
 <p>
 Knil tuples are entities and their primary key is their reference. If a tuple is changed then all tuples on other tables referecing it, will see the changes. This is the contrary of value based semantic used in Dok.
 </p>
@@ -4355,9 +4387,9 @@ As usual for distinguish between entities and values:
 </ul>
 </div>
 </div>
-<div id="outline-container-org19bccf7" class="outline-3">
-<h3 id="org19bccf7">Knil tuples as values</h3>
-<div class="outline-text-3" id="text-org19bccf7">
+<div id="outline-container-orga0f5580" class="outline-3">
+<h3 id="orga0f5580">Knil tuples as values</h3>
+<div class="outline-text-3" id="text-orga0f5580">
 <p>
 Strictly speaking Knil tuples are normal Dok values. They act like mutable entities only because they are stored inside a key-value store (i.e. the DBMS) where the key is the primary key of the tuple, and the value is the tuple itself.
 </p>
@@ -4367,11 +4399,11 @@ For example <code>Person(id: 1, name: "Massimo")</code> is a value distinct from
 </p>
 </div>
 </div>
-<div id="outline-container-org8f4e740" class="outline-3">
-<h3 id="org8f4e740">Exchange of information between Knil and Dok</h3>
-<div class="outline-text-3" id="text-org8f4e740">
+<div id="outline-container-org9bb0e45" class="outline-3">
+<h3 id="org9bb0e45">Exchange of information between Knil and Dok</h3>
+<div class="outline-text-3" id="text-org9bb0e45">
 <p>
-Knil types are tagged with`$SomeKinlType` inside Dok, and Dok types are tagged with `$SomeDokType` inside Kniil. The tag is important for the user reading the code because they have different semantic. It is important also for the the Knil compiler that can manage them in ad-hoc way.
+Knil types are tagged with <code>$SomeKinlType</code> inside Dok, and Dok types are tagged with <code>$SomeDokType</code> inside Kniil. The tag is important for the user reading the code because the two types have different semantic. It is important also for the the Knil compiler that can manage them in ad-hoc way.
 </p>
 
 <p>
@@ -4379,24 +4411,41 @@ Knil types are seen as containers of tuples in Dok, so they can be queried using
 </p>
 </div>
 </div>
-<div id="outline-container-org15d7aa9" class="outline-3">
-<h3 id="org15d7aa9">Weak vs strong references</h3>
-<div class="outline-text-3" id="text-org15d7aa9">
+<div id="outline-container-org612ec45" class="outline-3">
+<h3 id="org612ec45">Weak vs strong references</h3>
+<div class="outline-text-3" id="text-org612ec45">
 <p>
-In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with strong a reference to the original object to clone, because it is part of it, so you had to clone also its parts. 
+In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with a strong reference because it is part of it.
 </p>
 
 <p>
 In case of Knil and Dok we have clear distinctions between strong and weak references:
 </p>
 <ul class="org-ul">
-<li>every tuple inside a Knil table is an entity and every foreign key pointing to another entity is for sure a weak reference, i.e. a link to a distinct entity</li>
-<li>every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references)</li>
-<li>a compound value can have references to Knil entities, in particular in case of a noSQL data processing, but these are managed as values like <code>Ref(SomeForeignKey)</code> and so they act like weak references to the referenced entity</li>
+<li>every tuple inside a Knil table is an entity and every foreign key pointing to it is for sure a weak reference (i.e. for sure the first tuple is not part of the second)</li>
+<li>every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references) and they are represented using Dok values, used in attributes of Knil tuples</li>
+<li>compound Dok values have an inherent strong reference semantic, because they have no shared parts</li>
+<li>a Dok value can have references to external Knil entities, but these are inherently weak references because they have a form like <code>Ref(SomeForeignKey)</code></li>
+</ul>
+
+<p>
+An example: a Book can have an author and it can be composed of chapters. The Book is a Dok value with an "author" field pointing to a Knil entity of type Person. This is clearly a weak reference because if you clone a book you don't clone also the author (i.e. the author is not part of the book). The chapters of the book are instead part of it. So they are fields of the Dok Book value. A Book can have also some chapters shared with other books. In this case you can create Knil entities of type SharedChapter and insert weak references to them in the Book value. They will be weak references, and if you modify a shared chapter on a book also other books referencing the same Knil chapter will see the effects. 
+</p>
+
+<p>
+So the weak vs strong reference problem is automatically solved in Dok and Knil:
+</p>
+<ul class="org-ul">
+<li>everything you put in a Knil relation will be a weak reference</li>
+<li>everything you describe with a Dok type will be a strong reference</li>
+<li>references to Knil entities will always be weak references</li>
+<li>usage of Dok values will always be strong references</li>
+<li>you can reference Knil entities inside Dok values, and they will be weak references</li>
+<li>you can use Dok values in Knil entities, and they will be strong references</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc64ea98" class="outline-3">
+<div id="outline-container-org05af42c" class="outline-3">
 <h3 id="knil-functions">Knil functions</h3>
 <div class="outline-text-3" id="text-knil-functions">
 <p>
@@ -4421,7 +4470,7 @@ Knil relations can be seen as types in Dok, so normal Dok functions can be added
 </div>
 </div>
 </div>
-<div id="outline-container-org4dc3444" class="outline-3">
+<div id="outline-container-org5452851" class="outline-3">
 <h3 id="knil-queries">Knil queries</h3>
 <div class="outline-text-3" id="text-knil-queries">
 <p>
@@ -4473,7 +4522,7 @@ Note that according <a href="#knil-optimizations">Optimizing DBMS applications</
 </div>
 </div>
 </div>
-<div id="outline-container-org2752b5d" class="outline-3">
+<div id="outline-container-org91f708c" class="outline-3">
 <h3 id="knil-aggregates">Aggregates</h3>
 <div class="outline-text-3" id="text-knil-aggregates">
 <p>
@@ -4542,7 +4591,7 @@ These high-level queries can be further optimized rewriting them in more low-lev
 </div>
 </div>
 </div>
-<div id="outline-container-orgf47d024" class="outline-3">
+<div id="outline-container-orgbd49590" class="outline-3">
 <h3 id="knil-recursion">Recursive queries</h3>
 <div class="outline-text-3" id="text-knil-recursion">
 <p>
@@ -4637,7 +4686,7 @@ Recursive queries are written using Dok recursive functions, and they are compil
 </div>
 </div>
 </div>
-<div id="outline-container-orgc390898" class="outline-3">
+<div id="outline-container-org8351a77" class="outline-3">
 <h3 id="knil-relational-to-graph">Relational vs graph-databases</h3>
 <div class="outline-text-3" id="text-knil-relational-to-graph">
 <p>
@@ -4656,7 +4705,7 @@ An important difference with <a class='org-ref-reference' href="#darwen_third_19
 </p>
 
 <p>
-According <a class='org-ref-reference' href="#meijer_co-relational_nodate">meijer_co-relational_nodate</a> coSQL are the dual of RM, i.e. many properties are the opposite of the relational counterpart. There are not conflicts between the two models because instead they complement each other. Many benefit of one model are not present in the other and vice-versa. For example:
+According <a class='org-ref-reference' href="#meijer_co-relational_nodate">meijer_co-relational_nodate</a> coSQL are the dual of RM, i.e. many properties are the opposite of the relational counterpart. There are no conflicts between the two models because instead they complement each other. Many benefit of one model are not present in the other and vice-versa. For example:
 </p>
 <ul class="org-ul">
 <li>in RM also common queries can requires slow joins, while in coSQL data structures can use specific data structures and explicit references for speeding-up them</li>
@@ -4675,7 +4724,7 @@ Because it is difficult living without the characteristics of coSQL DBMS in Dok 
 </p>
 </div>
 </div>
-<div id="outline-container-org6898872" class="outline-3">
+<div id="outline-container-org1584503" class="outline-3">
 <h3 id="knil-optimizations">Optimizing DBMS applications</h3>
 <div class="outline-text-3" id="text-knil-optimizations">
 <p>
@@ -4694,7 +4743,7 @@ Knil compiler plugins and meta-annotations in the code can (partially) automatiz
 </p>
 </div>
 </div>
-<div id="outline-container-orgfca46e6" class="outline-3">
+<div id="outline-container-orgca4de7f" class="outline-3">
 <h3 id="knil-multiple-engines">Supporting multiple DBMS engine</h3>
 <div class="outline-text-3" id="text-knil-multiple-engines">
 <p>
@@ -4706,9 +4755,9 @@ Note that also in case of compilation to relational DBMS, some coSQL pass can be
 </p>
 </div>
 </div>
-<div id="outline-container-orge177190" class="outline-3">
-<h3 id="orge177190">Supporting already existing databases on production DBMS</h3>
-<div class="outline-text-3" id="text-orge177190">
+<div id="outline-container-orgb675d02" class="outline-3">
+<h3 id="orgb675d02">Supporting already existing databases on production DBMS</h3>
+<div class="outline-text-3" id="text-orgb675d02">
 <p>
 In case Knil databases can be imported from already existing DBMS and Dok code managing them can be converted to code updating the production DBMS.
 </p>
@@ -4718,9 +4767,16 @@ TODO study C# Entity framework that can instruct LINQ on how mapping to already 
 </p>
 </div>
 </div>
+<div id="outline-container-orgec47a88" class="outline-3">
+<h3 id="orgec47a88"><span class="todo TODO">TODO</span> Database transactions</h3>
+<div class="outline-text-3" id="text-orgec47a88">
+<p>
+TODO DBMS connections and transactions had to be managed in an explicit way because they are distinct (often) by <a href="#nested-transaction-semantic">Nested transactions semantic (TR)</a> control-flow. Study the approach of other libraries and think to some Actor-model-like responsible for resources and transactions.
+</p>
 </div>
-
-<div id="outline-container-orga2f1568" class="outline-2">
+</div>
+</div>
+<div id="outline-container-org7b9ad92" class="outline-2">
 <h2 id="knil-kb">Knil for ontologies and knowledge-bases</h2>
 <div class="outline-text-2" id="text-knil-kb">
 <p>
@@ -4739,9 +4795,9 @@ Dok can use ontologies for:
 <li>managing complex knowledge-bases</li>
 </ul>
 </div>
-<div id="outline-container-org7be75f1" class="outline-3">
-<h3 id="org7be75f1">Ontologies for tagging data</h3>
-<div class="outline-text-3" id="text-org7be75f1">
+<div id="outline-container-org4ba2296" class="outline-3">
+<h3 id="org4ba2296">Ontologies for tagging data</h3>
+<div class="outline-text-3" id="text-org4ba2296">
 <p>
 Ontologies can be used for tagging content: tags are additional meta-info because the content makes sense also without them.
 </p>
@@ -4755,9 +4811,9 @@ Tags have an open-world principle database semantic (i.e. what is not known to b
 </p>
 </div>
 </div>
-<div id="outline-container-org2ef9228" class="outline-3">
-<h3 id="org2ef9228">Ontologies for knowledge-bases</h3>
-<div class="outline-text-3" id="text-org2ef9228">
+<div id="outline-container-org4a1a104" class="outline-3">
+<h3 id="org4a1a104">Ontologies for knowledge-bases</h3>
+<div class="outline-text-3" id="text-org4a1a104">
 <p>
 Ontologies can be used for describing complex knowledge-bases capturing concepts of a certain domain (e.g. medical, legal, etc..). In this way from extensional facts (i.e. the explicit facts stored in the database), intensional facts can be derived according the rules of the knowledge-base.
 </p>
@@ -4771,9 +4827,9 @@ Knowledge-bases can have a closed-world semantic if they are considered as compl
 </p>
 </div>
 </div>
-<div id="outline-container-org14f66a0" class="outline-3">
-<h3 id="org14f66a0">Schema specification</h3>
-<div class="outline-text-3" id="text-org14f66a0">
+<div id="outline-container-orgbccd423" class="outline-3">
+<h3 id="orgbccd423">Schema specification</h3>
+<div class="outline-text-3" id="text-orgbccd423">
 <p>
 Ontologies for knowledge-bases and for tagging are supported by Knil and Dok using the same mechanisms.
 </p>
@@ -4879,9 +4935,9 @@ TODO this is still an incomplete specification, it will be completed during impl
 </p>
 </div>
 </div>
-<div id="outline-container-org3eb3325" class="outline-3">
-<h3 id="org3eb3325">Compilation from ontologies to Knil relations</h3>
-<div class="outline-text-3" id="text-org3eb3325">
+<div id="outline-container-org047426b" class="outline-3">
+<h3 id="org047426b">Compilation from ontologies to Knil relations</h3>
+<div class="outline-text-3" id="text-org047426b">
 <p>
 Knil relations used in ontologies can be compiled to Knil relations used for the relational world. Then normal Dok code working on these tables can be used or querying the ontology. 
 </p>
@@ -4931,9 +4987,9 @@ Efficient rules will be derived in best-effort-mode from the Knil compiler, and 
 </div>
 </div>
 </div>
-<div id="outline-container-org4139be4" class="outline-3">
-<h3 id="org4139be4">Differences with OWL 2</h3>
-<div class="outline-text-3" id="text-org4139be4">
+<div id="outline-container-org3e28e8c" class="outline-3">
+<h3 id="org3e28e8c">Differences with OWL 2</h3>
+<div class="outline-text-3" id="text-org3e28e8c">
 <p>
 Knil for ontologies aims to be at the same expressive power and efficiency of OWL 2 QL (<a class='org-ref-reference' href="#hitzler2009owl">hitzler2009owl</a>), but with the added support of transitive closure for relations. 
 </p>
@@ -4943,9 +4999,9 @@ Respect OWL 2, Knil has some limited support for n-ary relations.
 </p>
 </div>
 </div>
-<div id="outline-container-orgbc1ad24" class="outline-3">
-<h3 id="orgbc1ad24">Differences with Datalog</h3>
-<div class="outline-text-3" id="text-orgbc1ad24">
+<div id="outline-container-org488f4b1" class="outline-3">
+<h3 id="org488f4b1">Differences with Datalog</h3>
+<div class="outline-text-3" id="text-org488f4b1">
 <p>
 Datalog code is more powerful than many ontological and description-logic based languages, but it can also be slower to execute for certain type of queries. It can also be more verbose than some ontological languages.
 </p>
@@ -4956,9 +5012,9 @@ Dok can be used or deriving intensional facts with a complex business logic, ins
 </div>
 </div>
 </div>
-<div id="outline-container-org11178b4" class="outline-2">
-<h2 id="org11178b4">Dok semantic</h2>
-<div class="outline-text-2" id="text-org11178b4">
+<div id="outline-container-orgcf788e0" class="outline-2">
+<h2 id="orgcf788e0">Dok semantic</h2>
+<div class="outline-text-2" id="text-orgcf788e0">
 <p>
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 </p>
@@ -4968,9 +5024,9 @@ In general the Dok semantic is a call-by-need but with implicit priority between
 </p>
 </div>
 </div>
-<div id="outline-container-orgd9a193e" class="outline-2">
-<h2 id="orgd9a193e">Source code documentation</h2>
-<div class="outline-text-2" id="text-orgd9a193e">
+<div id="outline-container-orgc508b24" class="outline-2">
+<h2 id="orgc508b24">Source code documentation</h2>
+<div class="outline-text-2" id="text-orgc508b24">
 <p>
 Dok supports rich comments, i.e. comments can be tagged according their intendeed scope.
 </p>
@@ -5082,7 +5138,7 @@ Dok supports rich comments, i.e. comments can be tagged according their intendee
 </div>
 </div>
 </div>
-<div id="outline-container-orgec9efbe" class="outline-2">
+<div id="outline-container-orgce3b5e3" class="outline-2">
 <h2 id="editing-macro">Editing macro</h2>
 <div class="outline-text-2" id="text-editing-macro">
 <p>
@@ -5105,7 +5161,7 @@ This process is meant to be fully useable in conjuction with the DokMelody IDE o
 </div>
 </div>
 </div>
-<div id="outline-container-orgbc7a4cc" class="outline-2">
+<div id="outline-container-orgde5388b" class="outline-2">
 <h2 id="dokmelody-ide">DokMelody IDE</h2>
 <div class="outline-text-2" id="text-dokmelody-ide">
 <p>
@@ -5136,13 +5192,13 @@ From a certain point of view as C was designed for implementing Linux, so Dok is
 </p>
 </div>
 </div>
-<div id="outline-container-orgd55c9da" class="outline-2">
+<div id="outline-container-org7d57dc1" class="outline-2">
 <h2 id="modules-and-packages">Modules and packages</h2>
 <div class="outline-text-2" id="text-modules-and-packages">
 </div>
-<div id="outline-container-org206d35d" class="outline-3">
-<h3 id="org206d35d">Modules</h3>
-<div class="outline-text-3" id="text-org206d35d">
+<div id="outline-container-org3682ff4" class="outline-3">
+<h3 id="org3682ff4">Modules</h3>
+<div class="outline-text-3" id="text-org3682ff4">
 <p>
 Dok modules are simple <code>SomeModuleName.dok</code> files, because a Dok file can contains many related type definitions. The module name is by default the file name and it must be not repeated inside module.
 </p>
@@ -5168,9 +5224,9 @@ A client imports a module with the command <code>@Import&lt;&lt;SomeModule&gt;&g
 </p>
 </div>
 </div>
-<div id="outline-container-org759411d" class="outline-3">
-<h3 id="org759411d">Packages</h3>
-<div class="outline-text-3" id="text-org759411d">
+<div id="outline-container-org54e4cd8" class="outline-3">
+<h3 id="org54e4cd8">Packages</h3>
+<div class="outline-text-3" id="text-org54e4cd8">
 <p>
 Up to date there is no formal definition of a Dok package. Up to date it is simply:
 </p>
@@ -5184,9 +5240,9 @@ In future packages wil be probably different ways to retrieve a set of related m
 </p>
 </div>
 </div>
-<div id="outline-container-org55cf7cb" class="outline-3">
-<h3 id="org55cf7cb">Build system</h3>
-<div class="outline-text-3" id="text-org55cf7cb">
+<div id="outline-container-org4aabe87" class="outline-3">
+<h3 id="org4aabe87">Build system</h3>
+<div class="outline-text-3" id="text-org4aabe87">
 <p>
 Dok uses a simple but powerful system for building applications:
 </p>
@@ -5197,9 +5253,9 @@ Dok uses a simple but powerful system for building applications:
 </ul>
 </div>
 </div>
-<div id="outline-container-org60c6ca8" class="outline-3">
-<h3 id="org60c6ca8">Retro-compatibility</h3>
-<div class="outline-text-3" id="text-org60c6ca8">
+<div id="outline-container-org95727bd" class="outline-3">
+<h3 id="org95727bd">Retro-compatibility</h3>
+<div class="outline-text-3" id="text-org95727bd">
 <p>
 Different building tools written in Dok can exchange informations because they share the same runtime.
 </p>
@@ -5223,13 +5279,45 @@ converter from the old version to the new version, for having a uniform code bas
 </div>
 </div>
 </div>
-<div id="outline-container-org8d3944b" class="outline-2">
-<h2 id="org8d3944b">Comparison with other languages</h2>
-<div class="outline-text-2" id="text-org8d3944b">
+<div id="outline-container-orgd4608ff" class="outline-2">
+<h2 id="orgd4608ff">Comparison with other languages</h2>
+<div class="outline-text-2" id="text-orgd4608ff">
 </div>
-<div id="outline-container-org89b4633" class="outline-3">
-<h3 id="org89b4633">Lisp</h3>
-<div class="outline-text-3" id="text-org89b4633">
+<div id="outline-container-org37b36e9" class="outline-3">
+<h3 id="org37b36e9">Hybrid OOP, FP and metaprogramming approach</h3>
+<div class="outline-text-3" id="text-org37b36e9">
+<p>
+Dok tries to join OOP, FP and metaprogramming paradigms in a pragmatic way: taking the best idea and not using aspects that can cause problems.
+</p>
+
+<p>
+So Dok supports FP but monads, effects and other complex FP patterns are not technically possible because functions can only be arguments of higher-order functions, but not results of other functions. In these cases metaprogramming had to be used. Metaprogramming is favoured because it can analyze and transform code and so it is more powerful.
+</p>
+
+<p>
+Dok has no lazy evaluation like Haskell or co-recursion like Idris, but for these cases it uses streams that are more simple also if less elegant/powerful.
+</p>
+
+<p>
+Dok supports metaprogramming but only at compile-time (i.e. not a run-time), and all the application source-code must be known in advance. In this way global analysis and advanced/agressive optimizations can be performed. Metaprogramming can be used for extending the language/compiler, but the run-time behavior remain simple. Dok libraries can have advanced features like some FP libraries, but with the advantage of global analysis and code transformation.
+</p>
+
+<p>
+Dok supports OOP but objects are values and not references like in mainstream OOP. This simplifies a lot reasoning on code, and it is inspired to FP paradigm.
+</p>
+
+<p>
+Dok interfaces are like in mainstream OOP, because concrete types can supports abstract interfaces using inheritance. But inheritance for concrete types is very different from inheritance of mainstream OOP language: it is more similar to FP sum types. Every subtype is seen as a variant of the parent type, and type hierarchy is seen as a way for describing compound/hierarchical values.
+</p>
+
+<p>
+Dok supports database relational concepts but only databases schema had to be in normalized relational form. Instead relational data is processed using a <a href="#map-reduce">Map-Reduce programming model</a> approach, without any further reference to relational model, SQL-like languages, and normalization of data.
+</p>
+</div>
+</div>
+<div id="outline-container-org77303a3" class="outline-3">
+<h3 id="org77303a3">Lisp</h3>
+<div class="outline-text-3" id="text-org77303a3">
 <p>
 Dok uses nested records, while Lisp uses nested list. In Dok arguments can be named, in Lisp usually no, also if there are extensions for supporting names and properties.
 </p>
@@ -5247,13 +5335,13 @@ Lisp can manage code as data, so it allows metaprogramming at compile-time and r
 </p>
 </div>
 </div>
-<div id="outline-container-org514cb79" class="outline-3">
-<h3 id="org514cb79">Haskell</h3>
-<div class="outline-text-3" id="text-org514cb79">
+<div id="outline-container-org9d78a2b" class="outline-3">
+<h3 id="org9d78a2b">Haskell</h3>
+<div class="outline-text-3" id="text-org9d78a2b">
 </div>
-<div id="outline-container-org30885e9" class="outline-4">
-<h4 id="org30885e9">Differences with Monads</h4>
-<div class="outline-text-4" id="text-org30885e9">
+<div id="outline-container-orgd6cec4b" class="outline-4">
+<h4 id="orgd6cec4b">Differences with Monads</h4>
+<div class="outline-text-4" id="text-orgd6cec4b">
 <p>
 In Haskell Monads can be used for adding a new semantic to a sequence of actions:
 </p>
@@ -5288,9 +5376,9 @@ Dok uses the contrary philosophy:
 </ul>
 </div>
 </div>
-<div id="outline-container-org2f8dc9d" class="outline-4">
-<h4 id="org2f8dc9d">Differences with Lenses</h4>
-<div class="outline-text-4" id="text-org2f8dc9d">
+<div id="outline-container-orgec3a0a2" class="outline-4">
+<h4 id="orgec3a0a2">Differences with Lenses</h4>
+<div class="outline-text-4" id="text-orgec3a0a2">
 <p>
 This example is taken from  <a href="https://www.reddit.com/r/haskell/comments/37qnhq/motivation_for_lens/crpktn1/?context=1">https://www.reddit.com/r/haskell/comments/37qnhq/motivation_for_lens/crpktn1/?context=1</a>
 </p>
@@ -5390,9 +5478,9 @@ It is only one single example but it seems that navigation in data structures is
 </div>
 </div>
 
-<div id="outline-container-orga4cef69" class="outline-3">
-<h3 id="orga4cef69">Idris</h3>
-<div class="outline-text-3" id="text-orga4cef69">
+<div id="outline-container-org9b983b1" class="outline-3">
+<h3 id="org9b983b1">Idris</h3>
+<div class="outline-text-3" id="text-org9b983b1">
 <p>
 Idris has no lazy evaluation but it can manage potentially infinite data structures and streams using codatatypes.
 </p>
@@ -5480,9 +5568,9 @@ More complex cases in Dok will be solved using Actors or the Bloom approach. So 
 </p>
 </div>
 </div>
-<div id="outline-container-orge2ead05" class="outline-3">
-<h3 id="orge2ead05">Comparison with <code>Familia</code> type system</h3>
-<div class="outline-text-3" id="text-orge2ead05">
+<div id="outline-container-org12894f0" class="outline-3">
+<h3 id="org12894f0">Comparison with <code>Familia</code> type system</h3>
+<div class="outline-text-3" id="text-org12894f0">
 <p>
 Familia <a class='org-ref-reference' href="#zhang_familia:_2017">zhang_familia:_2017</a> is a programming language that tries unifying interfaces, type classes, and family polymorphism and many other related advanced concepts of functional and object-oriented type systems in a rather simple but powerful type system. Dok type systems has the same aim, but I know the subject a lot less respect the two authors. So it is usefull comparing Dok with Familia for validating (at least informally) Dok againts a well designed and advanced programming language.
 </p>
@@ -5610,9 +5698,9 @@ Familia nested types are used also for implementing modules. Modules in Familia 
 </p>
 </div>
 </div>
-<div id="outline-container-orge7dc759" class="outline-3">
-<h3 id="orge7dc759">Open-Closed principle</h3>
-<div class="outline-text-3" id="text-orge7dc759">
+<div id="outline-container-org7e64f3d" class="outline-3">
+<h3 id="org7e64f3d">Open-Closed principle</h3>
+<div class="outline-text-3" id="text-org7e64f3d">
 <p>
 According <a class='org-ref-reference' href="#meyer1997object">meyer1997object</a> "Modules should be both open and closed [..] A module is said to be open if it still availabre for extension. [..] A module is said to be closed if it is available for use by other modules."
 </p>
@@ -5626,9 +5714,9 @@ In case heavy semantic patches are needed before reusing a type/module Dok allow
 </p>
 </div>
 </div>
-<div id="outline-container-org26d2fb0" class="outline-3">
-<h3 id="org26d2fb0">Eiffel inheritance</h3>
-<div class="outline-text-3" id="text-org26d2fb0">
+<div id="outline-container-orgdb4e54b" class="outline-3">
+<h3 id="orgdb4e54b">Eiffel inheritance</h3>
+<div class="outline-text-3" id="text-orgdb4e54b">
 <p>
 In Eiffel <a class='org-ref-reference' href="#{meyer1997object">{meyer1997object</a>} inheritance has many different usages:
 </p>
@@ -5681,9 +5769,9 @@ Despite interface-like and hierarchical-like types are rather different in their
 </p>
 </div>
 </div>
-<div id="outline-container-org16c9fa9" class="outline-3">
-<h3 id="org16c9fa9">Separation of concerns</h3>
-<div class="outline-text-3" id="text-org16c9fa9">
+<div id="outline-container-org29b1749" class="outline-3">
+<h3 id="org29b1749">Separation of concerns</h3>
+<div class="outline-text-3" id="text-org29b1749">
 <p>
 According <a class='org-ref-reference' href="#wiki002">wiki002</a> "In computer science, separation of concerns (SoC) is a design principle for separating a computer program into distinct sections, so that each section addresses a separate concern". 
 </p>
@@ -5702,9 +5790,9 @@ In Dok the programmer can specify more or less ad-hoc rules for combining differ
 </div>
 </div>
 </div>
-<div id="outline-container-orgae12048" class="outline-2">
-<h2 id="orgae12048">Bibliography</h2>
-<div class="outline-text-2" id="text-orgae12048">
+<div id="outline-container-org72236de" class="outline-2">
+<h2 id="org72236de">Bibliography</h2>
+<div class="outline-text-2" id="text-org72236de">
 
 <!-- This document was automatically generated with bibtex2html 1.99
      (see http://www.lri.fr/~filliatr/bibtex2html/),
@@ -5967,7 +6055,7 @@ Pascal Hitzler, Markus Kr&ouml;tzsch, Bijan Parsia, Peter&nbsp;F Patel-Schneider
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Massimo Zaniboni</p>
-<p class="date">Created: 2019-06-05 mer 03:48</p>
+<p class="date">Created: 2019-06-05 mer 11:48</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

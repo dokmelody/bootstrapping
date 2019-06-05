@@ -1,4 +1,4 @@
-#DATE: 2019-06-02
+#DATE: 2019-06-05
 #+TITLE: Dok Programming Language v0.1.3
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
@@ -3016,7 +3016,7 @@ Assert {
 * Knil for relational databases 
 Knil is a Dok DSL for specifying relational and graph databases. The name stays for "link" but  written in reverse.
 
-The Knil schema and queries are meant to be high level specifications, then according application requirements and used queries the Knil compiler with the help of the user can derive a concrete database.
+The Knil schema and queries can be high level and inefficient specifications that can be optimized in the final phases of application development. So the majority of these chapters are about clear specification of database semantic.
 
 #+BEGIN_SRC dot :file knil1.png :cmdline -Kdot -Tpng
 digraph {
@@ -3057,6 +3057,35 @@ digraph {
 [[file:knil1.png]]
 ** Relational databases schema
 This an example of a relational database schema, defined using the Knil DSL. The syntax is very similar to Dok, but the semantic is diferent because in Knil objects are entities and not values.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+  @Knil {
+    Book --> (
+      isbnCode::$String @Key
+      title::$String
+      worthPoints::$Int
+    )
+    
+    Vendor --> (
+      name::$String
+    )
+
+    Country --> (
+      name::$String @Key
+    )
+
+    Sell --> (
+      ~:Vendor
+      ~::Book
+      in::Country
+      on::$Date
+    )
+  }
+}
+#+END_SRC
+
+The same schema but with explained semantic:
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
@@ -3144,11 +3173,11 @@ TODO many important details yet to decide/design
         }
       }
     }
+    #:NOTE: `Require` is used because the constraints is seen from the point of view of the user adding info to the database,
+    #        but we can use also `Ensure` because this is from the point of the user reading data from the database.
   }
 }
 #+END_SRC
-
-~@Require~ is used instead of ~@Ensure~ because the constraint is seen from the point of view of the user adding info to the database. But ~@Ensure~ can be used because in this case is perfectly compatible, i.e. it is same requirement seen from the point of view of the reader of the database. 
 ** Knil tuples as entities
 Knil tuples are entities and their primary key is their reference. If a tuple is changed then all tuples on other tables referecing it, will see the changes. This is the contrary of value based semantic used in Dok.
 
@@ -3166,14 +3195,14 @@ Strictly speaking Knil tuples are normal Dok values. They act like mutable entit
 
 For example ~Person(id: 1, name: "Massimo")~ is a value distinct from the value ~Person(id: 1, name: "Max")~, but inside a DB container there can be only one association between ~id: 1~ and a value of type ~Person~, so when you update the DB you are updating the entity referenced by the key ~id: 1~. So it is the DB container giving to entities a mutable state. 
 ** Exchange of information between Knil and Dok
-Knil types are tagged with`$SomeKinlType` inside Dok, and Dok types are tagged with `$SomeDokType` inside Kniil. The tag is important for the user reading the code because they have different semantic. It is important also for the the Knil compiler that can manage them in ad-hoc way.
+Knil types are tagged with ~$SomeKinlType~ inside Dok, and Dok types are tagged with ~$SomeDokType~ inside Kniil. The tag is important for the user reading the code because the two types have different semantic. It is important also for the the Knil compiler that can manage them in ad-hoc way.
 
 Knil types are seen as containers of tuples in Dok, so they can be queried using a [[#map-reduce]] proramming model.
 ** Weak vs strong references
 In OOP a weak reference is a link between two distinct objects/entities, while a strong reference is when an object is part of another object. A typical distinction is when you clone an object: you copy weak references without cloning the referenced object, but you clone an object linked with a strong reference because it is part of it.
 
 In case of Knil and Dok we have clear distinctions between strong and weak references:
-- every tuple inside a Knil table is an entity and every foreign key pointing to is for sure a weak reference (i.e. for sure the first tuple is not part of the second) 
+- every tuple inside a Knil table is an entity and every foreign key pointing to it is for sure a weak reference (i.e. for sure the first tuple is not part of the second) 
 - every compound value (e.g. XML/HTML/JSON documents, etc..) is composed of parts (i.e. strong references) and they are represented using Dok values, used in attributes of Knil tuples
 - compound Dok values have an inherent strong reference semantic, because they have no shared parts 
 - a Dok value can have references to external Knil entities, but these are inherently weak references because they have a form like ~Ref(SomeForeignKey)~ 
@@ -3442,6 +3471,8 @@ Note that also in case of compilation to relational DBMS, some coSQL pass can be
 In case Knil databases can be imported from already existing DBMS and Dok code managing them can be converted to code updating the production DBMS.
 
 TODO study C# Entity framework that can instruct LINQ on how mapping to already existing DBMS
+** TODO Database transactions
+TODO DBMS connections and transactions had to be managed in an explicit way because they are distinct (often) by [[#nested-transaction-semantic]] control-flow. Study the approach of other libraries and think to some Actor-model-like responsible for resources and transactions.
 * Knil for ontologies and knowledge-bases
    :PROPERTIES:
    :CUSTOM_ID: knil-kb
