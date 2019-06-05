@@ -94,7 +94,7 @@ Assert {
       #  because there is a pattern-matching for every possible
       #  variant of an expression.
       #  `@Case` is a metaprogramming macro.
-      @Case<<self.is(~)>> {
+      @Case[self.is(~)] {
         ./Int
         #:NOTE: the `@Case` macro is expanded to 
         #       `self.is(./Int)` code
@@ -1336,7 +1336,7 @@ In cite:bruce2003some there is the "expression problem" that is a relatively sim
     /Eq(R:Bool) --> (x:Expr(Int), y:Expr(Int))
 
     eval --> R {
-     @Case<<self.is(~)>> {
+     @Case[self.is(~)] {
        /I
        self.x
      } else {
@@ -2503,10 +2503,10 @@ Dok compiler is customizable by Dok users. Dok code is compiled to Dokk (the dou
 ** Generating code values
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  code1::= Dok<<
+  code1::= Dok[
     x::= 0
     x + 1
-  >>
+  ]
   code1.is(Dok)
   #:NOTE: this is an example of a value that is Dok code, specified using `Dok` DSL syntax.
   
@@ -2573,7 +2573,7 @@ Assert {
   )
 
   x::= @Id("f-def")
-  x == @Dok<<f(x::Int) --> Int>>
+  x == @Dok[f(x::Int) --> Int]
   # we are reusing the piece of code called as "f-def".  
 }
 #+END_SRC
@@ -2620,26 +2620,26 @@ Assert {
     }
   }
 
-  # The form `@SomeDSL<<..>>` is equivalent to the explicit parsing `"..".SomeDSL`
-  x::= @SomeDSL<<10>>
+  # The form `@SomeDSL[..]` is equivalent to the explicit parsing `"..".SomeDSL`
+  x::= @SomeDSL[10]
   x.is(SomeDSL)
   x == "10".SomeDSL
   x == /SomeDSL/VeryGood
 
   # DSL can be nested
 
-  x:= @SomeDSL<<
-    @String<<6>>
-  >>
+  x:= @SomeDSL[
+    @String[6]
+  ]
   x == /SomeDSL/GoodEnough
 
   # DSL supports anti-quotation, i.e. some Dok code can be called inside the DSL used as template
   y::= 6
-  x:= @SomeDSL<<@{y + 2}>>
+  x:= @SomeDSL[@{y + 2}]
   x == /SomeDSL/Good
  
   y:= 0
-  x:= @SomeDSL<<1@{y.toString}>>
+  x:= @SomeDSL[1@{y.toString}]
   x == "10".SomeDSL
   x == /SomeDSL/VeryGood
 
@@ -2663,13 +2663,13 @@ Assert {
   # We define the parser using a PEGParser DSL
 
   String --> Expr {
-    String --> MyParse @PEGParser<<
-      .Digit_1_9 --> @PegRange<<[1-9]>>
-      .Digit_0_9 --> @PegRange<<[0-9]>>
+    String --> MyParse @PEGParser[
+      .Digit_1_9 --> @PegRange[[1-9]]
+      .Digit_0_9 --> @PegRange[[0-9]]
   
       /Const --> (d1::Digit_1_9, dn::Digit_0_9*)
       /Sum --> (x::Expr, "+"::_, y::Expr)
-    >>
+    ]
 
     MyParse --> Expr
     MyParse/Const -> Expr { /Expr/Const(n: self.d1 ++ self.dn).Int) }
@@ -2705,13 +2705,13 @@ Assert {
   )
 
   String --> ExprWithBase {
-    String --> MyParse @PEGParser<<
-      .Digit_1_base --> @PegRange<<[1-@{base.String}]>>
-      .Digit_0_base --> @PegRange<<[0-@{base.String}]>>
+    String --> MyParse @PEGParser[
+      .Digit_1_base --> @PegRange[[1-@{base.String}]]
+      .Digit_0_base --> @PegRange[[0-@{base.String}]]
   
       /Const --> (d1::Digit_1_base, dn::Digit_0_base*)
       /Sum --> (x::Expr, "+"::_, y::Expr)
-    >>
+    ]
 
     MyParse --> Expr
 
@@ -2736,14 +2736,13 @@ Assert {
     ExprWithBase(expr: self.MyParse.Expr)      
   }
 
-  x:= @ExprWithBase(base: 2)<<10>>
+  x:= @ExprWithBase(base: 2)[10]
   x.eval == 2
 
-  "11".ExprWithBase(base: 2).eval == @ExprWithBase<<11>> == 3
+  "11".ExprWithBase(base: 2).eval == @ExprWithBase[11] == 3
 
 }
 #+END_SRC
-
 
 ** Macro 
 Dok uses metaprogramming also for adding to the language powerful and useful constructs and reducing boilerplate code.
@@ -2761,7 +2760,7 @@ Dok uses metaprogramming also for adding to the language powerful and useful con
      /Eq(R:Bool) --> (x:Expr(Int), y:Expr(Int))
 
      eval --> R {
-      @Case<<self.is(~)>> {
+      @Case[self.is(~)] {
         /I
         self.x
       } else {
@@ -3748,7 +3747,7 @@ Assert {
   Id("someIdName")
   # Assign a name to some Dok code.
   @..
-  Id("otherName")<<
+  Id("otherName")[
   # this code has complete reference name "someIdName/otherName"
   ..@
   ..@
@@ -3767,9 +3766,9 @@ This process is meant to be fully useable in conjuction with the DokMelody IDE o
 #+BEGIN_SRC fundemantal :tangle no
  @@PasteCode(canBePatched: True, id: "127")
 
- @@License/APL2<<
+ @@License/APL2[
    2019, Massimo Zaniboni - mzan@dokmelody.org
- >>
+ ]
 #+END_SRC
 * DokMelody IDE
   :PROPERTIES:
@@ -3806,7 +3805,7 @@ If a client imports explicitely a Dok module, then it imports implicitely also r
 
 Dok modules must not introduce name clash conflics with parent modules.
 
-A client imports a module with the command ~@Import<<SomeModule>>~ or ~@Import<<SomeModule as SomeNameSpace>>~.
+A client imports a module with the command ~@Import[SomeModule]~ or ~@Import[SomeModule as SomeNameSpace]~.
 ** Packages
 Up to date there is no formal definition of a Dok package. Up to date it is simply:
 - a series of related modules inside the same directory/repository/tarball/etc..
