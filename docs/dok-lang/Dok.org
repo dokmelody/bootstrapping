@@ -3018,7 +3018,9 @@ Assert {
    :END:
 Knil is a Dok DSL for specifying relational and graph databases. The name stays for "link" but  written in reverse.
 
-The Knil schema and queries can be high level and inefficient specifications that can be optimized in the final phases of application development. So the majority of these chapters are about clear specification of database semantic.
+The Knil schema and queries can be high level and inefficient specifications that can be optimized in the final phases of application development.
+
+Knil approach is similar to already existing technologies: the database model is expressed using a plain-old-objects (POJO-like) and then queried with a LINQ-like approach (i.e. [[#map-reduce]]).
 
 #+BEGIN_SRC dot :file knil1.png :cmdline -Kdot -Tpng
 digraph {
@@ -3057,6 +3059,8 @@ digraph {
 
 #+RESULTS:
 [[file:knil1.png]]
+
+
 ** Relational databases schema
 This an example of a relational database schema, defined using the Knil DSL. The syntax is very similar to Dok, but the semantic is diferent because in Knil objects are entities and not values.
 
@@ -3835,7 +3839,9 @@ converter from the old version to the new version, for having a uniform code bas
   :END:
 Dok tries to join OOP, FP and metaprogramming paradigms in a pragmatic way: taking the best idea and not using aspects that can cause problems.
 
-So Dok supports FP but monads, effects and other complex FP patterns are not technically possible because functions can only be arguments of higher-order functions, but not results of other functions. In these cases metaprogramming had to be used. Metaprogramming is favoured because it can analyze and transform code and so it is more powerful.
+So Dok supports FP but monads, effects and other complex FP patterns are not technically possible because functions can only be arguments of higher-order functions, but not results of other functions. In these cases metaprogramming had to be used. Metaprogramming is favoured because it can analyze and transform code and so it is more powerful. 
+
+For visiting hierarchical data (e.g. source-code) attribute-grammars (they are a form of visitor pattern on steroids) are used, instead of normal FP code.
 
 Dok has no lazy evaluation like Haskell or co-recursion like Idris, but for these cases it uses streams that are more simple also if less elegant/powerful.
 
@@ -4172,6 +4178,8 @@ Interface-like types are usually abstract, they supports partial implementations
 Hierarchical-like types are used for representing concrete objects. In this case multiple inheritance is implemented or using type conversion to different concrete types or supporting various interface-like types.
 
 Despite interface-like and hierarchical-like types are rather different in their intended usage, they are managed with the same syntax and semantic (more or less) because they reuse the same concepts, e.g. records, partial implementations, contracts, generic type params and so on.
+** Java
+   Many Java frameworks are based on run-time expansions of simple objects (POJO) with meta-annotations. Dok uses a similar approach but using metaprogramming at compile-time.
 ** Separation of concerns
 According cite:wiki002 "In computer science, separation of concerns (SoC) is a design principle for separating a computer program into distinct sections, so that each section addresses a separate concern". 
 
