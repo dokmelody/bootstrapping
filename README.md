@@ -1,6 +1,6 @@
 # DokMelody Bootstrapping 
 
-Implement the first useable version of DokMelody, using an iterative bootstrapping process.
+Implement the first usable version of DokMelody, using an iterative bootstrapping process.
 
 ## Getting started
 
@@ -24,7 +24,6 @@ Use ``lentil-all`` for showing open issues. They are on DEV.org and spread on so
 
 ## License
 
-Source code is released under LGPL-3.0-or-later. 
-See ``docs/decisions/DR-0002-LGPL-license.md`` for related consequences.
+Source code is released under the permissive [Boost Software License v1.0](https://www.boost.org/LICENSE_1_0.txt).
 
 Documentation is released under CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>

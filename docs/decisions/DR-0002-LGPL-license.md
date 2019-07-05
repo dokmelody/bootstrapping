@@ -3,6 +3,10 @@ SPDX-License-Identifier: CC-BY-4.0
 Copyright (C) 2019 Massimo Zaniboni - mzan@dokmelody.org
 -->
 
+# Status
+
+* DISCARDED in favour of DR-0004-Boost-license 
+
 # Context
 
 DokMelody is a project composed of an user interface, various programming languages compilers, and libraries.

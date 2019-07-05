@@ -1,6 +1,6 @@
 #lang frog/config
 
-;; SPDX-License-Identifier: LGPL-3.0-or-later
+;; SPDX-License-Identifier: BSL-1.0 
 ;; Copyright (C) 2019 Massimo Zaniboni <mzan@dokmelody.org>
 
 ;; Called early when Frog launches. Use this to set parameters defined

@@ -172,3 +172,52 @@
     url = "https://en.wikipedia.org/w/index.php?title=Dependency_injection&oldid=894064964",
     note = "[Online; accessed 5-June-2019]"
   }
+@incollection{hutchison_why_2013,
+	address = {Berlin, Heidelberg},
+	title = {Why {Do} {Scala} {Developers} {Mix} the {Actor} {Model} with other {Concurrency} {Models}?},
+	volume = {7920},
+	isbn = {978-3-642-39037-1 978-3-642-39038-8},
+	url = {http://link.springer.com/10.1007/978-3-642-39038-8_13},
+	abstract = {Mixing the actor model with other concurrency models in a single program can break the actor abstraction. This increases the chance of creating deadlocks and data races—two mistakes that are hard to make with actors. Furthermore, it prevents the use of many advanced testing, modeling, and veriﬁcation tools for actors, as these require pure actor programs. This study is the ﬁrst to point out the phenomenon of mixing concurrency models and to systematically identify the factors leading to it. We studied 15 large, mature, and actively maintained actor programs written in Scala and found that 80\% of them mix the actor model with another concurrency model. Consequently, a large part of real-world actor programs does not use actors to their fullest advantage. Inspection of the programs and discussion with the developers reveal two reasons for mixing that can be inﬂuenced by researchers and library-builders: weaknesses in the actor library implementations, and shortcomings of the actor model itself.},
+	language = {en},
+	urldate = {2019-04-25},
+	booktitle = {{ECOOP} 2013 – {Object}-{Oriented} {Programming}},
+	publisher = {Springer Berlin Heidelberg},
+	author = {Tasharofi, Samira and Dinges, Peter and Johnson, Ralph E.},
+	editor = {Hutchison, David and Kanade, Takeo and Kittler, Josef and Kleinberg, Jon M. and Mattern, Friedemann and Mitchell, John C. and Naor, Moni and Nierstrasz, Oscar and Pandu Rangan, C. and Steffen, Bernhard and Sudan, Madhu and Terzopoulos, Demetri and Tygar, Doug and Vardi, Moshe Y. and Weikum, Gerhard and Castagna, Giuseppe},
+	year = {2013},
+	doi = {10.1007/978-3-642-39038-8_13},
+	keywords = {concurrency, Unterstützungssystem (Informatik)},
+	pages = {302--326},
+	file = {Tasharofi et al. - 2013 - Why Do Scala Developers Mix the Actor Model with o.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/V59VHWKP/Tasharofi et al. - 2013 - Why Do Scala Developers Mix the Actor Model with o.pdf:application/pdf}
+}
+@article{alvaro_consistency_nodate,
+	title = {Consistency {Analysis} in {Bloom}: a {CALM} and {Collected} {Approach}},
+	abstract = {Distributed programming has become a topic of widespread interest, and many programmers now wrestle with tradeoﬀs between data consistency, availability and latency. Distributed transactions are often rejected as an undesirable tradeoﬀ today, but in the absence of transactions there are few concrete principles or tools to help programmers design and verify the correctness of their applications. We address this situation with the CALM principle, which connects the idea of distributed consistency to program tests for logical monotonicity. We then introduce Bloom, a distributed programming language that is amenable to high-level consistency analysis and encourages order-insensitive programming. We present a prototype implementation of Bloom as a domain-speciﬁc language in Ruby. We also propose a program analysis technique that identiﬁes points of order in Bloom programs: code locations where programmers may need to inject coordination logic to ensure consistency. We illustrate these ideas with two case studies: a simple key-value store and a distributed shopping cart service.},
+	language = {en},
+	author = {Alvaro, Peter and Conway, Neil and Hellerstein, Joseph M and Marczak, William R},
+	keywords = {concurrency, dbms},
+	pages = {12},
+	file = {Alvaro et al. - Consistency Analysis in Bloom a CALM and Collecte.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/7DGKYWCX/Alvaro et al. - Consistency Analysis in Bloom a CALM and Collecte.pdf:application/pdf}
+}
+@article{wu_anna:_nodate,
+	title = {Anna: {A} {KVS} {For} {Any} {Scale}},
+	abstract = {Modern cloud providers offer dense hardware with multiple cores and large memories, hosted in global platforms. This raises the challenge of implementing high-performance software systems that can effectively scale from a single core to multicore to the globe. Conventional wisdom says that software designed for one scale point needs to be rewritten when scaling up by 10−100× [1]. In contrast, we explore how a system can be architected to scale across many orders of magnitude by design. We explore this challenge in the context of a new keyvalue store system called Anna: a partitioned, multi-mastered system that achieves high performance and elasticity via waitfree execution and coordination-free consistency. Our design rests on a simple architecture of coordination-free actors that perform state update via merge of lattice-based composite data structures. We demonstrate that a wide variety of consistency models can be elegantly implemented in this architecture with unprecedented consistency, smooth ﬁne-grained elasticity, and performance that far exceeds the state of the art.},
+	language = {en},
+	author = {Wu, Chenggang and Faleiro, Jose M and Lin, Yihan and Hellerstein, Joseph M},
+	keywords = {concurrency, dbms},
+	pages = {12},
+	file = {Wu et al. - Anna A KVS For Any Scale.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/PXYX2VFA/Wu et al. - Anna A KVS For Any Scale.pdf:application/pdf}
+}
+@article{hewitt_laws_1977,
+	title = {Laws for communicating parallel processes},
+	url = {https://dspace.mit.edu/bitstream/handle/1721.1/41962/AI_WP_134A.pdf},
+	abstract = {Baker},
+	urldate = {2019-06-30},
+	journal = {MIT Artificial Intelligence Laboratory},
+	author = {Hewitt},
+	year = {1977},
+	keywords = {concurrency, distributed},
+	file = {Hewitt - 1977 - Laws for communicating parallel processes.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/WHWYZTWX/Hewitt - 1977 - Laws for communicating parallel processes.pdf:application/pdf}
+}
+
