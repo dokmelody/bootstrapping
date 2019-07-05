@@ -87,7 +87,12 @@ html, body {
   }
 
   p, div.SIntrapara {
-      padding-bottom: 0.25em;
+      padding-bottom: $line-height;
+      text-align: justify;
+  }
+
+  p {
+      padding-bottom: $line-height;
       text-align: justify;
   }
 
@@ -118,7 +123,7 @@ html, body {
 article {
     font-size: $font-size;
     color: $text-color;
-    font-family: $font-sans-serif;
+    font-family: $font-article;
     line-height: $line-height;
 }
 
@@ -182,7 +187,8 @@ h1, h2, h3, h4, h5, h6 {
 blockquote {
   background-color: #F6F6F6;
   margin: 0;
-  padding: 0.5em 35px;
+  padding-top: $line-height;
+  padding-bottom: $line-height;
 }
 
 .pagination {

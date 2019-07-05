@@ -48,10 +48,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Every (also minor) source code file must start with an header comment like
 
-```
-SPDX-License-Identifier: BSL-1.0 
-Copyright (C) 2019 Author Name <author-email@example.net>
-```
+> SPDX-License-Identifier: BSL-1.0 
+>
+> Copyright (C) 2019 Author Name \<author-email@example.net\>
 
 Authors and contributors must add them self to the list of copyright holders, when they change a file.
 
