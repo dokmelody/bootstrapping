@@ -1002,13 +1002,13 @@ Assert {
    P --> (
      p::Int
 
-     .A --> ( 
+     A --> ( 
        #: This is nested ``P.A`` type.
        a1::Int
      )
 
      f(x::String) --> Int { 
-       .B --> (
+       B --> (
          # This is a ``P.B`` type. It is visible only inside this function.
          # It can view the arguments of the function ``f``, and they are considered const/immutables.
          #
@@ -3007,11 +3007,6 @@ Assert {
   (1, 2, 3, 4)*.filter({self < 3}) == (1, 2)*
 }
 #+END_SRC
-* TODO Concurrency
-  :PROPERTIES:
-  :CUSTOM_ID: concurrency
-  :END:
-  TODO see also [[#map-reduce]]
 * Knil for relational databases 
    :PROPERTIES:
    :CUSTOM_ID: knil-rm
@@ -3066,7 +3061,7 @@ This an example of a relational database schema, defined using the Knil DSL. The
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  @Knil {
+  @Knil[
     Book --> (
       isbnCode::$String @Key
       title::$String
@@ -3087,7 +3082,7 @@ Assert {
       in::Country
       on::$Date
     )
-  }
+  ]
 }
 #+END_SRC
 
@@ -3096,7 +3091,7 @@ The same schema but with explained semantic:
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
 
-  @Knil {
+  @Knil[
     @Id("schema1")..
     Book --> (
       isbnCode::$String @Key
@@ -3142,7 +3137,7 @@ Assert {
       on::$Date
     )
     ..@
-  }
+  ]
 }
 #+END_SRC
 ** Integrity constraints
@@ -3154,8 +3149,8 @@ Integrity constraints are conditions that are guarantee to be true before a data
 TODO many important details yet to decide/design
 
 #+BEGIN_SRC fundamental :tangle yes
-@Assert {
-  @Knil {
+Assert {
+  @Knil[
     S -> (
       city::$String
       status::Int
@@ -3181,7 +3176,7 @@ TODO many important details yet to decide/design
     }
     #:NOTE: `Require` is used because the constraints is seen from the point of view of the user adding info to the database,
     #        but we can use also `Ensure` because this is from the point of the user reading data from the database.
-  }
+  ]
 }
 #+END_SRC
 ** Knil tuples as entities
@@ -3230,14 +3225,14 @@ Knil relations can be seen as types in Dok, so normal Dok functions can be added
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  @Knil {
+  @Knil[
     @Include("schema1")
 
     Sell.worthPoints --> $Int { self.book.worthPoint }
     # "denormalize" the `Book.worthPoints` making it accessible directly from `Sell` entity.
     # Doing so code can become more OOP than relational based because there are less 
     # explicit joins in the code respect pure relational code.
-  }
+  ]
 
   average::= $Sell.map({self.worthPoints}).average.String
   stdout!printLn("Average points: ".append(average))
@@ -3262,7 +3257,7 @@ Note that according [[#knil-optimizations]] these queries can be initially only 
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  @Knil {
+  @Knil[
     @Include("schema1")
 
     Sell.worthPoints --> $Int { self.book.worthPoint }
@@ -3278,7 +3273,7 @@ Assert {
     }
     # this is like a virtual relation
     # > WorthPoints --> (~::Vendor, in::Country, on::$Date, worthPoints::$Int)
-  }
+  ]
 }   
 #+END_SRC
 ** Aggregates
@@ -3292,7 +3287,7 @@ In case of grouping queries, the result of the query function is usually a Dok M
 These high-level queries can be further optimized rewriting them in more low-level code according the physical database format.
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  @Knil {
+  @Knil[
 
     Supplier --> (
       name::$String
@@ -3339,7 +3334,7 @@ Assert {
 
       Supplier.map({(self, Order.filter({self.supplier == super}).length)}).Map
     }
-  }
+  ]
 }
 #+END_SRC
 ** Recursive queries
@@ -3366,7 +3361,7 @@ Assert {
     SG(x, y):- Sibiling(x, y).
   }
 
-  @Knil {
+  @Knil[
     Person --> (
       name::$String
     )
@@ -3375,7 +3370,7 @@ Assert {
       parent::Person @Key
       child::Person @Key
     )
-  }
+  ]
 
   (x::$Person, y::$Person).areSibilings --> Bool {
     $Parent.filteri({self.child == x}).any {
@@ -3513,7 +3508,7 @@ These are different examples of schema with extensive documentation about the Kn
 
 #+BEGIN_SRC fundamental :tangle yes
 Assert {
-  @Knil {
+  @Knil[
       
     Any knows Any
     Any hasEnemy Any   
@@ -3646,6 +3641,201 @@ Respect OWL 2, Knil has some limited support for n-ary relations.
 Datalog code is more powerful than many ontological and description-logic based languages, but it can also be slower to execute for certain type of queries. It can also be more verbose than some ontological languages.
 
 Dok can be used or deriving intensional facts with a complex business logic, instead of Datalog, while Knil can be used for the majority of simple to declare business rules. 
+* Concurrency
+  :PROPERTIES:
+  :CUSTOM_ID: concurrency
+  :END:
+A thread executes instructions in sequence and in an synchronous way, with a predictable behaviour. We have concurrency when there are two or more threads running at the same time, sharing resources (e.g. CPU, storage, network, etc..) and/or communicating together. Their behaviour is not fully predictable because the interaction between them and the resources depends also from unpredictable external factors. There can be also more run-time exceptions.
+    
+Designing concurrent but correct code is more difficult than sequential one, because the order of some instructions is not deterministic and apparently our mind can not cope well with this. So whenever possible one should write sequential code. But the world is inherently concurrent (i.e. there are concurrent "process" communicating together and trying to access shared resources). So concurrent programming is (often) useful and we can not get rid of it. 
+
+Dok supports concurrency using different programming paradigms because a single paradigm can not be good for all type of usage scenario, as noted also by cite:hutchison_why_2013. For example:
+- MultiKore parallel DSL: I/O or CPU intensive tasks that can be split into sub-tasks following a pre-determinated schema, e.g. map-reduce data transformation jobs
+- Knil database DSL: database transactions that are specified in isolation, but that can automatically run in parallel/concurrent way
+- Kalm distributed DSL: multiple distinct tasks or transactions using common shared resources but with low probability of conflicts
+- Kalm distributed DSL: interacting active objects (i.e. Actors) providing services to other actors
+- graph algorithms
+- SAT solvers and other constraints algorithms
+- semaphore and locks: shared data structures with pessimistic locking (i.e. it is likely that many tasks will try to access the resource at the same time)
+** Kalm - Concurrent and distributed programming 
+   :PROPERTIES:
+   :CUSTOM_ID: kalm
+   :END:
+Kalm is a DSL for specifying distributed concurrent systems collaborating through the exchange of tuples (i.e. values in Dok). It is based on CALM principle and Bloom programming paradigm cite:alvaro_consistency_nodate
+- Process collaborate sending messages on channels.
+- Process manage state using relational tables.
+- Relational tables are updated by declarative rules.
+- Monotonic rules do not break the consistency of the system.
+- Non monotonic transactions requires synchronization or repair transactions.
+- Kalm tools help visualizing and reasoning on safe part of the code (e.g. monotonic transactions) and parts where the system can break integrity.
+*** When using Kalm
+Kalm is a rather low-level concurrent paradigm, so it should be used only when performances are important and no already existing Dok paradigms can be used (e.g. DBMS, distributed data structures, etc..). It can be used directly from programmers or it can be used as intermediate target language for other high-levels DSL and libraries.
+
+According cite:we_anna:_nodate shared RAM access and locks can reduce a lot the performances on modern multi-core CPU. So Kalm approach seems the best not only for distributed systems, but also for local systems with shared RAM and multi-core CPU. So its apparent limitations are instead strong points.
+
+Kalm code can coexists with other Dok DSL because Kalm specifies mainly how Process exchange information. Internal processing of received information can be done using different DSL. 
+*** TODO Kalm semantic
+Kalm uses these Bloom data types:
+- tuples: the values/entities inside tables, scratches and channels. Knil DSL syntax and semantic will be used.
+- table: persistent collection of tuples across timesteps. It is an unordered set, i.e. a relation using relational database terms.
+- scratch: a collection of values that persist only for one timestep
+- channel: a scratch collection used for communicating with external Process. The first element of the tuple contains the remote address.
+- interface: a scrach used as a communication protocol between modules.
+- periodic: a scrach with time periodic info
+
+Kalm code is a set of rules to execute at each timestep. So it is a rule-based system. Rules will be executed until a fix point is not reached. Then before the next timestep, data is physically sent to channels and state tables are updated. Then another timestep is executed. 
+
+TODO specify if it is casual consistent
+
+Tables can be updated with:
+- ~+=~ adds tuples in current timestep
+- ~++=~ add tuples at next timestep
+- ~--=~ remove tuples at next timestep
+
+Interfaces and channels can be updated with:
+- ~+++=~ add tuples and they will be visible in some next timestep, because network times are not predictable
+
+Scratches can be written only once, so:
+- or they are internal private variables inside Kalm rules
+- or they are private methods returning a read-only table
+ 
+TODO manage the address in channels
+TODO describe the minor differences between Bloom channels and Kalm channels
+
+This is an example of syntax/semantic:
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+   KeyValueStore --> @Kalm.Process[
+     #:NOTE: we are defining a type of Kalm.Proces using the Kalm DSL.
+
+     Entry --> (
+       key::$String @Key
+       value::$Any
+     )
+     #:NOTE: this is a tuple type, expressed using Knil syntax/semantic
+
+     store::Entry*
+     #:NOTE: this is a Bloom table. So its content will persisti between each timestep.
+     
+     _storeWithConflicts::Entry*
+     #:NOTE: this is a private Bloom table. It is like a normal table, but not readable from the external.
+
+     ^put::Entry*
+     #:NOTE: this is an interface/channel because it starts with `^`, 
+     #       and it is used for input because it is an assignable field.
+
+     GetRequest --> (
+       key::$String @Key
+     )
+     # another type of data.
+
+     ^getRequest::GetRequest*
+     # another input interface 
+
+     ^getResponse --> Entry*
+     #:NOTE: this is an output interface/channel because it starts with `^` and it is a method     
+
+     !!doPut --> {
+       #:NOTE: this a named rule. It will be executed at every timestep.
+       #       Name is useful for overriding rules in derived Process.
+       # The effect of the ruse is updating `self.store`.
+
+       self.store++= self^put.map({ Entry(self.key, self.value) })
+       # update the state with the changed requests
+     }
+
+     !!_newConflictingEntries --> Entry* {
+       self._storeWithConflicts.filter {
+         super.store.contains(self.key).not
+       }
+     }
+     #:NOTE: this is a private Bloom scratch because it is a rule returning a non modifiable table.
+     
+     !!getResponse --> {
+       self.^getResponse+++= self.^getRequest.map {
+        Entry(self.key, self._state.get(self.key))
+     }
+   ]
+}
+#+END_SRC
+
+This is another example
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+   KVS --> @Kalm.Protocol[
+     #:NOTE: `@Kalm.Protocol` is a `Process` that is `@Abstract`
+
+     Put --> (
+       client::Client @Key
+       reqid::ID @Key
+       key::$String @Key
+       value::$Any
+     )
+
+     GetRequest --> (
+       reqid::ID @Key
+       key::$String
+     )
+   
+     GetResponse --> (
+       reqid::ID @Key
+       key::$String
+       value::$Any
+     )
+
+     ^::Put*
+     #:NOTE: this is a short-hand for `^put::Put*`
+
+     ^::GetRequest*
+
+     ^ --> GetResponse*
+   ]
+  
+   BasicKVS && KVS --> @Kalm.Process[
+
+     State --> (
+       key::$String @Key
+       value::$Any
+     )
+
+     _state::State*
+
+     !!doPut --> { 
+       state++= self.put.map({ State(self.key, self.value) })
+     }
+
+     !!doGet --> {
+       self.^getResponse+++= self.^getRequest.map {
+         GetResponse(
+           self.reqid 
+           self.key 
+           self._state.get(self.key)
+         )
+       }
+     )
+   ]
+
+}
+#+END_SRC
+** MultiKore - Parallel programming
+   :PROPERTIES:
+   :CUSTOM_ID: multikore
+   :END:
+Parallel programming splits a task into combinable sub tasks that can run in parallel. Its scope is speeding-up the solution of the original task, taking advantage of two or more computing resources that can run in parallel, e.g. clusters of computers, muti-core CPU, GPU with hundred of linked stream processors.
+
+Parallel programming is useful because from an hardware point of view it is easier scaling a system adding additional processing-units than creating a faster sequential processor. But parallel programming is more difficult than creating sequential algorithms.
+
+Dok can execute some operations automatically in parallel due to its pure semantic. But usually only limited speedup can be obtained in this way.
+
+MultiKore is a DSL used for expressing computational heavy parallel algorithms, with an hopefully linear speedup. It uses the nested data parallelism approach:
+ - code is like pure functional code, (e.g. [[map-and-reduce)]] and very similar to Dok, so the paradigm is rather natural for programmers knowking functional programming
+ - algorithms must work on nested distinct sub sets of the orginal source data, 
+ - the code can be compiled into efficient code that run on stream of processors like GPU, or for clusters of distributed computers, or on multi-core CPU  
+ - code assumes a shared-nothing RAM architecture, with data exchanged using streams. This architecture is faster to execute also in case of cores with shared RAM because there are less conflicts and locks to acquire, and every core can process data at maximum speed
+*** TODO Define the DSL
+
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
