@@ -1,5 +1,5 @@
 #+DATE: 2019-06-05
-#+TITLE: Dok Programming Language v0.1.3
+#+TITLE: Dok Programming Language v0.1.4
 #+AUTHOR: Massimo Zaniboni
 #+EMAIL: mzan@dokmelody.org
 #+CREATOR: Emacs Org mode
@@ -3785,7 +3785,7 @@ Parallel programming is useful because from an hardware point of view it is easi
 Dok can execute some operations automatically in parallel due to its pure semantic. But usually only limited speedup can be obtained in this way.
 
 MultiKore is a DSL used for expressing computational heavy parallel algorithms, with an hopefully linear speedup. It uses the nested data parallelism approach:
- - code is like pure functional code, (e.g. [[map-and-reduce)]] and very similar to Dok, so the paradigm is rather natural for programmers knowking functional programming
+ - code is like pure functional code, (e.g. [[#map-reduce]]) and very similar to Dok, so the paradigm is rather natural for programmers knowking functional programming
  - algorithms must work on nested distinct sub sets of the orginal source data, 
  - the code can be compiled into efficient code that run on stream of processors like GPU, or for clusters of distributed computers, or on multi-core CPU  
  - code assumes a shared-nothing RAM architecture, with data exchanged using streams. This architecture is faster to execute also in case of cores with shared RAM because there are less conflicts and locks to acquire, and every core can process data at maximum speed
@@ -3815,7 +3815,7 @@ In any case a ~catch~ can not:
 Many exceptions must be managed in the same way, so the code in the catch part is rather boiler-plate code. The preferred way for managing exceptions in Dok, it is not through explicit try-catch code, but using compiler-plugins and source-code annotations:
 - compiler-plugins inject common exception management
 - annotations give hints to the plugin about the preferred way to manage some type of errors
-- [[#resources]] are closed according the resource manager plugin and the type of exception (e.g. rollback a DB transaction instead of commit)
+- resources (see [[#resource_management]]) are closed according the resource manager plugin and the type of exception (e.g. rollback a DB transaction instead of commit)
 
 The advantages of this approach is that exception management can be rather complex allowing robust applications, but the code remain short because there is only the normal business logic. This is a form of [[#AOP]].
 
