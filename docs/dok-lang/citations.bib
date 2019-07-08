@@ -220,4 +220,76 @@
 	keywords = {concurrency, distributed},
 	file = {Hewitt - 1977 - Laws for communicating parallel processes.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/WHWYZTWX/Hewitt - 1977 - Laws for communicating parallel processes.pdf:application/pdf}
 }
+@book{gamma1994design,
+  added-at = {2010-06-05T16:40:25.000+0200},
+  asin = {0201633612},
+  author = {Gamma, Erich and Helm, Richard and Johnson, Ralph and Vlissides, John M.},
+  biburl = {https://www.bibsonomy.org/bibtex/27e3f1154ab1fbce54752a46dba7f2217/pnk},
+  description = {Amazon.com: Design Patterns: Elements of Reusable Object-Oriented Software (9780201633610): Erich Gamma, Richard Helm, Ralph Johnson, John M. Vlissides: Books},
+  dewey = {005.12},
+  ean = {9780201633610},
+  edition = 1,
+  interhash = {7fe32957be97afaf4ecb38b5490d23b4},
+  intrahash = {7e3f1154ab1fbce54752a46dba7f2217},
+  isbn = {0201633612},
+  keywords = {DBIS Design Object-Oriented Patterns SS2010 Seminar Software},
+  publisher = {Addison-Wesley Professional},
+  timestamp = {2010-06-05T16:40:25.000+0200},
+  title = {Design Patterns: Elements of Reusable Object-Oriented Software},
+  url = {http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612/ref=ntt_at_ep_dpi_1},
+  year = 1994
+}
+@incollection{drossopoulou_failboxes:_2009,
+	address = {Berlin, Heidelberg},
+	title = {Failboxes: {Provably} {Safe} {Exception} {Handling}},
+	volume = {5653},
+	isbn = {978-3-642-03012-3 978-3-642-03013-0},
+	shorttitle = {Failboxes},
+	url = {http://link.springer.com/10.1007/978-3-642-03013-0_22},
+	abstract = {The primary goal of exception mechanisms is to help ensure that when an operation fails, code that depends on the operation’s successful completion is not executed (a property we call dependency safety). However, the exception mechanisms of current mainstream programming languages make it hard to achieve dependency safety, in particular when objects manipulated inside a try block outlive the try block.},
+	language = {en},
+	urldate = {2019-04-25},
+	booktitle = {{ECOOP} 2009 – {Object}-{Oriented} {Programming}},
+	publisher = {Springer Berlin Heidelberg},
+	author = {Jacobs, Bart and Piessens, Frank},
+	editor = {Drossopoulou, Sophia},
+	year = {2009},
+	doi = {10.1007/978-3-642-03013-0_22},
+	keywords = {concurrency, exceptions},
+	pages = {470--494},
+	file = {Jacobs e Piessens - 2009 - Failboxes Provably Safe Exception Handling.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/VS4QMG48/Jacobs e Piessens - 2009 - Failboxes Provably Safe Exception Handling.pdf:application/pdf}
+}
+
+@article{lagorio_strong_2011,
+	title = {Strong exception-safety for checked and unchecked exceptions.},
+	volume = {10},
+	issn = {1660-1769},
+	url = {http://www.jot.fm/contents/issue_2011_01/article1.html},
+	doi = {10.5381/jot.2011.10.1.a1},
+	abstract = {Exception-safety strong guarantee: The operation has either completed successfully or thrown an exception, leaving the program state exactly as it was before the operation started.” David Abrahams [Abr00] The above deﬁnition of strong exception-safety comes from the world of C++, but it can be applied to any language. Because the exception-safety strong guarantee plays a central role in easing the development of robust software, we have designed a type-system able to capture its essence. The idea is that the state of the reachable objects at the beginning of a catch block is the same as the beginning of the corresponding try block.},
+	language = {en},
+	urldate = {2019-04-25},
+	journal = {The Journal of Object Technology},
+	author = {Lagorio, Giovanni and Servetto, Marco},
+	year = {2011},
+	pages = {1:1},
+	file = {Lagorio e Servetto - 2011 - Strong exception-safety for checked and unchecked .pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/GG925NIJ/Lagorio e Servetto - 2011 - Strong exception-safety for checked and unchecked .pdf:application/pdf}
+}
+
+@inproceedings{cabral_implementing_2009,
+	title = {Implementing {Retry} - {Featuring} {AOP}},
+	isbn = {978-1-4244-4678-0},
+	url = {http://ieeexplore.ieee.org/document/5234317/},
+	doi = {10.1109/LADC.2009.15},
+	abstract = {Everyday experience tells us that some errors are transient, but also that some can be handled simply by “retrying” the failed operation. For instance, a glitch on the network might turn a resource unreachable for a short period of time; or a sudden peak of work on a server can cause a momentary denial of service. In many occasions, without other kind of specialized recovery code, it is possible to keep a program running only by retrying a failed operation. Unfortunately, retry is not explicitly available on many platforms or programming languages and, even if it were, it could not be blindly used for dealing with every abnormal situation. On languages like C\# or Java, or even on languages that offer the retry construct such as Smalltalk and Eiffel, where errors are represented and communicated through exceptions, there is no simple way to clear the effects of a failed operation and, thus, re-attempt its execution. Programmers have to explicitly write sometimes complex and error-prone code to repair the state of a program and the execution context. In this paper, we propose an AOP technique for implementing “retry” on systems lacking such a feature without using any language extensions for AOP or imposing modifications to the development language. Our approach eliminates the need for programmers to write “state-cleaning” code for normal objects by means of a transparent transactional mechanism and provides the means to identify non-idempotent operations on the code. In our evaluation we show that a relevant number of application failures can be masked using this approach.},
+	language = {en},
+	urldate = {2019-06-24},
+	publisher = {IEEE},
+	author = {Cabral, Bruno and Marques, Paulo},
+	month = sep,
+	year = {2009},
+	pages = {73--80},
+	file = {Cabral e Marques - 2009 - Implementing Retry - Featuring AOP.pdf:/home/zanibonim/lavoro/dokmelody/Zotero/storage/5GJ7UIPV/Cabral e Marques - 2009 - Implementing Retry - Featuring AOP.pdf:application/pdf}
+}
+
 

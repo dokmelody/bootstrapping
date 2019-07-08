@@ -134,21 +134,18 @@ Dok is a data transformation and metaprogramming (i.e. code is data) language.
 Dok programs are preferably developed using progressive refinements from high-level code to low-level code:
 - high-level code can be used as specification of low-level code
 - many different branch implementations of the same parent code can be derived for supporting different run-time environments and usage scenario
-- meta-annotations and compiler plugins can be used for deriving automatically low-level code from high-level code
+- meta-annotations inside code and compiler-plugins can be used for deriving automatically low-level code from high-level code
 - a complex problem can be partitioned in rather orthogonal aspects
-
-Summing up: in Dok source code is a first class citizen so there can be user-customizable compiler plugins for analyzing and transforming it or for injecting (low-level) functionalities.
 
 Like Smalltalk, Dok is shipped with a reference IDE (DokMelody), because interaction between the programmer and the programming language is not a secondary aspect. Unlike Smalltalk, generated applications are not obliged to live in the same virtual environment of the IDE, but they can be compiled to different hosting platforms and runtime environments.
 
 Dok programming language design follows these guidelines:
 - whenever possible values are preferred to references
 - nested transaction semantic joins some of the benefit of functional programming (code with a predictable semantic) with imperative programming (convenience of local mutable state) 
-- every part of a Dok application can be meta-annotated and then manipulated by metaprogramming code
+- every part of a Dok application can be meta-annotated and then manipulated through an extensible compiler
 - simple types can be extended with contracts (i.e. logical properties)
-- Dok compiler is fully extensible from developers
-- advanced features of the language are introduced using metaprogramming compilation rules that are user modifiable
-- effects of metaprogramming analysis and transformation rules must be always inspectable from the user using the DokMelody IDE
+- advanced features of the language are supported using compiler-plugins that can perform (local or global) analysis and transformation of the source code
+- compiler-plugins effects must be always inspectable using the DokMelody IDE
 
 Dok syntax guidelines are:
 - code must be readable from left to right (e.g. ~x.f.g(y)~ instead of ~g (f x) y~)
@@ -2129,40 +2126,8 @@ Assert {
   }
 }
 #+END_SRC
-** Exceptions 
-  :PROPERTIES:
-  :CUSTOM_ID: exceptions
-  :END:
-Exceptions are unexpected error conditions like: 
-- contracts not respected at run-time 
-- insufficient RAM
-- insufficient disk space
-- network problems
-- etc..
-
-An exception is not managed by a =try-else= branch because it is not an expected branch of computation but it is an unexpected error to manage.
-
-Dok joins the approach of Eiffel cite:meyer1997object with the approach of the Actor model cite:armstrong_making_nodate.  
-
-Like in Eiffel the preferred way for managing an exception is trying to fix the (transient) problem and then recall the interrupted block of code from the beginning. This implies that the exception handling code can not calculate the result of the function using a different code path, but can only fix things. So the semantic of the original code path is fully respected. 
-
-Another valid approach is re-throwing the exception to the parent block. The re-throwed exception can be a generic error exception or an exception with more details. The parent block will receive a stack of exceptions, and it can use this information mainly for log-reporting.
-
-Like in Eiffel, exceptions can not be ignored/masked.
-
-Exception handling:
-- must stop normal execution of code in case of errors
-- must restore the system to a reliable state where invariants are respected
-- can retry the operation or must abort it signaling the problem to the system/user
-
-The restoring of the system state after an exception is a very delicate and difficult thing to do because exceptions can happen in any point of the code, and so the variants to take in consideration are too much. For solving this problem Dok follows these approaches:
-- in case of values they can be restored automatically using the nested transaction semantic
-- in case of impure actions theirs rollback is managed by Dok compiler plugins that can analyze the code and according the used instructions, the developer annotations and the developer customizations can apply the correct strategy. Also retry or rethrow strategy is decided using Dok compiler plugins. 
-- also resources are managed in the same way, see [[#resource_management]]
-
-During exception escalation the parent supervisor will be advised of the stack of exceptions and it will be informed if the children has managed the exception restoring a consistent state or the state at the children level is potentially inconsistent. 
-
-So the Dok code is mainly free from exception handling branch, and all these details are managed using compiler plugins and meta annotations. The rationale it is that in case of exceptional problems there are usually well defined and generic strategies to follow (e.g. rollback databases connections, retry a network connection a certain number of times, etc..) and these strategies can be coded in one place, instead of being repeated in all the code. This is a form of [[#AOP]]. The code become both more compact and more robust.
+** Exceptions
+See [[#exceptions]]. 
 * Impure statements
   :PROPERTIES:
   :CUSTOM_ID: impure-statements
@@ -2264,18 +2229,8 @@ Assert {
 } 
 #+END_SRC
 ** Resource management 
-  :PROPERTIES:
-  :CUSTOM_ID: resource_management 
-  :END:
-Resources are:
-- initialized using explicit code
-- used for completing a task
-- released by customisable compiler plugins, after task completion or interruption
-
-The release is managed by compiler plugins because:
-- it is often boiler-plate code
-- the type of release can depend from the type of exception, from the state of the acquired resource, and other run-time (i.e. dynamic) conditions, so it is part of [[#exceptions]] handling.
-- explicit release code can be not well structured code because exceptions can happen in too much places
+   See [[#resource_management]].
+ 
 ** References
    :PROPERTIES:
    :CUSTOM_ID: references
@@ -2589,7 +2544,7 @@ Every DSL block has a:
 
 For example we can produce an HTML representation of some code (target-DSL), and we can process some SVG content (guest-DSL), inside a comment (host-DSL), inside Dok code (host-DSL). The Dok compiler architecture will try to manage all these combinations, and it will advise the user when some combination is not supported.
 
-Types, objects and other programming elements defined in the guest-DSL are indicated as ~$someElement~ in the host-DSL, for indicating that ~someElement~ must be transformed in the corresponding ~someElement~ of the host-DSL according the rules of the compiler plugin. At the same time in the guest-DSL programming language elements defined in the host-DSL or other guest-DSL are indicated using ~$anotherElement~ notation.
+Types, objects and other programming elements defined in the guest-DSL are indicated as ~$someElement~ in the host-DSL, for indicating that ~someElement~ must be transformed in the corresponding ~someElement~ of the host-DSL according the rules of the compiler-plugin. At the same time in the guest-DSL programming language elements defined in the host-DSL or other guest-DSL are indicated using ~$anotherElement~ notation.
 
 #+BEGIN_SRC fundemantal :tangle yes
 Assert {
@@ -2678,7 +2633,7 @@ Assert {
     self.MyParse.Expr      
   }
 
-  # We define a compiler plugin for evaluating Expr inside a String DSL.
+  # We define a compiler-plugin for evaluating Expr inside a String DSL.
   # The host DSL is managed in Dok as an owner type wheret the related type conversion is specified.
 
   String -> (
@@ -2786,9 +2741,9 @@ Dok uses metaprogramming also for adding to the language powerful and useful con
   :END:
 In Aspect Oriented Programming (AOP) paradigm:
  - a complex problem can be partitioned in rather orthogonal aspects
- - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler plugins
+ - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler-plugins
 
-Dok code annotations and (customizable) compiler plugins can supports powerful form of AOP because code regarding a certain aspect can be injected using global program analysis.
+Dok code annotations and (customizable) compiler-plugins can supports powerful form of AOP because code regarding a certain aspect can be injected using global program analysis.
 
 Dok favours a layered implementation: from high-level code to low-level code. When aspects implementation is not perfectly orthogonal (i.e. implementation details of one aspect influence the implementation of another aspect), there can be high-level layers where the two aspects are nearly completely orthogonal, and intertwined implementation details can be specified only at lower level.
 * Design by contracts and refinement types
@@ -2867,7 +2822,7 @@ According cite:dean_mapreduce:_2008 "MapReduce is a programming model and an ass
 
 Dok favours a map-reduce paradigm for transforming (large) data sets. 
 
-According Dok [[#design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
+According Dok [[#design-philosophy]] and in contrast with many map-reduce effective implementations, in Dok the map-reduce code can be only a specification of the data transformation to apply. The resulting compiled code can be very different, and it can be customized by developers according meta-annotations and custom compiler-plugins. In particular a global analysis of will be performed, and data structures, indices will be choosen according the needs of the application, e.g. which queries are important, which queries must remain active and process updates in an incremental way, queries sharing common parts, etc..
 
 In case of complex data transformations, in Dok map-reduce and functional data transformation algorithms are preferred to logical and declarative queries (e.g. SQL), because in many cases writing and comprehending this type of code is easier, and there is already a support for analyzing and optimizing them.
 
@@ -3460,7 +3415,7 @@ Thanks to [[#design-philosophy]] Dok supports iterative specializations of the c
 - the high-level schema and queries will play the role of specifications for the low-level versions
 - all links between high-level and low-level details will be mantained by DokMelody IDE
 
-Knil compiler plugins and meta-annotations in the code can (partially) automatize the derivation of low-level coSQL implementations.
+Knil compiler-plugins and meta-annotations in the code can (partially) automatize the derivation of low-level coSQL implementations.
 ** Supporting multiple DBMS engine 
    :PROPERTIES:
    :CUSTOM_ID: knil-multiple-engines
@@ -3836,6 +3791,146 @@ MultiKore is a DSL used for expressing computational heavy parallel algorithms, 
  - code assumes a shared-nothing RAM architecture, with data exchanged using streams. This architecture is faster to execute also in case of cores with shared RAM because there are less conflicts and locks to acquire, and every core can process data at maximum speed
 *** TODO Define the DSL
 
+* Exceptions
+  :PROPERTIES:
+  :CUSTOM_ID: exceptions
+  :END:
+Exceptions are unexpected error conditions like: 
+- contracts not respected at run-time 
+- insufficient RAM
+- insufficient disk space
+- network problems
+- etc..
+** Try-catch
+Exceptions are caught by ~try { .. } catch { .. }~ statements, and not by ~try { .. } else { ... }~ because they are not an expected branch of computation, but they are an unexpected error to manage.
+
+Dok is inspired by the Eiffel approach cite:meyer1997object. The catch code can:
+- rethrow the exception to the caller, using the ~throw~ command and adding optionally more information
+- fix the environment state, and call ~retry~ for executing again the method code
+
+In any case a ~catch~ can not:
+- ignore the exception because a throw is forced
+- calculate an alternative result, because ~retry~ execute again the original method body
+** Compiler-plugins for managing errors 
+Many exceptions must be managed in the same way, so the code in the catch part is rather boiler-plate code. The preferred way for managing exceptions in Dok, it is not through explicit try-catch code, but using compiler-plugins and source-code annotations:
+- compiler-plugins inject common exception management
+- annotations give hints to the plugin about the preferred way to manage some type of errors
+- [[#resources]] are closed according the resource manager plugin and the type of exception (e.g. rollback a DB transaction instead of commit)
+
+The advantages of this approach is that exception management can be rather complex allowing robust applications, but the code remain short because there is only the normal business logic. This is a form of [[#AOP]].
+
+Erlang cite:armstrong_making_nodate has many examples of possible error-recovery strategies.
+
+Also cabral_implementing_2009 notes that many network errors are transient, and so operations can be retrieved some number of times before giving up.
+
+All these approaches and many more can be specified in compiler plugins.
+** Consistent system state in case of exceptions
+Exceptions, in particular unexpected exceptions, can leave the system in an inconsistent state if managed incorrectly.
+
+Ideally the catch part, called in case of exceptions, should leave the program state as it was before the failing operation started. This both in case of ~throw~ and of ~retry~.
+
+In case of transactions with non-rollbackable actions, the paper cite:lagorio_strong_2011 suggests some code transformations making it more robust in case of exceptions. Dok can apply this technique (TODO not yet implemented) as compiler-plugin.
+
+The code and the process affected by an excetpion are determined by compiler-plugins, analyzing the source-code of the application. The paper cite:drossopoulou_failboxes:_2009 describes an explicit syntax and semantic for indicating which threads are affected by a failing excetpion, and a run-time mechanism for managing them. Dok can use the same semantic but internally, because it can derive the same information analyzing the normal source-code. 
+** Corrupted system state in case of exceptions
+During exception escalation (i.e. ~throw~), the parent supervisor will be advised of the stack of exceptions and it will be informed if the children were not able to restore in a consistent state the system. In this case the supervisor can apply some (heuristic) repair action.
+* Resource management
+  :PROPERTIES:
+  :CUSTOM_ID: resource_management 
+  :END:
+In Dok explicit resources are Process (because they have a state and they can perform some actions asynchronously respect the caller) giving a service to their client process, but that are shared with other process and that can be scarce in quantity. So they must used and released as soon as possible, for not blocking other process requiring the same resource. Example of explicit resources are file handles and DBMS connections. 
+
+Implicit resources are CPU time, RAM and storage space. They are used from client process, they are scarce, but they are managed with a different logic respect explicit resources, because without them the client process can not start.
+
+In Dok explicit resources are:
+- initialized using explicit code
+- used for completing the task, using strict semantic in order to release them as soon as possible 
+- released implicitely by compiler-plugins, after task completion or exceptions
+
+The release is managed by compiler-plugins (like [[#exceptions]]) because:
+- it is often boiler-plate code
+- the type of release can depend from the type of exception, from the state of the acquired resource, and other run-time (i.e. dynamic) conditions, so it is part of [[#exceptions]] handling.
+- explicit release code can be not well structured code because exceptions can happen in too much places
+
+Dok guarantees that resources are fully consumed using a strict semantic and that there can not be unevaluated thunks accessing the resources also after it is closed.
+
+Dok tries to mask the fact that explicit resources are process, using a rather normal syntax. Then code using resources is compiled (whenever possible) in an optimized way:
+- many resources are process, so they run on distinct threads and in parallell with the client
+- special type of process with small overhead are used
+- the client blocks only when it needs really the resource result (so in async mode)
+- client code is analyzed and transformed for using the resource in an optimized way (batching requests, caching of results, asking for a result before it is really needed, etc..)
+
+A resource can be owned by only one process: the process creating it. This process can pass the resource to its methods because there is only one thread of execution, so it is like passing ownership. Resources can not be sent to external process. So resource ownership semantic is simplified and it is always clear who had to release it: the process that created it.
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+  countLines::= do {
+    fh::= File!!open("someFileName.txt", Mode/Read)
+    #:NOTE:
+    # - the file handle will be automatically closed at the end of the scope owning it, i.e. the `do` scope
+    # - the code inside `do` scope will executed in strict mode, because there is a resource in it
+    # - `do` scopes without resources can be instead agressively optimized by Dok compiler and executed with deferred/on-demand semantic
+    # - in this case this `do` code will be executed when/only-if `countLines` is needed, but once its computation is required, it will be executed to completition
+ 
+    fh!!content.filter({self == '\n'}).count        
+  }
+
+  IO!println("There are " ++ countLines.String ++ " lines")
+}
+#+END_SRC
+* Dependency Injection and Contexts
+  :PROPERTIES:
+  :CUSTOM_ID: dependency_injection
+  :END:
+** The ~with~ modifier
+Rollbackable actions prefixed with ~with~ will be rollbacked at the exit of the scope owning them. 
+
+ #+BEGIN_SRC fundamental :tangle yes
+ Assert {
+
+   x::= 1   
+   do {
+     with x::= 2
+     #:NOTE: the effects will be discarded outside the scope
+
+     x == 2
+   }
+   x == 1
+ }
+ #+END_SRC
+** Contexts
+~with~ can be used for changing the run-time context. For example for assigning new definitions to methods of objects, or using different Process/services.
+
+Object methods can be modified only using the ~with~ modifier. 
+
+#+BEGIN_SRC fundamental :tangle yes
+Assert {
+
+   x::BigDecimal
+   y::BigDecimal
+   
+   BigDecimal.precision == Infinite
+   
+   x:= 0.1234
+   y:= 0.1234
+   
+   x + y == 0.2468
+
+   do {
+     with BigDecimal.precision:= 2
+     x + y == 0.24 
+   }
+   BigDecimal.precision == Infinite
+}
+#+END_SRC
+
+** Dependency Injection
+Depedency injection cite:wiki:dependency-injection is a pattern in which a service is split in sub services, and it is configured with which sub services to call. Changing the sub services will change the behaviour of the main service. For example during testing the payment card processor service can be replaced with a fake service.
+   
+Dependency injection is supported in Dok using:
+- ~with~ context modifier
+- metaprogramming rules injecting new behaviour to objects
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
@@ -4378,6 +4473,57 @@ Dok can split type definitions into different modules having different concerns 
 Dok can transform high-level code into low-level code using [[#metaprogramming]] and during the transformation different low level concerns can be injected into the code. In common OOP languages a class implements an interface, but when you combine classes in a real implemantations the resulting code can be inefficient: this is the problem of leaked abstractions.
 
 In Dok the programmer can specify more or less ad-hoc rules for combining different type of concrete class into efficient code. These rules can analyze (also globally) the code and inject semantic optimizations in case there are certain usage patterns. So problems causing leaked abstractions are managed in Dok writing domain specific compilation rules, and/or adding annotations to the code.
+** Design patterns
+A good programming language should be able to solve problems indicated by design patterns (cite:gamma1994design) in a natural way without using too much complex code.
+
+These design patterns are directly supported using immutable value semantic:
+- Flyweight
+- Aggregator
+- Memento
+
+Dok metaprogramming can inject advanced functionalities in the code. Usually these functionalities are activated at compile-time, but using contexts they can be enabled also at run-time depending from the context. The patterns that can be implemented in this way are:
+- Abstract factory
+- Builder
+- Adapter
+- Bridge
+- Composite
+- Decorator
+- Proxy
+- Chain of responsibility
+- Mediator
+- Observer
+- Strategy
+- Template-method 
+
+These patterns are supported from attribute-grammars:
+- Visitor
+- Interpreter
+
+Patterns supported by explicit object-oriented code, entities and services:
+- Facade
+- Singleton
+- Proxy
+- Chain of responsibility
+- Command
+- Mediator 
+- Template-method
+
+Patterns that can be supported adding some metaprogramming functionality also at run-time: 
+- Prototype
+- Chain of responsibility
+
+** Python resource management
+Python can manage resources in an elegant way using Context Managers (https://docs.python.org/3/reference/datamodel.html#context-managers).
+
+The advantages of Context Managers respect Dok approach are:
+- normal object-oriented code inside a "normal" library
+- simple semantic with ~__enter~ and ~__exit~ sections
+
+Dok uses instead compiler-plugins injecting resource management behaviour because:
+- it can manage resource management in presence of error conditions in a more customizable way
+- it is the approach used for exceptions
+- it respects more the Dok philosophy where boiler-plate logic is stored in metaprogramming compiler-plugins instead of libraries
+
 * Bibliography
 #+BEGIN_SRC sh :exports results :results value html
 bibtex2html --no-abstract --nodoc  --no-keywords --use-keys citations.bib > /dev/null
