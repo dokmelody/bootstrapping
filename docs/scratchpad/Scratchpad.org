@@ -1,0 +1,2904 @@
+#+TITLE: Scratchpad 
+#+AUTHOR: Massimo Zaniboni
+#+EMAIL: mzan@dokmelody.org
+#+CREATOR: Emacs Org mode
+#+LANGUAGE: en
+#+TODO: TODO MAYBE IMPLEMENT | DONE CANCELED
+#+BIBLIOGRAPHYSTYLE: unsrt
+#+BIBLIOGRAPHY: citations plain
+#+OPTIONS: toc:2 num:nil
+
+"A month or two in the laboratory can often save an hour or two in the library." - anonymous
+
+“To steal ideas from one person is plagiarism; to steal from many is research.” - Steven Wright 
+
+* Dok                                         
+** DSL syntax
+TODO says that ~@SomeDSL[...]~ does not introduce a new scope, but inject the code. It is used for DSL definitions, but not evaluation. So it replaces ~(...)~ but not ~{ ... }~
+
+TODO says that ~SomeDSL[..]~ define a value, but not inject new code
+
+TODO every DSL can refers to Process and Entities using the ~$SomeObject~ form that links different DSL
+
+TODO specify a language (maybe Dok) for creating process (also on remote host) locate them and so on. Take inspiration also from Kubernetus
+
+MAYBE data nested arrays have a fixed topology while the Actor model no
+** Concurrency
+*** Elixir
+FACT In Elixir https://elixir-lang.org/getting-started/enumerables-and-streams.html files can be resources and they are closed automatically, also in case of failure, like in Dok.
+
+In Elixir:
+- ~spawn function~ for launching a process.
+- ~send~ for sending a message to a process
+- a process can invoke ~receive~ for receiving a message in its mailbox and process it
+- ~link~ if a process fail, then the failure is propagated to the linked "owner"
+- process can maintain a state
+- ~register pid~ for making a private spawn process PID as public and anyone knowing the PID can send messages to the process
+- files are process, so file-system can be distributed
+- this is the API for process https://hexdocs.pm/elixir/Process.html
+- supervisors are used for managing errors in child process https://hexdocs.pm/elixir/Supervisor.html#content
+- MAYBE in Dok I can inject code using metaprogramming
+*** CRDT structures
+TODO PeerPad distributed CRDT data structures 
+https://peerpad.net/
+
+PeerPad is a collaborative real-time editor that works on the decentralised web, built on top of IPFS. It uses no second or third-party: all participating nodes talk directly to each other without a central service. PeerPad is open-source and built by Protocol Labs and the IPFS community.
+
+A Conflict-free Replicated Data Type (CRDT) offers 'Strong Eventual Consistency': a flavour of eventual consistency that ensures conflicts can be merged automatically to produce a value that is guaranteed to be correct/consistent.
+
+Two objects can be either equal, have hierarchy (one descends the other) or are pairs; the latter signifies a branch/divergence/conflict. From the intrinsic state of the two pairs, we can determine a new descendant object which is the result of the merge.
+
+Usefull implementation of CRDT.
+*** Kalm
+TODO compare with the paper about mini-transactions and distributed data structures (Sinfonia).
+
+[1]M. K. Aguilera, A. Merchant, M. Shah, A. Veitch, e C. Karamanolis, «Sinfonia: a new paradigm for building scalable distributed systems», pag. 16.
+
+TODO example of Bloom code that I need for DokMelody?
+- as DBMS I'm using PG that up to date it is good enough, also for map-reduce work, and sharding
+- as Key-Value store I will use PG + Agens + JSONB + other extensions
+- I need Bloom for writing ad-hoc distributed applications using a custom engine and replacing already existing engines
+- for the GUI I use QT and the Model is synchronized with some data and events extracted from PG
+- I can use Bloom if I have agents inspecting the events on the bus for taking actions, but mainly I had to reuse some rete algo and CLIPS or fuzzy CLIPS C-code instead of Bloom
+
+TODO 
+The CAP theorems says that strong consistency (SSI) and availability are unachievable in the presence of partitions. 
+
+FACT A new theorem proves that no consistency model stronger than causal consistency is available in the presence of partitions.
+
+Causal consistency:
+ - each process writes are seen in order
+ - writes follow reads: if P read A=5 and write B=10, then another process P' can not read B=10 and then an older value of A)
+ - transitive data dependencies hold
+
+Causal consistency is still less than ACID transactions, but a lot of useful code can be written with causal-consistency guarantee, and it is easy to understand and predictable for the programmers.
+
+There are many systems with very fast performances, only marginally slower than eventually-consistent counterpart (< 10%), that guarantee causal-consistency.
+
+TODO understand if it is not better using casual-consistency based systems instead of Kalm because they are nearly 10% slower (only) of many evantual-consistent systems.
+
+TODO see https://github.com/bloom-lang/bud/blob/master/docs/cheat.md for more details about Bloom language
+
+TODO regardnig Kalm, CALM and Bloom:
+- http://boom.cs.berkeley.edu/papers.html
+- http://bloom-lang.net/
+
+FACT Anna seems to favour copy of values also in case of shared RAM because it seems faster in any case. The same for seastars framework. They do not use shared-ram, NUMA. This reduce stress on TLB and cache coherence.
+
+MAYBE transfer complex data between distributed Actors using some incremental compression way.
+
+TODO read again the "Programming in E as Plan Coordination by Miller ..."
+ - a lot of examples
+ - a lot of communication patterns
+ - example of error management
+ - omnicomprehensive: security, error management, reliability
+ - TODO integrate with Plan9 plumber idea: scriptable reaction to events, in a dbus-like setting, with data transformation
+ - TODO see if with Plumber integration, the integrated set of rules mantain an OCAP flavour, or it became an ACL (the users that can access to some events)
+
+MAYBE a BUS of events/facts can be used for having CLIPS like generative rules and reacting to certain conditions. So it is a form of CLIPS, TupleSpaces, DashBoard and other similar design patterns.
+
+TODO add also fuzzy rules to dashboard-like design patterns.
+
+TODO probably I can extend using the same approach used for Bloom:
+ - modules with override
+ - named rules with meta-annotations
+ - new facts are in the form of functions returing values and they are not directly added
+ - I can compile functional and other code to incremental update and rete-like code and the compiler can advise when this is not possible
+ - a variant of derived facts is compiled returning only new facts added from a certain time-stamp
+ - global code analysis is performed or understanding which types of queries and new facts are used and for producing only this
+
+TODO integrate discussion on Kalm with more papers on DokMelody about distributed systems of the same authors
+
+TODO integrate Kalm with capability model ideas in particular when I pass address of external process and resources
+
+TODO in Kalm support also :
+- periodic
+- lattices like max/bool/min/etc..
+
+TODO there must be an analysis phase in which the coordination points must be completed
+
+TODO say in Relational DBMS section how join are converted to Knil code, i.e. using explicit filter and so on
+
+TODO represents STREAMS like Kalm Process but give them a reasonable API
+
+TODO support Process address in channels
+
+TODO support local Process address ~@local_addr~
+
+MAYBE an interface is like a Channel with implicit local address
+
+TODO derive graphs like in the Alvaro paper describing the dataflow of the code and where synchronization is needed
+
+TODO @Include(...) can be used for compact data presentation in Knil when there are many repeated fields 
+
+TODO use the concept of `Tuple*` as a table also in Knil
+*** Why using Kalm
+In theory DBMS solve the problem of safe and fast transaction processing, because they guarantee ACID properties, but in practice for performance reasons rarely they support full ACID transactions in production, and for distributed DBMS there can be several consistency problems due the CAP theorem.
+
+The maximum level of consistency supported by a distributed DBMS is casual consistency. (TODO specify better).
+
+Current distributed DBMS use usually only eventually-consistency:
+- read and write
+- at some point all the nodes will be informed of the writes
+- at some point reads will be consistent
+- in case of conflicts, there had to be a repair procedure
+- good enough in real-world scenario
+- usually in practice nodes can update themself in less than 1 second
+- usually also banks can adopt repair procedures (compensation), in case of inconsistent coded
+- it is possible (and product do) to calculate, or configure, the maximum times within data is not consistent between nodes, and calculate the probability of bad transactions, that are usually very low
+- so an optimistic approach work good in this type of applications
+- but writing compensation code is difficult and error-prone
+
+Code with monotonic operations is consistent in a eventually-consistent DBMS. Monotonic operations are:
+- accumulating values in a set
+- testing a threshold conditions
+
+These operations are non-monotonic, and so can cause inconsistency:
+- set deletion
+- counter resets
+- negation conditions (not-exists)
+
+PAPER: Anna: A KVS For Any Scale
+by Wu, Faleiro, Lin, Hellerstein
+
+They take the idea of Bloom, and implemented a fast and scalable KVS database in C++.
+
+Anna is also a library, and not only a product, because it can be used for implementing different things.
+
+The design:
+- one thread per core, without shared memory
+- every thread spend all the time working on data, without data synchronization
+- data is sharded
+- there can be multiple-master: data is replicated for faster parallel access when it is needed, both for reading and writing
+- also simple locks using fast atomic operations are very slow in high concurrently scenario, for example also incrementing the counter of next transaction-id (INCREDIBLE)
+- threads comunicate using message passing
+- threads coordinate the state using "distribuited lattices" that are a theory that enable various types of transaction isolations, also if not fully serializable
+- using distribuited lattices they minimize the cost of synchronizations, because the temporal/order differences of messages can be merged in a unique state
+- they allow multi-master mode: multiple nodes can have shard of the same data, and then they are merged using distributed lattices, so they remain consistent enough
+- distributed lattice allow read committed, and read uncommitted consistency levels, but not lirearizable
+- it is in any case more than many distributed KVS, and often in par with many relational DBMS as used in practice
+
+FACT ideas are very similar to seastars approarch with a thread for core and in full control of the CPU and no shared RAM and similar things.
+
+*** https://www.reactivemanifesto.org
+Reactive systems are:
+ - responsive: soft realtime, guarantee uptime bound, problems are discovered and signaled in advance, favour fast interaction with the user.
+ - resilient: the system stays responsive in face of failure, by replication, containement, isolation and delegation. Part of the system can fail, without compromizing the whole system. Parts of the systems are devoted to check wich sub-parts had failed. In practice this mean redundant hardware, and no off-line management.
+ - elastic: the system is reactive under varying workloads, and it scales linearly according the added resources. They provides relevant live performance measures.
+ - message driven: they use asynchronous message-passing, obtaining loose coupling, isolation, and location transparency.
+
+ Large systems are composed of smaller ones, following the same principles. So these rules apply at all level of scales.
+
+So Kalm should allows reactive systems:
+- loggin of problems
+- distributed services
+- monitoring
+
+TODO keep the best idea and implementations from Erlang world
+*** Akka stream processing and error handling
+Take inspiration also from Akka API
+https://doc.akka.io/docs/akka/current/stream/stream-error.html
+
+See also
+http://erlang.org/doc/man/supervisor.html
+
+See also
+[1]B. Cabral e P. Marques, «Implementing Retry - Featuring AOP», 2009, pagg. 73–80.
+
+Inject using an AOP approarch a retry strategy for transactions interrupted from some glitch in the network or similar.
+
+TODO a service has many redundant providers and a supervisor to call in case of problems. Clients in case of errors call first other providers, and only at the end the supervisor.
+
+TODO apply the idea of this paper
+[1]G. Lagorio e M. Servetto, «Strong exception-safety for checked and unchecked exceptions.», The Journal of Object Technology, vol. 10, pag. 1:1, 2011.
+** "Failboxes: Provably Safe Exception Handling ?"
+It is a syntax and semantic for describing when threads depends from each other, and managing errors in the proper way in case of excetpions.
+
+TODO Dok should derive this information from analyzing the application source-code (i.e. it is not explicit syntax), and then apply the same semantic. So the paper is used from the compiler, but it is transparent for the developer who writes only normal code.
+
+FACT the paper says that a problem is that unchecked-exceptions like OutOfRam and similar can happen in every point of a computation and so the ~finally~ part can work in an inconsistent state, and reasoning about the application is more difficult. Failboxes should be a solution to this problem.
+
+Failboxes have this simple semantic
+- ~x := currentfb;~
+- ~x := newfb;~
+- ~x := newfb(x);~
+- ~enter (x) { s } catch { s' }~
+
+Failboxes works on threads:
+- they form an hierarchy
+- take note of failed failboxes
+- take note of which objects are under lock of a thread
+- map thread to its state
+
+*** MultiKore
+TODO take inspiration from
+- Futhark 
+- http://www.cs.cmu.edu/~scandal/cacm/cacm2.html
+- http://www.cs.cmu.edu/~scandal/nesl.html
+*** Racket bootstrapping
+TODO Consider using ~will~ for resource finalization.
+
+TODO Custodians
+https://docs.racket-lang.org/reference/eval-model.html#%28part._custodian-model%29
+** Study Java CDI depedency injection
+http://docs.jboss.org/cdi/learn/userguide/CDI-user-guide.html
+- typesafe support of DI
+- can add events notifier and wrappers/interceptors to the services
+
+TODO study example of code, study also the Elixir/Phoenix counterpart and port to Dok case
+
+FACT Managed Beans are defined as container-managed objects with minimal programming restrictions, otherwise known by the acronym POJO (Plain Old Java Object). They support a small set of basic services, such as resource injection, lifecycle callbacks and interceptors. Companion specifications, such as EJB and CDI, build on this basic model. But, at last, there’s a uniform concept of a bean and a lightweight component model that’s aligned across the Java EE platform.
+
+FACT CDI: The scope of a bean defines the lifecycle and visibility of its instances. The CDI context model is extensible, accommodating arbitrary scopes. However, certain important scopes are built into the specification, and provided by the container. Each scope is represented by an annotation type.
+
+An instance of a session-scoped bean is bound to a user session and is shared by all requests that execute in the context of that session.
+
+FACT CDI: Intercetpors and Decorators are a way for extending the JavaEE run-time environment with custom business-logic. They extend OO methods. In Dok I can use metaprogramming instead, and I can use global analysis.
+
+FACT CDI: Events are run-time events for extending at run-time and not compile-time the business logic class of the applications
+
+DONE Interceptors and decorators in Dok are implemented using meta-programming.
+
+In Java and particular Spring, one can specify that some field of a class are injectable:
+ - the field represent a "service"/functionality, called from the object of the owner class
+ - the framework/session-container (Java EE and similar) at run-time (slowly) use some concrete class for the field
+ - so one can run in testing mode, using an injected testing service, and so on
+ - the JVM can specialize at run-time (JIT) the generic code, making it faster with times
+
+DONE use the Dok ~with~ construct for assigning and configuring services
+** MANUAL: DB Worlds
+*** Add sections about adding DB data to Dok
+*** Worlds
+[1]A. Warth, Y. Ohshima, T. Kaehler, e A. Kay, «Worlds: Controlling the Scope of Side Effects», in ECOOP 2011 – Object-Oriented Programming, vol. 6813, M. Mezini, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2011, pagg. 179–203.
+
+[1]Y. Ohshima, A. Lunzer, B. Freudenberg, e T. Kaehler, «Making Applications in KSWorld», pag. 17.
+
+Work published by Viewpoints research institute about first class worlds.
+
+World features are:
+- ~thisWorld~: refering to current world in which the current expression is evaluated
+- ~in <exprReturningWorld> <blockToExecute>~ : execute an exrpession in a world 
+- ~sprout~: create a new world from an existing world
+- ~commit~: commit world's changes to its parent world's
+
+A world has properties. 
+
+Read properties are logged.
+
+A commit to its parent is succesfull only if there are no other parent commits writing properiets read from child commit. In this case there is an exception.
+
+TODO find a way for solving exceptions, i.e. a "merge" phase
+
+MAYBE I need to log only Entities changes and not other changes
+
+MAYBE I can store a log of commands and replay them in case of conflict
+
+After a commit the children see the values of properties they have not read during their transactions.
+
+TODO this can introduce inconsistencies if some properties depends from other properties in constraints so I'm not sure 
+
+FACT this paper is not a lot cited
+
+FACT there are similitudines with ContextL because this code can support ContextL
+
+FACT it can support a form of STM
+
+#+BEGIN_EXAMPLE
+D = A.sprout();
+in D {
+  p.x = 5;
+}
+D.commit();
+#+END_EXAMPLE
+*** Dok attempt
+ DB worlds and tree of process are managed in two distinct way in Dok:
+ - tree of process are derived analyzing code
+ - errors involving tree of process are managed by injected code according some policy and meta-info annotations
+ - DB worlds are managed expilicitely
+ - they can be managed implicitely in more common cases
+
+Use explicit transactions like with PHP MySQL libraries.
+
+TODO the UI should support nested long transactions
+
+MAYBE concept of environment with resources:
+- parent environment
+- nested transactions
+
+TODO story in the environment transaction:
+- who
+- when (at least before another transaction)
+- what
+- why (the reason/commit message)
+
+TODO Move the world documentation inside the Knil part of the manual
+
+A World is a view of DB supporting:
+- commit
+- branch
+- etc...
+
+Process are not under "worlds". Only DB. So it is related to data and values, not to process.
+
+Worlds are different from nested transaction semantic because they are manageable directly from users.
+
+Every Process can have a field pointing to current DB branch. Then one can:
+- fork
+- save
+- merge
+- commit
+- destroy 
+the DB branch and update the Process field using an assignment.
+
+DokMelody UI is based on the idea of branches:
+ - configure/set objects/worlds
+ - test
+ - commit giving a name to the transaction
+ - create a tree of branches 
+
+The branch become in Dok the execution context of some code. It is a data-structure mapped to remote services communication.
+
+So Dok language have no built-in concept of branch, but only of nested transactions. Branch will be implemented using libraries and dedicated data structures.
+
+FACT branches are only supported for DB with entities inside, not for process and internal variables.
+
+FACT I can call TASK the user-level transactions. They need to be dynamic and not static, because they are decided at run-time.
+
+TODO a nested TASK can perform a SAVE: 
+- send changes to parent TASK
+- manage merge conflicts
+- do not close the TASK
+- SAVE appears as private/working commits so one can perform UNDO
+
+TODO a BRANCH is a nested TASK that in case of SAVE do not send to parent, but it can receive PARENT changes
+
+MAYBE a widget can store the actions done during nested TASK are open and re-execute them in case of SAVE of the child TASK and signal conflicts.
+
+MAYBE ENV is a tree of ENV. A widget or other run-time element stays inside a ENV. Some properties like DB are read from ENV that can be patched in DI style from the caller. ENV is used only for dynamic properties, while other params are passed as arguments.
+
+TODO the above point is feasible only if all ENV params are exclusively ENV paras and can be not passed as static function arguments. 
+
+FACT the ENV became a virtual owner of all objects and they read from it usisg a PARENT-like pattern searching for the first value of a certain property.
+
+TODO for example $SomeEntity!assert(...) search for ~DB~ DI field in the ENV and not in the object hierarchy.
+
+MAYBE ENV can be viewed/managed also by AG functions
+
+FACT the OWNER of an object/resource can be different from its creator
+
+TODO every widget/ACTOR speciy the fields in the ENV it needs and at compile time it is checkde that all these fields have at least a deault value. 
+
+In the run-time environment one can view the current DB connection and the parent connection.
+** MAYBE FRP programming
+Support inner functions ~f --> { ... }~ as a form of  active code, and when compiled in incremental way it became a form of FRP code.
+** Force the usage of nested functions with mandatory `self` in all examples of code 
+** Allows pure tuples as ~self~ of an anymous function
+** Bool/True
+TODO support Bool/True as value (and not Bool/True()) and support True and not Bool/True.
+       Useful for enumerating values, when they have no properties, or for using only properties with default values  
+** Supports name resolving
+If ~True~ has unique completition, then accept it instead of ~Bool/True~ and the same for other types.
+** Benchmarks annotation
+TODO some annotations:
+- `Benchmark` for avoiding compile-time specialization of code, and assume the argument value is specified at run-time (unknow to the compiler)
+- `BiggerThanRAM` for forcing the usage of storage-friendly data-structures
+- `BiggerThanCPUCache` for forcing the usage of RAM friendly data-structures
+- `InsideCPUCache` for suggesting CPU cache friendly algo
+- `InsideRAM` ...
+** Attributes vs Functions vs References
+#+BEGIN_SRC
+v1::Int
+# is a modifiable attribute/variable
+# It contains values
+
+v2::Ref[Int]
+# is a modifiable reference to a variable
+# So an Haskell-like approarch with explicit IORef
+
+f(x::Int) -> Int { .. }
+# is a non modifiable function returning a value
+
+T::(
+  x::Int
+  # public accessible attribute (readable and modifiable)
+
+  _y::Int
+  # protected attribute
+
+  z -> Int { ... }
+  # read only function/attrbute
+
+  !x(y::Int) -> { self._y = self.x }
+  # called when an attribute `x` is changed
+  # and `y` is the new value, and `self.x` the old value before update
+)
+#+END_SRC
+
+TODO study OCAP semantic for references passed as capability between process.
+
+MAYBE a reference can be managed like an "Actor" and so it receives notification of changes using a queue. It is similar to STM in Haskell. References are in this case more costly than values in Dok. But on modern CPU this is usually the case, also if there can be totally owned references to a thread that are faster than values. So the reference as Actor approach can be used instead of the Rust approach for concurrent code, and so we assume a distributed setting.
+** Consider if using RAG instead
+RAG uses references instead of values.
+
+MAYBE as in Knil entities are references, so in Dok a tree is a composition of references.
+
+FACT In case of complex scoping rules, RAG can point to the relevant position using less attributes. 
+
+FACT there are not yet very efficient incremental evaluation algorithms, but I have doubts that for the same problems the corresponding AG incremental algo are good.
+
+FACT in case of some editors the AG structure is partially determined at run-time, and RAG are better in these cases beacuse they are mainly evaluated at run-time using lazy-like evaluation semantic
+
+MAYBE RAG are used in JastAdd because Java uses references by default, so maybe in Dok that uses values by default AG with values sufficies
+
+TODO continue reading papers about the subject 
+** Common code patterns to test and integrate
+- TODO R split/apply/join pattern on data frames
+- TODO study some .Net and Kotlin like chained processing of data example
+
+TODO integrate with example of `FunWithState` that is a better form of `mapFold`.
+
+#+BEGIN_EXAMPLE
+##: Functional programming
+
+# In Dok only `self` can be paramater of a function.
+# Functions can be used only as input value, not as result.
+# Complex code is created using meta-programming and generating new code, not new functions
+
+# In FP fold became a for-loop in Dok, that modifies variables that are the state
+
+# In FP map became
+
+T*!map(f:Fun)
+# transform the content of a container of `T` elements
+
+# A map with an internal working state, in Dok became AG code, or for-loop code generating a new container
+#+END_EXAMPLE
+** IMPLEMENT IDE smart completition
+The symbol =~= can be used in many places inside Dok expressions and the IDE will substitute it during compilation with the proper value and the text will be substituted.
+
+In case of refactoring the user will be signaled of problems by the type checker.
+
+Examples of smart completition:
+
+#+BEGIN_EXAMPLE
+f() --> Int { 
+  r::~
+  # this is ``r::Int`` because ``r`` is the default name of result variable
+
+  r
+}
+
+x:= ~ * 2
+# this became x:= x * 2
+#+END_EXAMPLE
+** IMPLEMENT Type inference for generic params
+Support intelligent type inference for generic params for avoiding boilerplate code. Like type holes in GHC.
+
+Use =~= for letting the IDE to replace with the correct type. 
+** Test this code in Dok
+https://philipnilsson.github.io/Badness10k/posts/2017-05-07-escaping-hell-with-monads.html
+
+Se if these patterns are supported in Dok.
+** See how/if Dok solves this problems
+https://graydon.livejournal.com/256533.html
+** IMPLEMENT Language vs System
+Smalltalk and Lisp are systems: a strong run-time. But from a certain point of view also C (used for Linux).
+
+Dok can support different run-times: PG based, etc..
+
+TODO says something of similar in the documentation
+** Datalog queries for program analysis 
+[1]A. Bembenek e S. Chong, «FormuLog: Datalog for static analysis involving logical formulae», arXiv:1809.06274 [cs], set. 2018.
+[1]X. Zhang, R. Mangal, R. Grigore, M. Naik, e H. Yang, «On abstraction refinement for program analyses in Datalog», 2013, pagg. 239–248.
+TODO see also if Dok AG is good enough for these tasks
+TODO probably use a mix of AG and functional code
+** Steele - Growing a Language
+Steele says that it is better a small language that can be seamless extended by its users/community using libraries, than a big language. 
+
+In case of Dok:
+- DokMelody IDE should simplify Dok understantment
+- DSL allows language extension
+
+** Compare with Functor pattern
+http://www.haskellforall.com/2012/09/the-functor-design-pattern.html
+** Take as source of inspiration for syntaxes
+http://rigaux.org/language-study/syntax-across-languages/CntrFlow.html
+** Analyze this pattern
+https://medium.com/elixirlabs/decoupled-modules-with-elixir-eventbus-a709b1479411
+** https://www.sandimetz.com/blog/2016/1/20/the-wrong-abstraction
+In this talk explain the recurrent process:
+- write some code
+- create an abstract class factoring out the behaviour of the code
+- inevitabily there are exceptions to the rules, and the design become a mess
+
+So in Dok favours manegeable copy-and-paste of code, specifying the differences respect the copied code, and mantaining it in synchro when it changes, respect abstractions.
+
+So similar code is not factored out using abstractions, but using the copy and modify feature of the language, with automatic tracking of the changes.
+
+Only when one is 100% sure that an abstraction is a repeated piece of code, then he can create an abstract class.
+** OO 
+http://lambda-the-ultimate.org/node/1332
+
+read and see if these ideas are useful also in Dok
+** Value Strings vs Modifiable Strings 
+Some strings can be automatically shared because they are repeated values, so: make a distinction between a String value that can be shared in a dictionary (compression), and editable strings, that can be transformed to a value at the end.
+
+Support also some efficient string rope or similar, for concurrent editing, and that can support some form of prefix compression.
+** DBMS based on nested-data-array
+The DBMS knows the active queries and it merges them and compile into NDA work.
+** Jai Language
+https://github.com/BSVino/JaiPrimer/blob/master/JaiPrimer.md
+
+In videogames the DS layout is very important, and often OO and functional languages hide this info. In Jai the programmer is in full control:
+- no GC
+- no class by default
+- etc..
+- can call C libraries (the same run-time)
+
+In Jai like in Dok:
+- the code is built and compiled using the language itself, so a lot of power is possible for the programmer
+- there are a lot of automatizations possible at compile time (run test cases, import code, generate code, etc..)
+
+Unlike Dok:
+- it supports reflection at run-time
+- support polymorphism at the function level, and not using the subject like Dok
+- it has no (intentionally) RAII
+- it has no (intentionally) exceptions
+- it has no (intentionally) GC
+- it has no (intentionally) advanced metaprogramming and templates
+
+FACT one of the few way for avoiding GC in FP and value based languages is using linear-programming tecniques.
+
+In Jai every code can be run at compile time using the `#` prefix. For example
+
+#+BEGIN_SRC
+SRG_TABLE_SIZE : Int = 256
+
+float real_linear_to_srgb(float f)
+{
+    if (f <= 0.0031308f)
+        return f * 12.92f;
+    else
+        return 1.055f * (float)pow(f, 1 / 2.4f) - 0.055f;
+}
+
+// Approximate the value, so it is faster respect `real_linear_to_srgb`
+generate_linear_srgb :: () -> [] float {
+     srgb_table: float[SRGB_TABLE_SIZE];
+     for srgb_table {
+         << it = real_linear_to_srgb(cast(float)it_index / SRGB_TABLE_SIZE)
+     }
+     return srgb_table;
+}
+
+srgb_table: [] float = #run generate_linear_srgb(); // #run invokes the compile time execution
+
+real_linear_to_srgb :: (f: float) -> float {
+    table_index := cast(int)(f * SRGB_TABLE_SIZE);
+    return srgb_table[table_index];
+}
+#+END_SRC
+
+In Dok code instantiation/specialization is an automatic (but optional) optimizaton of the compiler, that can be enforced using some annotations:
+
+#+BEGIN_SRC
+SRGBColor::Float()
+
+ApproximatedSRGBColor::Float(
+  Bits::Int[8]
+  #: the approximation bits
+)
+
+LinearColor::Float(
+  Ensure {
+    self >= 0.0
+    self <= 1.0
+  }
+
+  Self-->SRGBColor {
+    try {
+     self <= 0.0031308f
+     self * 12.92
+    } else {
+      1.055 * self.pow(1.0 / 2.4) - 0.055
+    }
+  }
+
+  Self-->ApproximatedSRGColor {
+    SpecializeOn {
+      Result.Bits == 8
+    }
+
+    ResultSize::Int { 2.pow(Result.Bits }
+    srgTable::Array(Of:ApproximatedSRGColor, From: 0, To: ResultSize - 1)
+    i::Int[0]
+    repeat {
+      srgTable(i): (i.Float / ResultSize.Float).LinearColor.SRGBColor
+      i!next
+    }
+
+    srgTable.get(self * (ResultSize - 1)).Int)
+  }
+)
+#+END_SRC
+
+In Jai structures are defined like
+
+#+BEGIN_SRC
+Vector3 :: struct {
+    x: float = 1;
+    y: float = 4;
+    z: float = 9;
+}
+
+v1 : [4] Vector3;     // Memory will contain: 1 4 9 1 4 9 1 4 9 1 4 9
+
+Vector3SOA :: struct SOA {
+    x: float = 1;
+    y: float = 4;
+    z: float = 9;
+}
+
+v2 : [4] Vector3SOA;  // Memory will contain: 1 1 1 1 4 4 4 4 9 9 9 9
+#+END_SRC
+
+In Dok we can use compilation hints/annotations for deciding how representing a DS layout. We create a complex example, allowing the derivation of different versions of the same code, according the compilation hints:
+
+#+BEGIN_SRC
+Point3::(
+  x::Float
+  y::Float
+  z::Float
+)
+
+v1::Array(Of: Point3)
+
+build -> {
+  v1.metaInfo!add(Dok[
+    @Transpose
+  ])
+  #:NOTE: from now all data acessing `Point3` elements inside `v1` are managed considering
+  #       the `x1,x2,y1,y2,z1,z2` transpose layout, instead of normal `x1,y1,z1,x2,y2,z2` layout.
+  #:NOTE: the `@Transpose` annotation can be added also to `Point3` making the default layout.
+}
+#+END_SRC
+
+Jai allows to say that a pointer is owned by the parent struct, and when the parent struct is deallocated, then also the pointed object is deallocated.
+I will not analyze this, because it is better studying the more complete Rust approach.
+** Reduce polymorphism overhead with Smarteiffel approach
+Dok (unlike Jai) is an OO language. But there is no a unique way for mapping tagged type variants to run-time info. Some code, after static analysis, can accept only few variants of some type, so the tag can be in some case simplified. In other cases the type is known in advance.
+
+TODO study again the SmartEiffel approach that simplify a lot TAG management doing global static code analysis and discovering that often there is no dynamic dispatch, but there is or static-dispatch, or very few alternatives. Probably the maximum liberty is for data from the user (input) but then many parts of the code apply constraints on the possible values, and often the constraint is a precise type of data. So the info/tag can be retained (very few bits), but the dynamic dispatch part can be substituted with direct calling of code.
+[1]O. Zendra, D. Colnet, e S. Collin, «Efficient Dynamic Dispatch without Virtual Function Tables. The SmallEi el Compiler.», pag. 17.
+** https://github.com/xgdsmileboy/SimFix
+Language for specifying potentially bugged template of code, and patch them.
+Used in practice.
+** Strings
+Make distinctions between:
+- string literals/constants
+- char buffers
+- list of strings
+- and so on
+
+Each type can be decided during final phases of compilation/optimizations, according the real usage of the String, or they can be specified in the code, if it is already clear.
+
+TODO see the Haskell String interface/class.
+
+MAYBE like in case of other expressions, we are managing expressions returning new strings, and we want to transform in efficient code, using maybe efficient ad-hoc data structures
+** Equality
+In Category Theory equality is defined rigorously, using isomorphisms.
+
+TODO find a good way for defining it also in Dok and for types supporting it, and taking in consideration:
+- types conversions
+- reduce to canonical form before converting values
+- `x --> y` can be different from `x == y` because `x --> y` and `y --> x`
+** Rascal 
+Rascal does not use AG, but it uses:
+- visitors
+- relations
+Compare examples.
+** Types as code execution
+From an IDEA on IRC:
+- `f = 2` has no type `Int` but type `2` because it is most precise value we can assign to this function
+- type checking became execution of code at compile time, inferring the most we can inferring, so `some Int > x input parm`, etc..
+- check that preconditions of functions are respected, using the derived postconditions from this type analysis
+- typechecking is like abstract interpretation of code
+- FACT it is called also abstract interpretation
+TODO see also https://bitbucket.org/duangle/scopes/wiki/Home implementation
+TODO compare with refinements types (Liquid Haskell) and other ideas. 
+** Substitute `-forward->` rewrite rule with generic term-rewriting rules
+** Pattern matching in Dok
+** Pattern matching in AG using the DSL syntax
+** Extensions of JastAdd and other to AG 
+** AG for stream window based computing
+Some GUIS can work on a stream of data and transform using:
+- skip not interesting data like SQL window functions
+- manage with foldl like algo other data
+TODO AG should discover when there are fast recursion schemes
+** SOMEDAY Resource management using Maccagnoni
+MAYBE in cite:munch-maccagnoni_resource_2018 the management of pointers as in Rust (borrowing and so on) is used also for safe and predictable resource management (files and so on). In Haskell lazy evaluation poses serious problems to resource management. In Dok:
+- I want robust resource management
+- the majority of code will use safe value based libraries
+- MAYBE only low level code will use Rust-like references
+- for many code it is not important having lock-free, safe and fast concurrent access to shared RAM but it sufficies persistent data structures updatable from many threads with some restoring point, or Bloom or Erlang approach
+- For example: "Data-race Free: Pony doesn’t have locks nor atomic operations or anything like that. Instead, the type system ensures at compile time that your concurrent program can never have data races. So you can write highly concurrent code and never get it wrong.", so Pony is good for Actor-based applications where one can specify accurate programs working on same data structures in RAM (no really distributed) or resources (OCAP). So Pony can replace also C-like code usually not developed in Erlang but in C because it is low level and fast.
+
+MAYBE probably this is overkill in Dok because:
+- semantic is hard to understand
+- it is a paradigm 
+- in Dok many code is value-based so conflicts are reduced also if the code is sometime slower
+- unsafe code can be written in any case if performances are important
+- many cores works better assuming there is no shared RAM, and only explicit exchange of messages, so a Bloom-like approach
+- streams and other resources can be managed with borowers and owners but probably this semantic is overkill and something of simpler suffices
+
+Resources are not managed by GC but with RAII semantic. RAII semantic ensures that the resource destructor (i.e. deallocation) is called with predictable semantic. For example this is not the case of Haskell with lazy evaluation. 
+
+There are these modes of management:
+- G: GCed value. They can be copied freely but they have no destructors. They are usually traced and subject to GC.
+- O: owned value. They can be moved. They supports destructors. They had not to be traced, because ownership analysis is done at compile-time, and they are only moved. They are destructed when they exit the scope of the owner. 
+- B: borrowed value. They can be copied, but subject to the restriction that the copy does not outlive the resource it originates from. This is ensured from static analysis. They are never destructed because only the owner will destruct them, and for sure the owner will outlive the borrowed copy.
+
+FACT implementation requires changing of the GC algo, typically of the GC of OCaml but maybe also other GC. 
+
+There are two types of pointers:
+- traced pointers with lower bit set to 0, and allocated in the minor heap
+- untraced pointers with lover bit set  to 1, allocated on major heap and deallocated using RAII semantic
+
+For Baker in FP implementation linear logic can be used for efficient implementation:
+- values can be moved instead of copied
+- tail call recursion became explicit and fundemantal
+** The error LOG service is a Kalm.Process
+** Study Ruby on Rails plugins
+** Try to solve programming contests examples
+Study the problems of these sites
+- http://www.hackerearth.com
+- https://projecteuler.net
+
+Try to solve using some dynamic and optimization Dok library.
+* Knil 
+** ~INSERT ON DUPLICATE~
+Support in Knil a semantic like http://dev.mysql.com/doc/refman/5.0/en/insert-on-duplicate.html
+** Active DataBase Semantic
+An ActiveDB can be used for:
+- reacting to events
+- the stream part can be used for analyzing event, and conditions
+
+Postgres uses the triggers for reacting to events.
+
+For example:
+- if a new invoice is added invalidate/recalc/update summary report on all invoices of the month
+- if a new data enter, update the state of the Gator Network
+- etc...
+
+Events processing is a logical pattern:
+- view DB as a series of events
+- react to events, and not to database state
+- express organization workflow as reaction to events
+- GATOR conditions are triggered when the events and the DB conditions are respected, and so it is good also for having workflow based on declarative conditions, and in this case events are only used for updating the state of declarative conditions
+** tell that add to DB data is visible only at end of the transaction
+TODO it is not so simple: in case of DB transaction where they start and finish
+TODO in case of nested transaction I have mini-commit, so in this case?
+TODO check what are doing other DBMS
+TODO see the Kalm approach
+** Integrate considerations of the paper using FP for expressing and optimizing queries
+[1]T. Grust e M. H. Scholl, «How to Comprehend Queries Functionally», pag. 28.
+TODO see if there are papers citing and extending these ideas
+** Fact Validity Period                                  :temporal_dbms:
+In general facts can be true when some validity condition is respected:
+- a time-frame (managed in an efficient way, and ad-hoc by Knil)
+- certain days/hours of the day, or when something in the database is true (managed using deductive rules, but potentially not efficient)
+- inside current transaction (managed in an efficient way from Knil)
+
+This is the behaviour/semantic of temporal databases, where new facts invalidate old facts, but old facts remain in the database because also information of the past is useful (auditing, rules inspecting the change of data, and so on).
+
+When you execute `assert:` and `retract:` in a rule, the time-frame of the derived fact is the intersection of the time-frames of the facts in the condition.
+
+When you execute `assert:` in a transaction, the time-frame is the default time-frame of the transaction.
+
+Rules deriving new facts can only read them in condition, but not asserting them in the `assert:` part.
+
+Dok code processing query results can read the validity period of a fact, and it is part of the DB-friendly values. 
+
+Active queries (stream of results) returns the time-frame of results, and they can be used from active-rules, and stream-processing rules for monitoring important events linked to changes in the database. Some queries are inherently temporal, because their logic is related to the changes inside the database, and not the actual value. Active rules on stream of changes are usually written in Dok, and not using DBRules.
+
+In less extreme cases, temporal databases are useful for auditing of data changes.
+
+TODO use a C# Entity approach for converters:
+- they are mainly automatic
+- they can be annotated and customized
+- customizations are interactive using the IDE
+** Fuzzy Logic 
+Fuzzy logic is a form of multi-valued logic derived from fuzzy set theory to deal with reasoning that is approximate rather than precise. Just as in fuzzy set theory the set membership values can range (inclusively) between 0 and 1, in fuzzy logic the degree of truth of a statement can range between 0 and 1 and is not constrained to the two truth values {true, false} as in classic predicate logic. -- [http://en.wikipedia.org/wiki/Fuzzy_logic Wikipedia]
+
+TODO: integrate idea of document "live-2279-3505-jira.pdf"
+*** OWL2 + Fuzzy Logic
+ [1]U. Straccia, «Foundations of Fuzzy Logic and Semantic Web Languages», pag. 381.
+
+ [1]F. Bobillo e U. Straccia, «Fuzzy ontology representation using OWL 2», International Journal of Approximate Reasoning, vol. 52, n. 7, pagg. 1073–1094, ott. 2011.
+*** Extensional Facts
+  #+begin_src
+  assert(truth: 60%)! bob isATallMan
+  #+end_src
+
+ If not specified the truth-level is 100%
+*** Intensional Facts 
+For conditions in "ands", the truth level of the assert fact is the minimum truth-level of the conditions in "ands".
+
+For conditions in "or", the truth level of the asserted fact is the maximum truth-level of the conditions in "or".
+
+For fact in asserted in the "else" part, the truth level is `100% - truth-level of the then part".
+
+For a condition in "not C", the truth level il "100% - truth-level of C".
+*** Hedges
+ An hedge is an action that either changes the shape of a fuzzy set or produces a new fuzzy set. Hedges play the same role in approximate reasoning as adjectives and adverbs play in natural language. Like in natural language the order in with a hedge is applied is significant.
+
+ #+begin_src
+Person::(
+  isTallMan --> DBBool
+)
+
+bob::Person
+
+assert(truthLevel: 80%): bob isTallMan
+
+@Assert {
+  bob is-very-TallMan
+}
+
+#+end_src
+
+The "very" hedge intensifies the membership function by squaring:
+
+#+begin_src
+   m(VERY_A, x) = (m(A,x))^2
+#+end_src
+
+
+The "somewath" hedge is the contrary of "very":
+
+#+begin_src
+   m(SOMEWHAT_A, x) = (m(A,x))^(1/2)
+#+end_src
+
+The "about", "near", "around" are synonymous. The corresponding fuzzy set is a Gaussian membership function centered over the number position in the domain.
+
+#+begin_src
+$person has-about-Age 25
+#+end_src
+*** Membership Functions
+Numeric values can be associated to fuzzy set membership functions.
+
+#+begin_src
+Person::(
+  height --> DB[Int]
+
+  isTall --> DB[Bool]
+)
+
+rule {
+  $p::Person
+  $thruthLevel: gaussianTruth(leftCenter: 3, rightCenter: 10, leftStandardDeviation: 2, rightStandardDeviation: 3, $p.height)
+  assert(truthLevel: $thruthLevel): $p isTall 
+
+}
+#+end_src
+*** Defuzzification
+Defuzzification method derives a scalar value from a fuzzy set specification. Knil uses the "Composite Maximum" method.
+
+Defuzzification is the inverse operation of membership functions.
+
+#+begin_src
+assert: max isTall
+
+@Assert { max hasHeight 185 }
+#+end_src
+** "unknown" fact
+It is possible to add the information that a part of a fact is unknown using "unknown" as argument of a relation. For example
+
+#+begin_src
+tom isMarriedWith unknown
+#+end_src
+
+The meaning is that "tom" is married but up to date we do not know who is his wife.
+
+"unknown" is a place-holder that signals incomplete information about a fact. This is very different from  NULL usage in SQL where it can be used also to identifies relation arguments without a value.
+
+`unknown` is used for data sanitazion/clearence. It is a sort of TODO.
+** Import schemas in this link
+http://www.databaseanswers.org/data_models/index.htm
+and in the Data Modelling Books
+** DB with negation semantic                             :database:deductive:
+"Classical Negation in Logic Programs and Disjunctive Databases" by Gelfond 
+
+Super Logic Programs by Brass Dix
+linguaggio logico con negazione
+** ETL Tool
+In an ETL tools there these orthogonal questions:
+- logical transformation of data
+- physical movement/processing of data:
+  - where is stored the data
+  - in-place data analysis and transformation
+  - transferring of data to more near location, or transferring of only the aggregate result
+  - merge of public data with private data, without sending private informations
+** SAT solver
+Used in production and very powerful
+http://www.optaplanner.org/
+* Dok Compiler 
+** Attribute Grammars (AG)
+*** Overview
+*** Expressivity of AG
+[1]M. M. Schrage e J. Jeuring, «Xprez: A Declarative Presentation Language for XML», pag. 17.
+AG for GUI and incremental evaluation in Xprez by Schrage
+
+[1]T. Kaminski e E. Van Wyk, «Integrating Attribute Grammar and Functional Programming Language Features», in Software Language Engineering, vol. 6940, A. Sloane e U. Aßmann, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2012, pagg. 263–282.
+- descrive molto bene le featueres di Silver che sono presenti anche nei linguaggi funzionali e che rendono le AG di Silver comode per programmare un po' tutto
+- c'e` anche un discorso semantico del linguaggio
+- da usare per capire cosa serve anche sotto Dok
+
+[1]T. Ekman e G. Hedin, «Modular Name Analysis for Java Using JastAdd», in Generative and Transformational Techniques in Software Engineering, vol. 4143, R. Lämmel, J. Saraiva, e J. Visser, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2006, pagg. 422–436.
+
+[1]P. L. Group, «Tutorial on Name Analysis», 1999.
+
+[1]A. Dijkstra, «Stepping through Haskell», [s.n.], S.l., 2005.
+
+[1]A. Dijkstra, J. Fokker, e S. D. Swierstra, «The Structure of the Essential Haskell Compiler, or Coping with Compiler Complexity», in Implementation and Application of Functional Languages, vol. 5083, O. Chitil, Z. Horváth, e V. Zsók, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2008, pagg. 57–74.
+
+UHC AG implementation of Haskell: a big compiler structured used AG 
+
+"Incremental Context-Dependent Analysis for Language-Based Editors" by Demers
+data una grammar crea un editor con incremental update, e deriva pretty printing, errors, etc.. 
+
+*** Optimization of functional code using AG
+AG can be:
+- compiled to strict evaluating forms that are rather efficients.
+
+- optimized (fusion etc..)
+- compiled to incremental upgrade forms
+
+From functional to AG for more efficient compiled code:
+- [1]S. D. Swierstra, «Strictification of lazy functions», pagg. 1–12.
+- [1]J. Saraiva, D. Swierstra, e M. Kuiper, «Functional Incremental Attribute Evaluation», in Compiler Construction, vol. 1781, D. A. Watt, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2000, pagg. 279–294.
+- [1]P. Parigot, «Attributes grammars: a functional declarative language», Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique, vol. 37, n. 1, pagg. 55–57, 1995.
+- [1]M. F. Kuiper e S. D. Swierstra, «Using attribute grammars to derive e cient functional programs», pag. 15.
+- others saved on Zotero
+
+[1]N. Mitchell, «Transformation and Analysis of Functional Programs», pag. 225.
+converte programmi functional second order, in first order e poi permette ottimizzazioni. Estende tecniche di supercompilation. Fa inline e specialization delle functions.
+
+"Stream Fusion - From Lists to Streams to Nothing at All" by Stewart, Coutts
+powerful stream fusion tecnique 
+
+"Recicly Your Arrays" by Leschinsky
+transform functional code into imperative code with in-place array modification
+
+"Two for the price of one: a model for parallel and incremental computation" by Sadowski
+metodo che unisce memoization, parallel, incremental update, con speedup anche di 37x su CSS processing e altri ALGO, non di Sweistra 
+
+"Secrets of the Glasgow Haskell Compiler Inliner" by Simon Peyton Jones
+practical tricks used for inlining functions
+
+Flow-Directed Lightweight Closure Conversion by Siskind
+escape analysis
+
+*** Efficient execution of AG code
+[1]H. Alblas, «OPTIMAL INCREMENTAL SIMPLE MULTI-PASS AlTRIBUTE EVALUATION», INFORMATION PROCESSING LETTERS, pag. 7, 1989.
+
+[1]J. A. B. V. Saraiva, «Purely functional implementation of attribute grammars = Zuiver functionele implementatie van attributengrammatica’s», Utrecht, 1999.
+- more important paper on Saraiwa method
+- attribute grammars
+- incremental evaluation
+- LRC system 
+
+[1]S. D. Swierstra, «Strictification of lazy functions», pagg. 1–12.
+ esegue la strictification su una classe ridotta di programmi. Poi in una paper nuova prova ad estendere la tecnica, ma a volte bisogna cambiare l'algoritmo tradizionale. La tecnica lavora riconoscendo l'ordine di chiamata dei thunk "lazy" di un codice funzionale, e deriva quindi la versione strict. Inoltre fa memoization, e grazie a questa permette di calcolare un delta-upgrade.
+
+leggere Pettoross 1988 che is una tecnica di strictification che usa higher order AG, ed is diversa da quella di Saraiwa.
+- [1]J. Saraiva, «Strictification of Computations on Trees 1 The Class of Functions Considered», pagg. 1–15.
+
+[1]J. Saraiva, «Strictification of Computations on Trees 1 The Class of Functions Considered», pagg. 1–15.
+
+`Stratification of Computation on Trees` presenta una tecnica per trasformare generic AG su lazy in STRICT e ORDERED per poi applicare DEFORESTATION. is basata sul lavoro di LRC di cui non trovo il codice ma che is stato rilasciato.
+
+[1]U. Utrecht e R. Magnifi-, Generating incremental attribute evaluators. 1994. 
+a detailed analys of how evaluate AG
+
+Questa is la persona che sta dietro a LRC e al lavoro di stratification http://www3.di.uminho.pt/~jas/
+
+https://github.com/christoff-buerger/racr
+library compiling AG to scheme code with support of incremental rewriting.
+TODO study and compare with other incremental compilers of AG.
+
+[1]J. Saraiva, «Effective Function Cache Management for Incremental Attribute Evaluation 1 Introduction 2 Incremental Attribute Evaluation 3 Visit-Function Cache Updating», pagg. 1–10.
+[[file:/home/zanibonim/lavoro/dokmelody/papers/10.1.1.30.1375.pdf]]
+
+INRIA worked on FLC-2: attribute grammars that can be used as standalone program.
+
+"Generic Attribute Grammars" di Saraiva et al. descrive molto bene come derivare delle lambda functions e strict da una grammatica HAG con supporto dei GENERICS. Seguirla se voglio implementare qualcosa di LRC-like. Non tratta incremental update, come le altre paper, ma probabilmente descrive bene gli algoritmi che stanno alla base. Inoltre evita la duplicazione di codice oggetto finale, dato che mette in common le parti in common di un VISIT quando possibile.
+@inproceedings{saraiva1999generic,
+  title={Generic attribute grammars},
+  author={Saraiva, Joao and Swierstra, Doaitse},
+  booktitle={Second Workshop on Attribute Grammars and their Applications, WAGA},
+  volume={99},
+  pages={185--204},
+  year={1999}
+}
+
+[1]M. C. Pennings, «Generating incremental attribute evaluators = Het genereren van incrementele attribuut evaluatoren», Utrecht, 1994.
+
+[1]J. Fokker e S. D. Swierstra, «Abstract Interpretation of Functional Programs using an Attribute Grammar System», Electronic Notes in Theoretical Computer Science, vol. 238, n. 5, pagg. 117–133, ott. 2009.
+simplify call of functions in Haskell-like code, using AG:
+- evaluate at compile-time the code
+- reduce the possible TAG that can be present at run-time 
+- TODO compare with SmartEiffel approach
+- TODO there are papers saying that Abstract Interpretation can be used also for deriving good order of evaluations of params, on a call-by-need way but without using thunks at run-time. Similar to AG evaluation order.
+
+[1]P. Correnson, «Symbolic composition», Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique, vol. 37, n. 1, pagg. 55–57, dic. 1992.
+Sembra una sintesi di altre tecniche, studiare. Apparently simple and efficient.
+Anche l'initial syntax-tree frutto del parsing iniziale della stringa non deve essere materializzato completamente e la fusion viene fatta anche nei passaggi successivi. Solo i parametri passati sono importanti, tutto il resto puo` essere scartato.
+Quindi:
+- visit sequence sono funzioni che si chiamano
+- lo stato è passato come parametri delle function
+- le instace dei grammar template sono passati come parametri delle functions + le dipendenze dagli attributi
+- le function alla fine di una VISIT tornano la prossima function che fa partire una nuova VISIT e completa il passo successivo di computazione
+
+"Using cached functions and constructors for incremental attribute evaluation" by Swiestra
+sempre tecnica di esecuzione delle AG di Sweistra
+** RACR - attribute grammar library under Racket
+https://github.com/christoff-buerger/racr
+
+Reference Attribute Grammar with Rewritings
+FACT released under permissive MIT license
+
+Graph rewriting is used for transforming data, and References AG for querying and they are interwinded, i.e. the analysis suggests what to rewrite, and the rewrite generate incremental evaluation. The algo had to be dynamic because in these cases static analysis is not effective/useable.
+
+FACT usage of references then there are abstract syntax graphs instead of abstract syntax trees 
+
+FACT the Lisp syntax is not so much clear
+
+TODO Can I use values instead of references?
+
+FACT rewrite functions are also explicit ~deleteElement~ or ~replaceSubtree~. With value based AG one had to simulate this copying all elements except the element to delete, or creating a Dok ~!replaceSubtree~ like function creating a clone of a value without the element.
+
+FACT attributes definitions are similar to Dok:
+- automatic copy propagation
+- OO-like inheritance support of common definitions of attributes
+
+FACT there is an example using Racket and Racket GUI and using RACR for dynamically calculating widgets to display or not, acting like a MVC but using only RACR. Very similar to what I want to obtain with DokMelody GUI.
+https://github.com/christoff-buerger/racr/blob/master/examples/examples-overview.md
+
+TODO check if this approarch needs widgets as references and not as values
+
+TODO RACR and JastAdd that are references AG uses name analysis as example. So try to express using Dok-AG the same thing for seeing if values can be used instead.
+
+TODO consider a value-based rewriting with explicit pass:
+- at pass one the algo search on the old AST/graph and produce the new
+- only at the end of pass one, the old AST is replaced thiw the new AST
+- the process is repeated
+- MAYBE or use NESTED TRANSACTION and every running-transaction sees the effect of current transaction 
+** Target run-time
+Evaluate:
+- LLVM
+- IBM Eclipse OMP P9
+- RPython
+- Thorin/Impala functional CPS run-time, fast as C https://anydsl.github.io/
+** Concepts
+Concepts
+- attribute grammars (AG): from language S to language D
+- term-rewriting (TR), equivalent transformation: from language S to language S
+- supercompilation (SC) / superanalysis: apply a series of term-rewriting transformation in an optimal way
+- code-analysis (CA): RML/Crocopath/BDD queries on code
+- specialization (SP) / partial evaluation
+- abstract interpretation
+- constraints, pattern matching, logical languages: select part of code to transformation
+- static typing / design by contract: check at compile time for errors
+- code quality testing (CC = code-contracts): query on code for searching for known defect (sql injection, changing of some parts, without effects on others). Probably they can be coded using a RML/Crocopat approach
+
+Optimizations
+- fusion / deforestation
+- strictification
+- from second order to first order
+- equivalent transformations
+
+Technologies
+- BDD, Crocopat
+- Rete
+- Liquid Haskell
+
+AG are very good for:
+- translating from a language S to a language D,
+- applying and propagating local changes/rewrites
+
+TR and SC are goods for optimizing a language D into an equivalent form of D, but more efficient, because they accept complex conditions on code, like queries, and not like directly calculated attributes.
+
+CA are very good for checking code properties, understanding it, navigating, because they answers to queries quickly.
+
+SP is very good for inlining and specialization of generic code and libraries, according their real usage in an application.
+
+Transforming a lazy language into an AG equivalent form, and applying some paper, is a good way for strictification. TODO check for fusion
+
+SC and TR is good for function inlining, and SP.
+
+SC and inlining tends to:
+- be slow
+- increase dimensions of code
+
+SP is used for combining application code, with generic libraries, producing an ad-hoc unique application, with only static code.
+- lot slower than full dynamic libraries
+- resulting application usually is not so big (surprislying small)
+- resulting application is fast
+- unikernel approach
+- shared dynamic libraries can use the same RAM for different applications (container approach)
+- JVM by default use a SP approach for many libraries at run-time
+- in part is a repeated work in case of JVM usage 
+
+TR: it is risky applying all possible transformations, without some plan. SC allows to apply TR in a controlled but automatic way:
+- slow for big code
+- adapt for optimization of small modules
+** Type + Design by Contracts :static_typing:design_by_contract:formal_specification:formal_verification:use:
+[1]J. Gronski e C. Flanagan, «Unifying Hybrid Types and Contracts», pag. 16.
+** Persistent Saving of Compilation Passages
+Maybe it is better saving on a fast RAM database like LMDB the compilation passages, like AST, and so on. The benefits are:
+- can compile code bigger than RAM
+- can store all intermediate results, directly accessible, for incremental development and compilation
+- compatible with the IDE of an image
+- I can create different indexes (BDD, and so on...) used from the IDE for searching in the code
+- the index approach is similar to DBMS
+- this is feasible only if the overhead of LMDB is acceptable respect a direct storage in RAM of data-structures
+
+TODO check the differences in speed for acessing LMDB vs RAM, and in case it is too much slow, store on LMDB only IDE access data structures
+** Compiler-plugins
+[1]P. Surana, «Meta-Compilation of Language Abstractions», pag. 212.
+
+A Scheme compiler written using AG, and that is extensible from users, with new language constructs.
+Useful paper because it shows a lot of AG rules, for implementinng rewriting optimizations:
+- dead-code elimination
+- constant propagation
+Probably it a validation of the point that AG are composable in the compiler domain, and I hope also in other domains.
+
+FACT for UHC team the type rules are boring to implement using AG, so they are using Ruler that is a declarative language for typing-rules, and then Ruler are converted to AG by the Ruler compiler.
+
+[1]A. Chlipala, «The bedrock structured programming system: combining generative metaprogramming and hoare logic in an extensible program verifier», 2013, pag. 391.
+file:/home/zanibonim/lavoro/dokmelody/papers/86042.pdf
+
+Macro system with combinable macros:
+- The bedrock structured programming system: combining generative metaprogramming and hoare logic in an extensible program verifier
+- macro are applied if some preconditions are meet
+** Term Rewriting and Super-compilation
+[1]T. L. Veldhuizen, «Active Libraries and Universal Languages», pag. 206.
+
+Describe super-analysis that is a method for combining in a correct way two or more rewriting rules. This because a bad order of rewriting rules can generate slower code. It solves the phase ordering problem.
+
+It can be used also for injecting in the code proof-based/domain-specific high-level optimizations, like numeric tricks, numerical theorems, etc.. 
+
+The system in the paper is generative, but the rewriting rules can be based on simple term-rewriting.
+
+Super-analysis can be too much slow.
+
+Super-analysis and super-compilation is:
+- rewrite the same language L
+- transformation rules are logical (Crocopat like)
+
+Transformation and Analysis of Functional Programs
+[1]N. Mitchell, «Transformation and Analysis of Functional Programs», pag. 225.
+
+Composing Dataflow Analyses and Transformations
+Sorin Lerner David Grove Craig Chambers
+Univ. of Washington IBM T.J. Watson Research Center Univ. of Washington
+lerns@cs.washington.edu groved@us.ibm.com chambers@cs.washington.edu
+
+Efficient super analysis used from GHC, for simulating in an efficient way supercompilation.
+** Crocopat/RML
+Crocopat punta su un linguaggio simile Prolog, le relations, e BDD per risolverle in maniera efficiente
+RML (Crocopat) language
+
+Efficient Relational Calculation
+for Software Analysis
+Dirk Beyer, Member, IEEE, Andreas Noack, Member, IEEE Computer Society, and Claus Lewerentz
+
+Context-Sensitive Program Analysis as Database Queries
+Monica S. Lam
+John Whaley
+V. Benjamin Livshits
+Michael C. Martin
+Dzintars Avots
+Michael Carbin
+Christopher Unkel
+
+RML is based on BDDD data structures.
+- http://bddbddb.sourceforge.net/
+- http://suif.stanford.edu/bddbddb/
+- LGPL license
+
+MAYBE BDDD can perform long static analysis (in minutes) so they are more for refactoring than for compilation.
+
+MAYBE BDDD is good for pointer aliasing, but maybe it is not needed in Dok because it is value based
+
+TODO these crocopat rules, can be used for adding management contracts to the code. Rules like:
+- if you change class A then check also if the constraint is added to class B
+- if you change this, then clippy should suggest this
+- it should analyze not only the static code, but the dynamic transformations introduced from patches
+- etc...
+- generic rules can be addd for checking if an application is correct from common bugs
+
+LGPL license.
+- http://www.sosy-lab.org/~dbeyer/CrocoPat/
+- https://github.com/hotpeperoncino/crocopat
+Scritto in C/C++ mentre bddbddb is scritto in Java e sembra forse un po' piu` lento (20 minuti invece che 10 minuti per big-analysis).
+
+Ecco un esempio di un programma RML (CorcoPat) che determina quando vi is degenerate-inheritance, supponendo di avere nella base di dati tutte le relations che collegano i vari packages.
+
+#+begin_lang
+DegeneratingInheritance(super, sub, degsub) :=
+    Inherit(degsub, sub)
+  & Inherit(degsub, super)
+  & TC(Inherit(sub, super));
+#+end_lang
+
+dove `TC` is un combinator built-in che calcola la transitive-closure di binary relations.
+** Fusion of strings operations
+The Concatenate Vanishes
+Philip Wadler
+University of Glasgow ∗
+[[file:/home/zanibonim/lavoro/dokmelody/papers/vanish.pdf]]
+** Refinement types
+Refinement types are types with predicates. I prefer refinement types against dependent types because simple types + conttracts are more readable, and because it can be seen as a compile-time extension of design-by-contract that is instead used at run-time. 
+
+TODO study:
+- http://lambda-the-ultimate.org/node/2828 
+- [1]J. Gronski e C. Flanagan, «Unifying Hybrid Types and Contracts», pag. 16.
+- liquid Haskell
+
+TODO compare with abstract interpretation where the type of an expression is derived also from its usage, but probably in this case we are not comparing a type specification (requirments/specifications) with its correct usage, and so it is more a form of optimization, because we restict the run-time complexity of code.
+
+TODO in GRIN di Haskell c'e` per UHC una ottimizzazione che annota il codice GRIN con constraints sui tipi. Vedere se posso usarlo per aggiungere design by contract.
+** Type Checking
+*** Ruler Approach
+[1]A. Dijkstra e S. D. Swierstra, «Ruler: Programming Type Rules», in Functional and Logic Programming, vol. 3945, M. Hagiya e P. Wadler, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2006, pagg. 30–46.
+
+Ruler is type-checking language, used in EHC project. Using Ruler you can specify typing rules one time, and then it derives:
+- AG code
+- latex accademic formalism
+
+They said that using only AG can create code a little too much complex in some cases. This is their first version, using only AG: "Efficient relational calculation for software analysis" by Beyer
+*** OCAML Type Inference                               :static_typing:
+http://okmij.org/ftp/ML/generalization.html
+** Correctness by Design/Construction
+"From the 1970s, Dijkstra's chief interest was formal verification. The prevailing opinion at the time was that one should first write a program and then provide a mathematical proof of correctness. Dijkstra objected noting that the resulting proofs are long and cumbersome, and that the proof gives no insight on how the program was developed. An alternative method is program derivation, to "develop proof and program hand in hand". One starts with a mathematical specification of what a program is supposed to do and applies mathematical transformations to the specification until it is turned into a program that can be executed. The resulting program is then known to be correct by construction."
+** Persistent data-structures vs mutable data-structures
+Dok should derive automatically when DS are mutable in-place. But note that in Clojure and in many persistent DS it is possible opening a transient phase, where a mutable subset (transient) is managed from a function, and then only at the end merged with the persistent DS. So we have the best of two worlds, when in some parts of the code the persistent DS is managed in mutable way 
+** Slow backend Compiler
+ I can have a slow backend compilation-process (also on distinct servers) executing:
+ - slow/non interactive code checks
+ - static analysis of code for common errors
+ - compiling
+ - advanced optimizations
+ - execute slow regression tests
+** Types are calling conventions
+[1]M. C. Bolingbroke e S. L. Peyton Jones, «Types are calling conventions», 2009, pag. 1.
+
+It is common for compilers to derive the calling convention of afunction from its type. Doing so is simple and modular but missesmany optimisation opportunities, particularly in lazy, higher-orderfunctional languages with extensive use of currying. We restore thelost opportunities by defining Strict Core, a new intermediate lan-guage whose type system makes the missing distinctions: lazinessis explicit, and functions take multiple arguments and return multiple results.
+
+So it defines a language strict by default and with optional laziness.
+
+TODO see the differences with GRIN that is also cited in the paper. MAYBE it is better for Dok
+** Optimizations Level vs Flexibility Levels             :optimization:
+Whole compilation analysis:
+- faster code
+- slow code generation
+- resulting code is not extensible at run time
+
+It can be done only for most important parts:
+- instrumented, profiling, detect wich are
+- parts without run-time settings
+
+Other parts can use normal code:
+- fast compilation
+- development mode
+- can be integrated with external libraries
+- like GHCi approach
+
+Other parts can use run-time code:
+- GUI
+- fully user definable at run-time
+- interpreted
+- slow but flexible
+
+Or there can be a merge of these tecniques in a JIT-like approach:
+- the compiler is part of the run-time environment
+- compiled code is cached
+- code is profiled
+- code and path with more execution are merged
+** https://github.com/facebookincubator/SPARTA#sparta
+Libraries for abstract interpretation.
+** Build system
+I can use a Fabricate-like approach:
+- imperative Dok code compiling a project, and generating documentation
+- Dok can execute it checking for dependencies
+- next-run of the code will be faster
+- TODO see also other build systems with similar behaviour, they are saved in bookmarks and other documentation parts
+- TODO probably I need to use/call these tools because many build instructions can use external tools
+** Abstract Interpretation
+Abstract Interpretation can be used for a lot of things:
+  https://www.di.ens.fr/~cousot/AI/#CITECominiDamianiVrech08-SAS
+  - type checking
+  - call by need without using thunks
+  - gradual typing
+
+Execute code at compile-time using types instead of values if they are not known for deriving many useful properties of the code.
+
+Type errors became compile-time exceptions. It is good to use with gradual typing.
+
+  Not proved requirements can be signaled.
+
+  Code can be optimized if it is used only in a certain way.
+
+  Not checkable code is checked at run-time, and it generates an exception of type "Error in the code".
+
+Some heavy to test invariants are checked at run-time but only during debugging/test phase.
+
+It is a form of partial evaluation.
+
+It is a form of global program analysis because it simulate the real usage of a certain piece of code, and so it can apply global optimizations.
+
+The idea it is that compilation with global analysis is often needed in complex DSL for applying powerful transformations. These are difficult to express using an interpreter. So in Dok I can:
+  - apply abstract interpretation for simplifying the code
+  - applying global analysis rules on simplified code
+  - iterate 
+
+Typing and optimizations are the same idea here:
+  - abstract interpretation is execution of code at compile-time
+  - code to compile became result of abstract interpretation
+  - errors in the code at run-time became @Require and @Ensure that are not proovable true at compile-time, but that are checked at run-time and they generated error-in-the-code exceptions
+  - unikernel-like approach
+  - similar to SmartEiffel idea to global compilation of code, and derive compact TAGS for polymorphic call, simplifing the code
+  - during development one can executed unoptimized code
+  - high-level analysis compilations can be seen as the interpreter calling first a "global" analysis of certain type of code
+
+See for example waitAll in Asterisell approach where the Haskell type system was not powerfull enough for expressing a rather simple type constraint.
+
+  MAYBE I can vie "f := 2" as "f::Int, f = 2" and not only "f::Int" because I have in this case the correct info that "f is 2". So I have a series of contracts added to a variable with the most precise inferred value using abstract-interpretation. Type errors can be a compile-time (when I'm sure of an error) or at run-time with "error in the code" exception when I had to test them at run-time.
+
+TODO see also [1]S. Collin, D. Colnet, e O. Zendra, «Type Inference for Late Binding. The SmallEi el Compiler.», and [1]O. Zendra, D. Colnet, e S. Collin, «Efficient Dynamic Dispatch without Virtual Function Tables. The SmallEi el Compiler.», pag. 17., because it can be used for transforming abstract metaprogramming based Dok code into efficient code with a lot of static binding.
+
+NOTE: in any case types (and also refinement types) are useful because types caputer code specification, while abstraction interpretation code implementation
+** Partial Evaluation 
+  TODO study poprc language approach
+  TODO study why poprc uses multiple passes partial evaluation
+  TODO study the difference between tracing (RPython probably) and partial evaluation (Graal probably) and abstract interpretation
+** http://graphit-lang.org/
+Parallel language:
+- synthetize algo from generic language, according the size and structure of the data set
+- a lot faster than other graph libraries
+TODO see the language format for inspirations. But probably there are other libraries for managing graph to use.
+** Rewriting rules
+TODO study supercompilation tecniques because they are based on rewriting rules
+** OO semantic                         :object_oriented:formal_specification:
+FACT Dok is mainly value based, while OO mainly ref based, but maybe is still useful.
+
+[1]B. Meyer, «Towards a Calculus of Object Programs», in Patterns, Programming and Everything, K. K. Breitman e R. N. Horspool, A c. di London: Springer London, 2012, pagg. 91–127.
+
+[1]«Coping with aliasing in the GNU Eiffel compiler», n. 0.
+
+[1]B. Meyer e A. Kogtenkov, «Negative Variables and the Essence of Object-Oriented Programming», in Specification, Algebra, and Software, vol. 8373, S. Iida, J. Meseguer, e K. Ogata, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2014, pagg. 171–187.
+
+[1]O. Zendra, D. Colnet, e S. Collin, «Efficient Dynamic Dispatch without Virtual Function Tables. The SmallEi el Compiler.», pag. 17.
+
+[1]P. Ribet, C. Adrian, O. Zendra, e D. Colnet, «Conformance of agents in the Eiffel language.», The Journal of Object Technology, vol. 3, n. 4, pag. 125, 2004.
+
+** Instruction Cache Miss
+It seems that instruction cache misses are very very expensives. For MySQL a 10% of code cache miss was a 40% performance penality, and this reducing the misses only from 10% to 8%!!!!
+
+Use LLVM tools and similar that can analyze code at run-time and then recompile in a way for reducing cache-miss. Probably JIT is doing this automatically.
+* Knil DBMS 
+** Overview
+Knil DBMS is a module/plugin that compiles Dok applications with database related annotations to efficient code, working like a database:
+ - ACID
+ - efficient on data bigger than RAM
+ - applications can start fastly because the data must be not loaded all on RAM at startup, but it is loaded on demand from secondary memory
+ - use other DBMS as storage engines: they are a compilation target of Dok code
+
+TODO Dok can compile code and queries to different DBMS engines, so Knil syntax/semantic must be flexible enough
+
+The Knil compiler tries to convert rules into highly efficient forms applying logical transformations. For example it tries to find shared parts between different rules, or to discover common recursion patterns like transitive closure and to apply efficient and well known alghoritms. 
+
+If a set of rules is not executed in an efficient way then the correct process is to signal an "error" or "possible improvement" to the Knil compiler development team.
+** Typical usage scenario
+Many type of applications are like these:
+- a lot of table/relational data
+- few hierarchical content like configurations, customer data
+- some document in hierarchical/XML format
+- analysis of source code (BDD format)
+- incremental update of info in documents or configurations (there are algo for this working on linear queries)
+- fuzzy facts (with some degree of thruth) and they are manageable in case of single relational passage
+
+Linear Datalog queries can be solved without recursion, so maybe they are fast also on a relational engine.
+
+PG supports also XML and many other type of data and it is highly extensible and often good enough.
+
+There are specialized algo for:
+- processing of big graphs, off-line using the secondary HDD
+- BDD for storing info about code
+** Efficient Storing of Nested Transactions
+BTrees (but not fractal trees) does not scale well when there is a lot of data.
+
+Worse in case of nested transactions:
+- only the top-lever transaction, with the final cumulative rebased commit is used in practice
+- all other micro transactions events are here for archiving/analysis porpouse, but they are rarely used
+- so only the top-level transactions should be put in cached and compact tables
+
+TODO use separate tables for transactions of not top-level, and use compact tables for committed transactions
+
+TODO consider if using tables partiotioned agains domain and transaction name, so open transactions are put near the same data of the parent transaction, and there is locality access
+
+TODO use separate, temporary tables for currently open transactions:
+- they are usually small
+- there is the current edited data
+- the data will be saved when the transaction is closed and:
+  - top level transaction put in top-transaction tables
+  - nested transactions put in archive tables
+
+TODO consider if putting currently open transactions to the same top-level transaction, but with a compact bit-mask indicating the level of the transaction.
+** Use PERFORMANCE REGRESSION TESTS
+Also end user applications should run in profile mode, and after the upgrade regression in performances should be tested. 
+** Cheap fsync 
+fsync are costly. So in DokMelody that is mainly a desktop application transactions can be saved in a permantent way after some time.
+** Safe fsync
+DokMelody when used in distributed way can send transactions to multiple servers and so:
+- save on disk after some time, because they are replicated
+- signaling when the transactions before a certain time are safely written
+- tell when they are saved in at least two servers
+- tell when they are under backup
+
+So there are multiple fsync levels.
+** Versioning with merge Data Structure
+http://lambda-the-ultimate.org/node/4699
+** Queries Optimizations
+*** Probabilistic Query Plans                                 :database:
+Probabilist Bottom-up Join Order Selection ... by Pellenkoft INS 
+
+Optimizations Tecniques for queries with expensive methods by Hellerstein
+Integrare poi con Hellerstein che tiene conto nel query plan del costo della CPU.
+*** Query plan optimization                                   :database:
+- "Towards Efficient Evaluation of Methods by Reduction" by Kandzia: Permette di usare info come sum(x) < 100 in una query, dato che se per un X vede che la sum is gia` 110 allora non va avanti. Quindi usa la definizione di una function per ottimizzare il piano di join.
+- Using Integrity Constraints as Deletion Rules by Wetzel : usa integrity constraints per ottimizarre le query
+- Structural Query Optimizations - a uniform framework ... by Hernandez : trova schemi ricorrenti in query datalog e fattorizza e ottimizza
+- Incrementally evaluating constrained transitive closure by conjunctive queries by Dong : incremental update of query results, for queries with transitive results and conditions on results
+- Fully Dynamic Undirected Graph Reachability in Constant Time on a CROW PRAM by Hesse : dato un undirected graph, usa una data structure per query di reachability with incremental update
+- Nonrecursive Incremental Evaluation of Datalog Queries by Dong : incremental update di queries datalog in una certa forma, usando per calcolarlo solo relational formulas, e non recursion
+- Pushing Extrema Aggregates to Optimize Logic Queries by Greco : optimizations of queries with min and max predicates
+- Rules and Strategies for Contextual Specialization by Pettorossi : optimizations of queries when some constraints are specified
+- Avoiding Sorting and Grouping in processing queries by Wang : algo di query optimizations che tiene in conto order e i group
+- AQuery: Query language for ordered data, optimizations techniques, and experiments by Lerner : extension of SQR with stream of data and temporal data. 10/100 volte piu` veloce di SQL normale
+- A formal approach for horizontal fragmentation in distributed deductive database design : dato un DB deduttivo scopre se le queries hanno parte di plan in comune
+- Materialized view selection and maintenance using multi-query optimizations by Mistry : tecnica di materializzazione di view utili per queries che hanno parti in comune
+- Optimization and evaluation of disjunctive queries by Kemper : ottimizza piani di join con query in OR
+- A multi-query optimizer for monet by Kersten : trova parti di piani in comune fra n query e fattorizza le operazioni in comune
+*** F[1]T. Grust e M. H. Scholl, «How to Comprehend Queries Functionally», pag. 28
+Transform some relational queries to functional code and apply related optimizations.
+*** [1]T. Grust e M. van Keulen, «Tree Awareness for Relational DBMS Kernels: Staircase Join», in Intelligent Search on XML Data, vol. 2818, H. Blanken, T. Grabs, H.-J. Schek, R. Schenkel, e G. Weikum, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2003, pagg. 231–245.
+It uses GIST indexes of PG and related DBMS for XML and graph databases.
+
+TODO check if Postgres is implementing this type of join and technique
+*** Tez, Storm and Spark
+ Some of them (I suppose Tez) have the concept of high-level query plan, that can be transformed and optimized. The query-plan remains active and it can became a persistent strema with upgrades.
+
+ TODO there is a paper also about transformation of query plans expressed as functional code, so map, foldl and so on
+
+ TODO I'm not sure that PG has this idea of advanced query transformations, inspect the power of query optimizer
+
+ FACT in any case Knil queries and Dok code with big data, can be compiled to different DBMS run-time using Dok language
+** AgensGraph for PG
+Graph engine for PG
+** Data Structures
+*** Karlsson, J.S., Kersten, M.L., Karlsson, J.S. and Kersten, M.L., 1999. Omega-Storage: A Self Organizing Multi-Attribute Storage Technique for Very Large Main Memories. In In Proceedings of Australian Database Conference. IEEE.
+efficient select of data on RAM using different criteria and attributes.
+
+The storage is optimal indipendently from the order of insert, because it fills all the bits and then compress.
+*** [1]S. Chen, P. B. Gibbons, T. C. Mowry, G. Valentin, e M. Hill, «Fractal prefetching B+-Trees: optimizing both cache and disk performance», ACM Intl. Conference on Data Management (SIGMOD’02), vol. 1, pagg. 157–168, 2002.
+useful for I/O on RAM and disks. Now RAM has the same behaviour of disk, but with different latency.
+*** [1]Y. Sismanis e A. Deligiannakis, «Dwarf: Shrinking the PetaCube», pag. 12.
+  Compressed data structure for OLAP applications:
+  - compress prefix
+  - compress suffix
+  - 1 peta byte cube compressed to 2.3 GB
+** SemanticWeb
+Uses schemas from schema.org that are pragmatic enough:
+- import
+- export
+
+Import data from dbpedia.
+
+See SOLID and new concepts of semantic web.
+
+Think to some federated service for the services and distributed for the data with some blockchain for using as stream.
+
+XML has a lot of already defined formats to reuse. I can:
+- import/export them in Dok-like format
+- store them in compact way
+- distribute them in XML format for compatibility with web-tools
+** https://flaredata.github.io/
+It is a library for compiling Spark and other queries to C native code. It enables order of magnitude improvements.
+
+FACT it exploits the fact that some server can have many RAM and CPU and so you can simplify the engine respect a distributed engine
+
+FACT scale vertical is used also from stack-overflow and it can be viable also for very large databases.
+
+FACT there are also off-line graph analysis algo that can work on a single server at a speed incredible, replacing hundred of clustered machines. 
+
+FACTS also PG is starting supporting JIT compiled procedures.
+** Postgres (PG)
+It is more a platform/environment that a dedicated DBMS:
+- many algo/data-structures/indexes/tables format can cohexists
+- MAYBE a genetic query plan evaluator like Monet maybe it is better
+- can be extended easily with custom languages and data-structures
+
+ACID, but durable constraint (fsync) can be relaxed:
+- temporary tables
+- non durable transactions
+- write data on disk every few seconds
+
+CitusDB: OSS version that can scale Postgres to multiple nodes, with near linear scalability. The only drawback it is that when nodes are added, there must be a manual phase for spredaing the data. 
+
+PipeDB: OSS version that can support open streamed queries, with time-frame windows.
+
+From indipendent analysys:
+- Postgres is often very very fast for common usage scenario, and near big-data instances
+- it joins in a unique environment the features of many disparate big-data tools
+- in the short-term it is more difficul to tune than dedicated big-data tools
+- in the short-term it is easier to grasp than big-data tools, because only one tool must be managed
+
+FACT this article describe how a complex big-data setup can be replaced by Postgres http://renesd.blogspot.it/2017/02/is-postgresql-good-enough.html, but it dose not cite PipeDB, that is good for streaming.
+
+Useful links:
+- https://www.postgresql.org/docs/9.3/static/transaction-iso.html
+  - important notes on ACID transactions in PG
+- https://github.com/wal-e/wal-e
+  - archive/backup PG using the WAL
+- https://www.pipelinedb.com/
+  - extend PG with stream/pipeline processing
+- https://github.com/antonmks/Alenka
+  - GPU database engine
+
+There is an extension of PG implementing a c-store like table: https://www.citusdata.com/blog/2014/04/03/columnar-store-for-analytics/
+
+Column Store database are fast:
+- when the data in the column is highly compressible (often this is the case)
+- because compressed columns stays in RAM
+- because every chunk of compressed columns contain a max-min value and they can be skipped fast
+- when there are more reads (or reads of very very big data) and less writes
+- when bulk insert of data is important
+- if they use few/no indexes, but only fast algo working on compressed data
+
+PG stores directly small rows, and put large rows on the separated TOAST. So it reduces a little the drawbacks of pure row store DBMS.
+** GRIPP index
+Index that can be used on relational databases and that can answer quickly to reachability queries involving graph data.
+** Semantic and decentralized Web maybe pragmatic/practical to use
+https://github.com/solid/solid
+** A very very fast algorithm for analyzing graphs on disk using a single computer 
+https://github.com/sslab-gatech/mosaic
+https://blog.acolyer.org/2017/05/30/mosaic-processing-a-trillion-edge-graph-on-a-single-machine/
+
+Mosaic: processing a trillion-edge graph on a single machine.
+
+Faster than a cluster of computers.
+
+Apply known analysis to a grapd DBMS on disk at a speed comparable to a cluster of computers.
+
+They are off-line analysis.
+
+See the differences with similar technology https://github.com/GraphChi/graphchi-cpp
+** GPU Based DBMS
+- https://github.com/omnisci/mapd-core
+- https://github.com/heterodb/pg-strom
+- https://github.com/antonmks/Alenka 
+** DGraph DBMS: distributed graph DBMS saving on disk 
+https://dgraph.io/
+** [1]Afrati, «Linearizability on datalog programs».
+Transform piecewise linear datalog programs into linear programs
+** Subsumption
+Tecniques for understand when the results of a datalog rule are a subset of another and so share plan and storage.
+* DokMelody concepts 
+** Features 
+DokMelody must support rules with well stratified negation. It does not support explicit negation but it uses a (simple) closed world semantic.
+
+DokMelody must support base/derived facts with fuzzy degree of truth.
+
+DokMelody must support functions with infinitely values, for example mathematical functions. 
+
+DokMelody must support aggregate relations.
+
+DokMelody should support intra-query optimizations. A query is open when it is used from a widget of the user interface or when it used from an active agent or when it is part of an integrity constraint check. During queries computations, DokMelody can create query execution plans that are shared by multiple queries. In this way computation passes are shared between different queries. Example of these techniques are described in [https://dev.DokMelody.com/trac/DokMelody/chrome/site/papers/monet2.pdf [2]] where "performance experiments with the Drill Down Benchmark showed, that the optimizer yields significant improvements of up to factor 4, while causing hardly any optimization overhead".
+
+ DokMelody should support prefetching of queries. Knil query prefetch declarations can be used also during query plan generation/execution. In other words prefetch queries can be seen as active (open) queries and DokMelody should apply intra-query optimizations techniques on them.
+
+ DokMelody should support incremental-updates. When new facts are added to the database active queries must be updated. In some situations it is possible to reduce the cost of query evaluation reusing already computed information and combining them with only new facts. [https://dev.DokMelody.com/trac/DokMelody/chrome/site/papers/incremental.pdf [7]] describes a method applicable on certain class of queries. Other papers and other techniques can be applied to DokMelody programs in final phases of design.
+
+ Recursive queries/rules can be divided into different classes according the characteristics of the recursion.
+
+ Different types of recursions can be computed using specific algorithms according theirs characteristics.
+
+ DokMelody can refuse compiling queries and rules having a too complex recursion structure. It advises the users that the database schema is too complex and it can not generate an efficient program. Obviously DokMelody must be powerful enough to manage in an efficient way all the common recursion schemes
+** DokMelody semantic web tagging
+An objective of DokMelody is tagging/classifying external resources:
+- assign trust to some website
+- use their meta annotations or meta annotations added from other source or patched meta annotations for retrieving content
+- can save some content also locally
+- the same for papers and so on
+- the same for products and so on
+
+Ontology as semantic web tagging/annotations:
+- TODO external content can be imported and keept in synchro in case it is needed
+- TODO trusted nodes can work on shard of the same content and proces parts of the query plans
+- TODO the result of a node is signed and there can be a double check of its work
+- TODO in case of very big data shards of the data and registered queries can share the work on many nodes collaborating toghether
+- TODO the idea it is that one need a working node associated to a client, the client is mainly stupid and the working node can be part of a shard if it remain sufficiently active 
+** Code reasoning and reuse
+I use as example this code for Asterisell
+
+#+BEGIN_SRC
+/**
+ * @param int $fromDate
+ * @param int|null $toDate
+ * @param int $interval :
+ *        - 0 the entire non whole interval on ar_cdr,
+ *        - 1 the starting non-whole part on ar_cdr,
+ *        - 2 the entire whole part on ar_cached_grouped_cdr,
+ *        - 3 the ending non whole-part on ar_cdr
+ * @return array|null list(int $startDate, int|null $endDate) null if the interval does not exists
+ */
+function fromTimeFrameToWholeDay($fromDate, $toDate, $interval)
+{
+    if ($interval == 0) {
+        return array($fromDate, $toDate);
+    }
+
+    $fromWhole = fromUnixTimestampToWholeDayStart($fromDate, false);
+    $toWhole = fromUnixTimestampToWholeDayEnd($toDate, false);
+
+    // the interval time-frames are:
+    // $fromDate |--------| $fromWhole |------| $toWhole |------| $toDate
+    //               1                     2                3
+
+    $isThere1 = true;
+    $isThere2 = true;
+    $isThere3 = true;
+
+    if (is_null($toDate)) {
+        // open end-interval
+
+        $isThere3 = false;
+        if ($fromDate == $fromWhole) {
+            $isThere1 = false;
+        }
+    } else {
+        // specified end-interval
+
+        if ($fromWhole >= $toWhole) {
+            $isThere2 = false;
+        }
+
+        if ($fromDate == $fromWhole && $isThere2) {
+            $isThere1 = false;
+        }
+
+        if ($toDate == $toWhole && $isThere2) {
+            $isThere3 = false;
+        }
+    }
+
+    if ($interval == 1 && $isThere1) {
+        if ($isThere2) {
+          return array($fromDate, $fromWhole);
+        } else {
+            return arraay($fromDate, $toDate);
+        }
+    }
+
+    if ($interval == 2 && $isThere2) {
+        return array($fromWhole, $toWhole);
+    }
+
+    if ($interval == 3 && $isThere3) {
+        if ($isThere2) {
+            return array($toWhole, $toDate);
+        } else {
+            return array($fromDate, $toDate);
+        }
+    }
+
+    return null;
+}
+#+END_SRC
+
+Note:
+- I spent a lot of time creating and debugging it
+- it is error prone
+- it has some math symmetry/elegancy, but not completely
+
+In an ideal programming language:
+- it favors equational coding
+- it checks for simmetries
+- it favours code reuse and search for similar code
+- there are tools analyzing the code and suggesting to check for symmetries and so on
+- one had to add properties/contracts to the code, and then a quick-check like tool will test the code
+
+If I started from already created notes from others, and so idea/code reuse, for sure I would be a lot faster. But for having this:
+- quick search of related concepts
+- paste and copy of concepts
+- adapt to my particular case
+
+So I need a library about the division of time frames in whole time frames and similar concepts, and a wikipedia-like navigation of concepts and tricks, and some pseudo code to use.
+
+In an ideal IDE:
+- import a lot of codes and examples as raw-data and different languages
+- allows to refine them
+- share refinements with others in a wikipedia-like shared KB
+- it should be easy to interact and improve the common base of code
+
+Code search, sharing and reuse should be the first priority because it speed-up the development.
+
+Sharing of bonus points (credits) and also shared payments should be a priority of the community around DokMelody KB.  
+
+Storing all useful code requires a lot of space, so it makes sense using dedicated shared servers, and load locally only useful info.
+** DokMelody for solving problems in an engineered way
+The premises are these: in IT every tools/solution has strong and weak points, and it can be applied only when it is good for the problem to solve.
+
+Given a problem, a user of DokMelody can:
+- decompose (iteratively) in steps/pass, and sub problems
+- at each pass one can view what are the tools/tecniques/best-practices
+- every pass is inside a tree of branches with various attempts
+
+So DokMelody gives also a knowledge of possible tecnique to apply for solving complex tasks:
+- research possible solutions
+- test them
+
+https://en.wikipedia.org/wiki/OKR
+TODO tool for specifying objectives of projects
+** Import facts from already existing KB
+There are many scientific and public/government knowledge bases. For example:
+- https://ckan.org/
+- https://en.wikipedia.org/wiki/EU_Open_Data_Portal a lot of knowledge to integrate
+- https://en.wikipedia.org/wiki/Open_Knowledge_International
+
+Import data from them every X months.
+
+TODO check licenses and give them credits.
+** DokMelody community oriented development
+*** Code Review Tool
+Use a Diskussion-like tool for merging and discussing on branches.
+
+Use IFPS approach for having a queue of commits. TODO there are projects using IFPS for distribuited repositories.
+
+Use DokMelody for viewing and editing all.
+*** GitLab Community Guidelines
+ https://about.gitlab.com/handbook/
+
+*** PEP di Swift 
+ le PEP di Swift sulla falsa riga di Python sono fatte bene. C'e` anche una sezione di discussione della community prima di accettarle.
+
+ https://github.com/apple/swift-evolution/blob/master/0000-template.md
+*** Develop the project using DokMelody itself
+*** Distributed code review system for Git repos 
+- https://github.com/google/git-appraise
+- https://github.com/amark/gun
+** Services as dataflow
+Following the advices on https://www.youtube.com/watch?v=ROor6_NGIWU : if the best way to create composable applications is using a value oriented, stream/flow approach (functional programming), this is also the best approach for creating systems and services.
+
+A service can be seen as part of the dataflow, and it can process information it receives, and returning a flow of new information, sent to another service.
+
+Then some data can be cached remotely or locally for better processing speed, but the design (performances and functional) should be around data flow.
+** Pluggable package manager
+Configurations, and package management in DokMelody should be pluggable:
+- there is a generic API with concepts of profile, context, user, application, plugin, etc..
+- then there is a reference implementation, but it can be overridden in case DokMelody is used in different usage scenario (cloud, private nework of computers, personal workstation, etc..)
+** Live environment and incremental GUI
+Facts:
+- SmallTalk was a live environment.
+- JVM is a live JIT environment.
+- SmallTalk and JVM are based on live mutable objects exchanging messages.
+- Emacs is expandible because it uses dynamic scope and every plugin can injected custom behaviour by default.
+- NixOS is a "live environment" where you can change the packages
+- containers are a "live environment"
+- live environment favours evolution and customizations
+- Declarative languages are based on dead definitions that can be substituted through term-rewriting. This is the contrary of live objects.
+- AG allows to define declarative (equationally) properties, that can be easily injected and fused toghether, like in case of EmacsLisp dynamic binding, or injection pattern
+- some Dok libraries have run-time dependency injection based environment, so this can be used also for the GUI
+
+The best approach is probably:
+- declarative transformations rules from source to GUI description, with intermediate layers (a simplified HTML like Proxima as target dest)
+- traditional OO GUI widgets are managed natively, but there is an AG wrapper, mapping each attribute of the widget to AG properties, and updating it in both directions
+- AG specified widgets and paginations can be inserted inside the page
+- the native DokMelody page is described converting high-level DATA to low level display commands (or native widgets) and managing properties and commands using AG specifications
+- so DokMelody see an UI like a PDF/HTML/... high level description, and not like a network of objects/widgets, and the interaction between widgets is replaced by declarative AG rules
+- a compiler derive incremental transformations like AG and Elm
+- the best of live environment and term-rewriting systems
+- the declarative code is converted to efficient imperative JVM code, with in-place transformations
+** Document management
+The IDE is meant to be a complete project management and knowledge
+management tool. Many ideas that are useful for source code management,
+can be used also for managing different type of info. For example:
+
+- code repositories tracking commits and branch are an useful concept
+  also for documents and data
+- changes of source code with a final commit, can be translated to the
+  concept of long transactions, where you transform information in
+  various places, before committing the new info, and making it visible
+  to other users
+- shared private branches of a repository can be mapped to working
+  groups with different access privileges
+- inheritance and specialization of a class, can be mapped to documents
+  acting like prototypes/templates for generating new documents
+- navigation in source code, can be used also for navigating in the
+  knowledge base
+- generation of codes from chunks, can be mapped to generation of
+  documentations combining different topics/chunks, like in case of DITA
+  documents
+- etc...
+** Meta references
+   :PROPERTIES:
+   :CUSTOM_ID: meta-references
+   :END:
+ A Meta Reference is a reference to a piece of code, or to an external
+ reference like web page, issue, and so on. They are called "meta"
+ because they are not related to run-time objects of the application, but
+ to development/compile-time values.
+
+#+BEGIN_EXAMPLE
+sourceCode none @Assert {
+
+ T::( f --> Int { @Ref { someName } # in this case the reference has full
+ name "moduleName.T.f.someName"
+
+ #+BEGIN_EXAMPLE
+       #INSERT: Ref.newRef
+       @InsertedCode[canBeManuallyModified: True, synchronized: False] {
+         @Ref { someUniqueUUID }
+       }
+     } 
+ #+END_EXAMPLE
+
+ ) } 
+#+END_EXAMPLE
+* DokMelody UI design
+** Analyze - Decide - Act
+The  project management tool should allows to open a long transaction, analyze data, decide and then prepare a series of actions according the decision.
+
+This should be documented, because when one review the long transaction (branch) one should see the reasons. This is meta-info about the reasons of certain actions.
+
+If I have a document with some search, I can:
+- list the results
+- annotate the already viewed results
+- list new results added by incremental evaluation after the stream is updated, and automatically tagged as TO-PROCESS/REVIEW by some automatic rule
+** Gopher idea
+In Gopher there is a repetitive and predictable layout and movement between data/pages.
+
+The same is true for sites like GitHub, Stackoverflow. All info in these sites has a predictable layout.
+
+So in DokMelody there should be:
+- few predictable layouts for info
+- user can move between data using keyboard like in Gopher
+- it should be all configurable by users and not only by creator of websites
+** Metaprogramming links
+During code development I can see the code generated by a compiler-plugin, and navigate back to the compiler-plugin.
+** Queries with hashed query and IPFS-like cached answered
+I can calculate an hash for the query and retrieve a log of answers (an IPFS-like stream) according the date of the answer (the same query can have different answers according the time)  and retrieve the answer using an IPFS-like public service.
+
+I need rather fast interaction protocol.
+
+For private work shared inside a working group I can:
+- use a private IPFS-like network
+- use a public IPFS-like network but encrypt all with a key (risky)
+
+Private data forms an hierarchy:
+- private and personal branch
+- working group branch
+- department branch
+- etc..
+
+The PG DB with the working state should be reconstructible relodaing an IPFS-like stream of events.
+
+TODO compare DAT vs IPFS and features. IPFS seems very slow. But IPFS guarantee no liability because one can store only chunks.
+
+I can export some dynamic-like DokMelody data into static HTML content and serve it using or DokMelody servers or exporting to IPFS-like and then using some distributed internet service already implemented.
+** Distributed vs Federated DokMelody
+One starts assigning some trust level to some initial server. Then trust is derived using some rule, according web of truth. This in a distributed scenario.
+
+TODO in case of search the distributed scenario had to assign trust for queries more or less like Google
+
+In a federated scenario one trust some server, and this server has some parent server and so on.
+
+TODO study better
+TODO study how blockhains solve some of these problems
+
+TODO Trust should be by domain, and domains can be nested/hieararchicacl:
+- for PG code I trust PG community website
+- for PG benchmarks I can trust another company website supporting DBMS
+- for OSS licenses I can trust OSI website and GNU website
+- etc..
+
+Trust the work of other servers using an X%:
+- check 50% the queries of other servers
+- check 50% the check of servers checking other servers and so on
+- if a server has lost trust then it will loose forever, and all trusted work reused from this server must be discarded and submitted again
+- every work is signed, and also every test of the server result and so on
+- think that one can own two servers and checks can be fake, but also the checker has some trust level and it can loos all
+- servers are paid, but if they loose trust the money for their work should be transferred or invalidated (XRP has a policy for this)
+- there should be XRP contracts for reverting payments from servers
+- some time is required for gaining trust level, and so if one server is cheating it will loose all trust and some money
+- some works can be signaled as critical (compilation of potentially unsafe code) so they can be accepted only if trusted by two very trustworthy and indipendent servers or only if checked internally at some level (50% of submitted work and so on)
+- fuzzy rules can be used for describing how critical is a job result, and how expensive it is, and how it is likely it would be calculated
+** Links inside DokMelody documents
+A Link is a piece of content owned by the parent document. It contains:
+- object reference
+- if it is a copy or a shared reference inheriting changes, or require review
+- attributes of the link (tags, etc..)
+- the name/type of the link
+- attributes of the object overwriting in this link the original attributes of the object
+- how patch/adapt the content of the object for this particular container
+- how transform/process the object for including it (transfrom to SVG or JPEG, with resolutions and so on)
+- etc...
+
+In case of transclusion the content of the object is included, otherwise there is a link/reference to it.
+
+So contrary to RDF I have a document with only parts, and one part can be of type link.
+
+Dok allows to use context during processing of a document, and links are part of the document content.
+
+DokMelody caching allows to cache conversion jobs etc..
+
+Tags and links can be hierarchical.
+** Notes/meta-info vs content
+Code like content has two main level:
+- proper content
+- notes/meta-info
+
+For example one can study PDF, papers, documents adding notes about the task to-do, the links between info, but these are meta-info for accomplish the task. Then when it is ready it starts modifying the content (code, paper, document) according the notes.
+
+Favour this type of work with DokMelody.
+
+Specifications are the notes/meta-info of the implementation. Design choices can have features as "specification"/cause. And so on.
+** Blackboard based UI
+** Keyboard UI
+*** Fast moving
+Move at begin of a paragraph inserting the first letter of the paragraphs, for example for moving to this paragraph digiting "mab" (i.e. "Move at begin").
+*** Fast completition
+Insert method names digiting only the initial camel-case letters, for example "nml" stays for "newMouseListener".
+*** MAYBE Smart editing of parens
+MAYBE the IDE allows to write code without typing `(..)` but it insert it automatically, and SPC or double SPC is used instead of `(`. This because the `(` and `)` are used a lot for arguments, but inserting them in the editing phase is tiring. 
+
+DONE in any case the minor syntax points like spaces, are decided from the IDE that can reformat the code freely 
+** DokMelody community discussions
+DokMelody is also a discussion tool. Take idea from:
+- https://www.kialo.com/should-universal-basic-income-be-the-future-1634/1634.0=1634.1/=1634.1
+  - tree discussions
+  - each point has pros / cons and each pros or cons has other pros / cons
+- add to it, support for FACT, INSPIRATION, etc.. etc.. like in 5 hats De Bono theory for discussions
+** Use comments in documentation like PHP and MySQL
+Rarely documentation is perfect. PHP and MySQL allows comments from users. Some of these comments can be transformed in improvements of the documentation.
+
+There can be:
+- official documentation
+- pull-requests with improvements of the documentation
+- quick informal comments on official documentation pages
+- stack overflow for more complex how-to
+
+** TODO Import the PDF with the sketches of DokMelody UI
+** Tag-based IDE
+Every directory/classification/container can have default TAGS:
+- every object inside the container inherits these tags
+- every object can override these tags
+
+TAGS are used for knowing when:
+- something is private, private for a group, public, ecc..
+- something is dynamic/ever-changing or in archive-mode
+- etc..
+
+Using TAGS the code can decide how manage things:
+- where store archived things
+- etc...
+
+TAGS are a natural way for classifying things, and virtual containers are a good way for quickly classyfing something, and then fine-tuning using specific TAIGA.
+** Iterative merging of source code using textual comment annotations
+   :PROPERTIES:
+   :CUSTOM_ID: iterative-merging-of-source-code-using-comment-annotations
+   :END:
+The push/commit of Dok code is filtered by a Git plugin.
+
+If you are in branch =b1/b2= and there is a comment like
+=#BRANCH: b1/b2/b3= then by default a new branch =b1/b2/b3= is created.
+If the complete branch structure does not match, a commit error is
+signaled or a temporary branch is created.
+
+If there is at least a comment like =#TMP: ...= or =#ASK:= then the
+branch is considered to be reviewed, before being merged, until there
+are no any more comments of this type.
+
+When the work is completed, there is a final commit with rebase
+(intermediate versions are removed), with the name of the original
+autothor and/or of the final committer. The intermediate/working
+branches are moved to the "merged-branches/" branch tree, where they can
+be later removed.
+
+Doing so:
+
+- the history of main branch is clean, without intermediate commits
+- there can be a good collaboration using git without too much problems
+- using =BRANCH= it is possible sending a merge submit to another
+  developer of the chain, retaining all the history of changes, until it
+  is not all good and perfect for the final inclusion
+
+http://strlen.com/treesheets/docs/screenshots.html
+** Coda Next-Gen document systems
+TODO study also Coda 
+- https://www.theverge.com/2017/10/19/16497444/coda-spreadsheet-krypton-shishir-mehrotra
+- https://coda.io
+"Coda is a next-generation spreadsheet designed to make Excel a thing of the past":
+- expressive formula language
+- multiple data inside a documents
+- it can be used for anything
+  - issues
+  - project management
+  - data exploratory
+  - documents
+  - spreadsheet
+  - summary views
+  - analytical data
+The idea is to replace all hand-made spreadsheet and words documents, with a unified tool, that can replace ad-hoc applications too.
+Think also to FAMAS where they manage a lot of things with spreadsheets.
+DokMelody is more meant for managing complex tasks with a lot of information, like source code and programming, but it can be customized.
+** GUI based on nested trees inside cells
+** Sandstorm like UI 
+In Sandstorm every piece of info is a sand that can be shared and linked/referenced.
+
+In DokMelody I want this, and also transclusion and processing of data before transclusion.
+
+In this way the sum of the tools is greater than the single tool.
+** F[1]M. S. Bernstein, «Information Scraps: Understanding and Design», pag. 148.
+various useful idea for capturing and classyfing user data.
+
+Read some time, and apply some of the idea.
+
+For example: user do not like to store structural info, especially for fast idea recording. So insert unstructured notes and ideas and refine later.
+** Moose for DokMelody IDE
+** GIT with programming language semantic
+http://blog.datomic.com/2012/10/codeq.html
+
+Support queries on git commits.
+http://www.moosetechnology.org/
+** Formal Discussion Based Tool
+http://en.arguman.org/
+** Kite Editor
+It is a very interesting editor, joining different informations from different sources, and helping a programmer actively.
+Study its user interface idea.
+The slogan is beautiful: "Kite wants to be every developer’s pair-programming buddy".
+** Proxima Editor and XPrez Language                                    :gui:
+[1]M. M. Schrage e S. D. Swierstra, «Beyond ASCII – Parsing Programs with Graphical Presentations», pag. 14.
+
+http://www.oblomov.com/webviews/webviews
+
+Mantain a bidirectional mapping between document structure and its graphical representation. Its target is:
+- AG based, because it usses UUAG Haskell library
+- from hierarchical document to XPrez view to graphical view
+- TODO see if in a local setting it is fast enough
+** Hopscotch: Towards User Interface Composition
+author: Vassili Bykov
+
+UI of Newspeak.
+Usually info is hierarchical. Representing as a graphical graph is too much complex. So usually the user navigate in the info link by link opening forms. 
+
+Hopscotch uses the metaphor of document instead of form, and web-page like. Hopscotch calls the frames "presenters". Every presenter contains the menu and buttons needed for changing its state. There is no global menu on top.
+
+Veri presenter does not send commands directly to the Model, but through a subject. A subject points to the Model. It is similar to an URL. It points to the main Model and the specific subpart.
+
+Presenters does not call directly widgets, but UI of the presenter are specified using a DSL. The DSL request presenters and viewers for different role, for example the presenter ask to show the "name" field using the default compact string viewer and so on. So it is like a strategy pattern where the requests of the presenter are converted to the specific widget, and the associated widget can change by configurations and settings. This is a form of late-binding.
+
+Mixins can be used like CSS and settings, because they translate some presenter requests (main editor, small editor) to specific widgets to use. It is inspired to typesetting in Latex.
+** [1]L. Diekmann e L. Tratt, «Eco: A Language Composition Editor», in Software Language Engineering, vol. 8706, B. Combemale, D. J. Pearce, O. Barais, e J. J. Vinju, A c. di Cham: Springer International Publishing, 2014, pagg. 82–101.
+Editor and incremental parsing. Is manage also incremental conversion from syntax-tree and AST.
+
+There is also an incremental parser
+
+[1]T. A. Wagner e S. L. Graham, «Efficient and flexible incremental parsing», ACM Transactions on Programming Languages and Systems, vol. 20, n. 5, pagg. 980–1013, set. 1998.
+- optimal use of RAM
+- node sharing between changes
+- produce also a report of the revisions of a file
+- MAYBE apply to PEG and AST incremental changes
+- MAYBE see the changes like in a shared LOG for further analysis of the information
+** [1]V. Quint e I. Vatton, «Hypertext aspects of the Grif structured editor: design and applications», pag. 24.
+Hypertext and SGML editor, predecessor of Amaya. Good because mix the idea of links, and of inclusion of shared parts inside a compound document.
+** http://www.vistrails.org/index.php/Main_Page
+Filters, transformers and GUI widgets can be put under BRANCH, so one can try different scenario. Extend the idea of Git to the UI.
+** IDE with autoformatting code
+- code is formatted according fixed rules, and according the width of columns
+- use proportional fonts
+- visually impaired users can change the layout
+* DokMelody implementation and deploy
+** System design concepts
+DokMelody uses these recurring concepts:
+- nested branched transactions
+- caching of results
+- garbage collection of not used any more results
+- incremental update
+- fuse different logical transactions into same phisical transaction
+- quick local update of UI and slow integration of results from remote servers
+- who/when/what changed something
+- execute code compilation and queries in a fast way, but then in background execute the real query and apply global code check and optimizations and advise later the user of the complete result, so use both quick and detailed analysis
+- DokMelody users must be able to apply/suggest/signal quick patch of the DokMelody tool itself and related plugins. In this way there can be small, low-overhead but constant improvements. A short of GitHub pull-requests on steroids
+- DokMelody users and communities must be able to mantain fork/branch for their settings and code without affecting the main DokMelody branch
+- Work on DokMelody project and DokMelody managed projects must favour constant small improvements of documentation, UI and code (thanks to regression tests in this case), following the boy scout motto: "leave the place better than when yo entered it.". 
+** AG incremental layout impaginator
+Cassorway is a constraint based layout paginator that is very good.
+
+TODO study PROXIMA algo.
+
+Can I create something that is AG based and user configurable?
+
+A node collect on TOP attributes the hints about its placement and it receives info from other nodes, so it is an incremental placement of objects.
+
+FACT this work good if I'm using AG with efficient incremental evaluation.
+** KScript and KWord
+[1]Y. Ohshima, A. Lunzer, B. Freudenberg, e T. Kaehler, «KScript and KSWorld: a time-aware and mostly declarative language and interactive GUI framework», 2013, pagg. 117–134.
+
+It is a user-customizable FRP based library:
+- documents
+- widgets
+- FRP based
+- only layout and constraints are implemented using circular procedural code
+- all the rest is non-circular FRP programming
+- late boound and use a Smalltalk like approach
+
+MAYBE in DokMelody I use instead AG:
+- top down attributes
+- convert from one form to a UI description language
+- declarative enough or more declarative
+** [1]S. Burckhardt e D. Leijen, «Semantics of Concurrent Revisions», in Programming Languages and Systems, vol. 6602, G. Barthe, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2011, pagg. 116–135.
+It is an STM on steroids:
+- each process can create a fork of data
+- it can work on its branch of data
+- there are commits
+- merges can be repair
+
+It is fast because there are no locks.
+
+It models very well DokMelody usage scenario.
+** Retro Compatibility and Upgrades
+DokMelody clients can tell to the DokMelody servers/service-providers their DokMelody protocol version. Doing so the server can send data in the proper format, without forcing a global upgrade of clients.
+** Distributed jobs
+Some processing jobs or also queries can be parallelized and partial results can be saved:
+- shared between different jobs sharing common pass (intra-query optimizations, but see also sharing of computations inside lambda calculus)
+- reused for incremental evaluation
+
+[1]P. K. Gunda, L. Ravindranath, C. A. Thekkath, Y. Yu, e L. Zhuang, «Nectar: Automatic Management of Data and Computation in Datacenters», pag. 14.
+** PG JSONB
+A nested (hieararchical) data tree structure can be stored inside JSONB.
+
+Distinct objects can references themself using symbolic links.
+** Communication libraries
+ZMQ are considered very very fast also for environments were speed is all: Anna distributed DBMS and CERN data transmissions.
+
+TODO are ZMQ proxy/firewall friendly?
+
+Websockets are probably now fast enough, firewall friendly and very well supported.
+
+These makes sense:
+- for internal communications between clients and "local" servers
+- for communications between servers
+- MAYBE for normal communications HTTPS and Websockets probably are better
+** GUI technology
+Web UI can be slow, but it is easy to install.
+
+QT UI is:
+- fast/reactive
+- I can use some QML or scripting language and so it can be cheap also on RAM part
+- port to Android and iOS customizing it for the environment
+
+If I choose QT then I had to export to HTML compatible format.
+
+In any case if I have Web UI I need:
+- single page application for editing
+- export to static HTML for public pages
+- but I can reuse widgets converting data to HTML/SVG in single-page app, for generating static content, and also the pagination algo are more or less the same, instead with QT probably I need a completely different export
+** Pluggable store
+DokMelody can use nix-store for storing packages and so on. But it can use also other tools. It uses a generic API. The store is only a low-level mechanism.
+** Ad-hoc Graphics
+Elm is powerful because from a function mapping model to view the compiler can derive incremental updates:
+- no callbacks
+- no FRP
+
+In Dok:
+- from model to view using AG
+- automatic incremental evaluation
+- support also tables and lists with large models
+
+In Dok I want to discover where are the background empty spaces for:
+- baloon using free space
+- efficient eink drawing
+
+So in Dok I can:
+- import the code of a GUI library
+- convert semiautomatically to AG and low level commands
+- enrich drawing code with AG rules for discovering layout and blank-spaces
+
+So I use a first version of DokMelody as a tool for importing and adapting already existing code.
+** Postgres (PG) usage
+Data can be represented in different physical formats from PG:
+- every form is for processing in some algo
+- there is a safe central transaction arbitrer storing if/when data must be transformed, and if the operation was sucessful, for managing transcations between different systems
+
+A compound document should be stored efficiently, and ideally many data structures of the document should be managed using the same data structure instead of local ad-hoc data structures
+
+Postgres now manage also XML documents in a native way. Study better the option, and if it is the case to extend PG. Consider also JSONB approach in PG. Consider that:
+- PG is highly extensible
+- extensions can touch every part of PG
+- Citus manage a "fork" of PG like an extension of official PG, and they are very very happy
+- Agens is an extension of PG for managing graphs
+- at startup all data is accessible without slow loading 
+- documents (tree-like data) can be stored in JSONB fields in a very efficient way, and locality is preserved like in case of graph-databases
+- TODO see if nested transactions can be managed by PG internal MVCC table format
+- PG started supporting compiled (JIT) procedures
+** Deploy
+*** ISP Providers
+  Physical Hosting Requirements:
+  - ECC RAM
+  - SSD Disk
+  - HDD Disk 1-4TB
+  - a lot of RAM
+  - DDOS attack prevention
+  - server farms in different physical locations, with easy replication between them in case
+  - fast connection between servers in the same farm
+  - fast connection to outside network
+  - use encrypted file system, because if the server is dismissed for sure the HDD will be not deleted in a safe way
+  - DokMelody services run on Containers or on Virtual Machines and Unikernels
+*** Usefull tools for startups 
+*** System Design Check List for deploying a project
+ https://github.com/donnemartin/system-design-primer
+  http://startuptools.pbworks.com/w/page/17974963/FrontPage
+*** Server usage optimizations
+A server can have bottlenecks:
+- RAM
+- I/O
+- network
+- CPU
+
+One should combine services on servers for using resources in a complementary way. For example a server using CPU and RAM can use the disk for backup, and similar thing. Otherwise servers are used at 40-60% of their overall capacity.
+** Analyze licenses and attributions of used components
+https://github.com/fossas/fossa-cli?top
+
+** DokMelody as StackOverflow on steroids 
+Context:
+- the majority of developers are users of advanced tools and algorithms, for creating a final solution for their end-users
+- fine tuning of tools and algorithms is a delicate thing and requires time and expertise
+- it is not easy to know if some combination of technology stack is a good match for a certain usage scenario, e.g. stable, fast, etc..
+
+Solution:
+- end-user developers can use DokMelody also for developing applications that are not related to DokMelody project, and they can collaborate with many technological experts
+- DokMelody must be (also) like a StackOverflow on steroids: there should be a ``question + context --> suggested solution --> improvements + consulting``
+- old answers must be searchable
+- there should be a date and versions of app used, because with time solutions can change
+- also failed path must be registered, because it is important knowing which combination of tools is effective or not, without following again a wrong path
+- every solution must describe the context of application (processing time constraints, dimension of data, etc..)
+
+** Support quick feedback
+End user must be able to create screenshoot and indicate parts to improve. Private information should be obfuscated.
+
+Community is more important than product in the long run, because only with a strong community the product can improve.
+** Possible implementation PG based
+*** Design
+ DokMelody is a platform/environment for publishing/sharing/searching/reusing content and paying in shared way for its direct and indirect (by reuse) usage.
+
+DokMelody is composed of at least 2 big instances of PG, with various sharding and replicated nodes. 
+
+1 instance is used for realtime procesing of queries.
+
+Another instance is used for checking x% of queries randomly, on x% of users, for seiing if the answer of the cluster is correct, or there is some node that is compromized. The checking instance can be very slow. Every answer from a client to the server must be signed from servers processing it.
+
+Btree tables are inefficient if they are big, but in DokMelody there is a natural clustering and sharding criteria:
+ - first if data is actual/current, or data of the past, for historic queries (already merged)
+ - then the chain of domain/project/sub-project/task
+ - then if it son actual/current data, but still important for frequent queries, because this type of history is important in UI queries, and not only for batch and maintanance queries
+ - every branch is a domain/.../... chain
+ - every open branch is so clustered, and there is no btree decadence of performances because data is well clustered (TODO check this and how PG manage this)
+ - doing so there are all the advantages of "small" table with only the data of a project/domain, with advantages of a centralized cluster without wastes
+ - IMPORTANT: often there are low % of users using all the resources, so take in consideration this for payments and sharing of resources
+ - TODO study fractal-like data structures
+ - TODO study columnar-stores
+
+ - every project has a group responsible of it
+   - in d1/p1/s1/t1 there can be distinct groups for every sub-project
+   - the first root group is responsible of all, and it delegates to other groups some responsibility
+ 
+ - every project can rebase a (maybe private) branch task, into a nice task/commit or export to some other project for pull merge
+ - an ardor or an IFPS named chain can be used for notifying of new added content
+   - a chain can serve as notification to the group
+   - the group review the pull requests
+   - another blockchain is used for official releases approved by the group
+ - the weight of users in a group is a file IFPS with the current status, and link to previous status:
+   - it can be decided by user proposing a weight like in poker
+   - it is all iterated until differences are not too much distant
+   - there can be motivations
+   - if there is no accord, it is voted by majority weighted
+   - the users digital signatures are used for being sure of the content of the discussion
+   - for every commit, there is a weight of this type:
+     - w: hard work (time estimated according other similar works, forming a logarithmic scale)
+     - g: genius/novel/good idea
+     - p: professional development (no problems, easy to integrate, mature)
+     - the final weight is: w*g + w*p
+     - the weight is added to the user total inside the project, and the % of the user is calculated
+
+ Content to archive can be moved with time to secondary storage or deleted.
+
+ History of the past fully merged-rebased (like progression of votes, discussions, etc..) can be removed with time.
+
+ Example of domains:
+ - a generic source code domain like git-hub, divided by author or organization
+ - a domain with curated list of software and resource for music, like freshmeat, but specialized for a niche
+ - in all cases important info is kept near and cluster and sharded accordingly
+
+ If the PG is trusted it can also compile shared source code, and apply regression tests, with an high reuse of resources.
+
+ A caching-node is a node of an user that is a mini DokMelody but without all the content, but that can interact with the cluster, and/or can host private and protected projects
+ 
+ Fork and merges:
+ - D1/P1/T1
+ - T2 is a pull request of T1
+ - if the group of T1 does not accept the merge, the T2 group can ask to create a fork D1/P1/T2 to P1 group
+ - if the group P1 does not accept the fork, it can ask for the D1/P2/T2 fork to D1 group
+ - if the group D1 does not accept the fork, then T2 create a fork like SOME-DOMAIN/P1/T2
+ - this schema is an extension of GitHub merge or fork schema
+ - metainfo and review sites, are used for identifying the reference variant of a project
+ - income of the forked project is in any case sent at 30% to the original project, or 70% if it considered a minor work/variant
+
+ IFPS is used as distribuited file-system, but files content is kept in compressed PG tables, and served to other nodes.
+
+ IFPS can form a blockchain.
+
+ User computers can collaborate in storing IFPS files, but mainly for backup reasons, or for storing rarely used files, or multimedial files that do not need to be processed by the processing cluster as content. 
+
+ Due the incremental nature of IFPS file content:
+ - PG tables must contain the final content of a file
+ - the IFPS files are needed often only for deriving the actual content, and then they can be "archived"
+ - in case the entire history is subject of the processing, it is considered main-content
+
+ Users pay the DokMelody network for resource usage, in bulk-way, and then the cost of used resources is reduced.
+
+ NOTE: a blockchain coin is safe because it uses the network of nodes for ensuring correctness. But it is "slow". DokMelody presumes that the PG cluster is safe, because it is randomly checked. So for non critical monetary questions, the result of the cluster is assumed correct. For important questions the result must be double checked from some users, or some indipendent clusters.
+
+ NOTE: in a blockchain there is the state of the system, that is derived from the blockchain. In DokMelody it is the same: the database state can be reconstructed from events of IFPS files, that are in chain and form a block-chain, also if in reverse mode. This is obviously very slow, but logical feasible.
+
+ NOTE: in IFPS connections are not always direct. In DokMelody whenever possible connections between a user and a service node are direct, so there is less latency. This is feasible because Dokstar is not an anynomous network. In case there can be an access using Thor.
+
+ Fairness of server resource accounting is double checked randomly repeating some queries on other clusters and comparing the result.
+
+ MAYBE for cheap resource counting parametrize CPU and RAM usage, and count the time of answer of queries and apply some mean, also because queries are fused and shared. 
+
+ A project stored on DokMelody main cluster can be marked as private:
+ - logically it is not exported to other groups
+ - phisically it is on a server, so it can be compromized
+ - storage resources are paid by users, but it should be a low cost
+ - they generate no income, because they are not seen by other users
+ - in theory they can be paid by users of the private cluster, so it can be a form of commercial software, but with exposing of users to the source code and project
+ - in many cases there can be a public project D1/P1/S1 and there is a private task S2, that is a change of code, then with a rebased pull requests. So only the bad work is put private, not the final work
+ - a project can be marked as DELETE, or MANTAIN BUT WITH LOW PRIORITY
+
+ A user client send to the DokMelody server the code to executed for the UI or for the query in form of Dok and Knil code. The code is fused with code of other queries, and a unified plan is created. Often the code of an user is exactly the same of other clients, because it is derived from the same library. Also hironically the code does not came phisically from the remote client, but from the PG cluster, because the remote client is only a Web UI commanding changes on the Dokstar PG cluster. The server with the code can:
+ - check for abuses
+ - instrument for checking resource usage
+ - heavily optimize and fuse with other plan queries
+ - calculate and send UI results to the clients
+ - if it is for an active query when there are changes in input data, recalculate the differences
+ - if the result is the same for many clients, then the server can export an IFPS file so it is naturaly cached and distribuited using multiple paths 
+ - and so on...
+
+ The sent code must be specify if:
+ - it is for active real-time (UI) query
+ - it is for a batch query
+ - it is for a maintanance query
+
+ PrivateServers:
+ - can collaborate with public nodes
+ - contains private data, that must be physically protected
+ - can form a private cluster
+ - it is like a DokMelody network, but using distinct chainblocks and IFPS network
+ - MAYBE can use the same network but storing encripted content
+
+ 50% of user planned payment go to the DokMelody cluster, for resource usage. Paid in advance. If at the end of the month there is left money it can be used also for the next month. Other 50% go to content revenue. Every few hours the PG cluster calculates revenue sharing, aggregating the data of some users, and then tell to users what pay to certain group. The paymente is cumulative and done merging the payment of all users and groups. So an user can pay EUR 1 to some group because there are other 100 users paying 0.01 to the group. The scope is reducing the overhead of payment network reducing micro-transactions.
+
+ The fact that every few hours some user pay, and some group is "calculated" is a way for creating a continous stream of payments. Too low payments are kept in the PG tables, and summed. In any case the cost of PG cluster for calculating this is order of magnitude simpler than if it is done from micro transactions, because the PG cluster is trusted and efficient. It can be double-checked.
+
+ New version of DokMelody server code can be developed in group, voted using Ardor blockchain and installed on the clusters, with dynamic migration of processing data. Dokstar code is a code project, with a group of responsible as other projects.
+
+ IFPS is a natural GIT based file system and repository.
+
+ Private emails, and public forums can be probably managed by DokMelody and associated (if enabled) to every project or part of a project. 
+
+ Think to a new form of email:
+ - urgent messages are notified immediately
+ - not urgent messages only when the user is ready
+ - processing fees reduce SPAM
+ - a message to a forum should be moderated otherwise SPAM is money efficient
+ - a mesage to a forum can cost a lot of money, but the money is returned if the message is not considered SPAM
+ - messagen between users can be done sharing a public/private discussion branch and storing changes to is an native IFPS files, and notification new messages on a shared channel
+ - private discussions can be encripted instead of only signed
+ - protected discussions can be enabled sending encripted messages on a encripted channel directly to caching servers, or to the most secure server indicated by the user, or for the project
+ - PG can use tables for storing email-like messages: 
+   - after few weeks it is deleted if not read
+   - not complicated because there is no SPAM due to the cost of sending messages in DokMelody
+   - not exposed to IFPS because it can be private
+
+Queries can be cached:
+ - predictable content
+ - search if exists in the IFPS network
+ - new versions calculated in advance from PG cluster when data change
+
+The income to a user is calculated:
+ - 70% of income of the project where it is part of the group, is distribuited according actual weight of the users
+ - 30% of income is sent according the weight of the most recent 3 months, so recent contributors are retribuited
+
+Legacy HTML export:
+ - there is usually no direct income
+ - it is "only" a cost
+ - band is cheap
+ - a project can decide if export or not the HTML view
+ - the URL can be DokMelody standard, based on the project chain
+ - there can be a CNAME in the DNS of the project
+ - the income of the group is deduced from the (cheap) cost of the bandwidth. Mainly used for avoiding abuses
+ - use some DDOS plan for avoiding hackers:
+   - MAYBE export the HTML content to some proxy/caching server where bandwidth is cheap, and under a DDOS firewall
+   - MAYBE the HTML content has generous caching directives
+   - MAYBE in future IFPS and GNUTELLA became a standard protocol, so spammer should also share and not only SPAM a site, otherwise they loose money
+   - MAYBE it is nice a protocol where each request cost money, but the client is an IFPS node, and can compensate with money from other requests
+
+ Stored but mainly content is a "passive" cost, in this sense:
+ - its cost is very cheap
+ - with time if not accessed can be removed
+ - it costs is added to users accounts
+ - if users stop to pay because their account is not renewed, the content is mantained
+ - if the content generate some income, it is deduced from the cost of the past
+ - the costs adds to the operational costs of active content, in a negligible way
+ - monitor the situation and remove very big content without any useful income
+ - says explicitely that in DokMelody if something is not generating income, then it is deduced that it is not useful, and so it is eligible for being removed, expecially if there is no user paying for it
+
+ Probably I can not use Ardor, and only XRP and IFPS:
+ - every project can expose an URI inside IFPS
+ - the URI is used for pointing to the HEAD of a blockchain implemented in IFPS
+ - the blockchain contains all the last info of the project
+ - TODO continue 
+ - this is a read chain, and it can be written only from the owner of the project and an element of the chain is valid only if it signed by the majority of the project GROUP, and in decreasing order 
+ - TODO check how to accept write requests and messages toward an IFPS project URI
+ - MAYBE use paying transactions (for reducing SPAM) and store the message in a PG table
+
+ Content that can be derived is marked as DERIVED in the IFPS file system, and in case of lost of space it can be deleted.
+
+ User personal-inbox:
+ - an user can have a DokMelody URL with his events/feeds
+ - this allows only from User to World/subscribed users information
+ - every user can enable an inbox queue:
+   - user-id can be hashed and shared to different physical queues according the number of total users, and the ID
+   - the queue store messages to the user for a certain amount of time
+   - an user must pay for queuing messages, so there is SPAM protection
+   - if an user retrieve a message from the queue 
+   - TODO continue
+
+ User personal-online agent:
+ - an user can have a DokMelody URL with his events/feeds
+ - this allows only from User to World/subscribed users information
+ - an user can register an inbox queue associated to an always online node
+ - TODO think to contracts, delegated firms and so on...
+
+ The pass-away access:
+ - an user can have a DokMelody URL with its events/feeds
+ - the feeds includes a ping when he is online phisically one day (not through agents)
+ - an user can inform when he is in vacancy, and it is expected there are no pings
+ - the user set a number of days without ping that are suspect
+ - if there are these days without ping, the user configure an email or some other communication sent to accounts of his choice, with instructions on how retrieve private passaway documents
+ - a document tagged as passaway document, is a normal Dok document, stored in IFPS but stored also encripted with a key used only for pass-away manegement
+ - TODO continue
+*** Server Collaboration
+Concepts:
+- node: a server collaborating with other nodes
+- physical-server (PS): a server with some distinct resources
+- node-resources:
+  - CPU
+  - bandwidth
+  - local I/O
+  - storage
+  - RAM
+- node-functions:
+  - backup of data, and GNUTella caching/backup of data
+  - sending GNUTella data to other clients
+  - build software and test, when there is enough local info in the node
+  - answer to queries, when there is enough local info into the node
+  - send results to local/near clients
+  - update the UI
+- cluster: a set of nodes trusting each other, with a root of the cluster, and collaborating for answering queries, and sharing resources
+- domain-server (DS): a server answering questions about a domain and knowing all about a domain
+- domain-replica (DR): a DS containing a complete replica of a DS, and that can replace fully it  
+- sharding-node: a server connected with fast network access to a DS cluster, trusted by the cluster, that is part of the cluster and used for scaling horizontally a DS adding CPU/IO/RAM resources to the cluster.
+- caching-node (CN): a node caching some content of one or more domain, but without a fully copy
+- client
+- query: a service request to a server from a client. Queries can be:
+  - real-time-queries (RTQ): related to UI, and so on. Usually not cached. Unde 0.Xs of answer.
+  - fast-queries (FQ): search in the knowledge-base, can be cached, usually ~ 1s of answer.
+  - batch-queries (BQ): AI learnining algo, stats, build/compilation of software, regressing tests
+  - maintanance-queries (MQ): rebuild index, garbage collection and so on
+- a DR is slow when it can not process the type of queries within the time boundaries decided by QoS
+- a DR can be too slow because:
+  - it has too much clients, in case a new DR can be created
+  - the domain is too big for processing the queries, and more I/O bandwidth is requested, in this case the DR can scale horizontally, or more sharding nodes can be added
+
+A sharding-node extends the performances of a DS and DR, because more CPU/bandwidth/IO is added to a logical server, but it is a single point of failure.
+
+A DR make a domain more robust, because they are usually:
+- distinct servers
+- distinct zone of the planet
+- different administrators not sharing the same passwords and backup methods
+
+Every domain indicates the minimun characteristing of a DR, and it depends from the domain dimension and it can increase with time.
+
+The big picture is this:
+- sharding-node, and DR are added to the network
+- trust is mantained because the client using a DR can check some query results on the parent DS of the cluster
+- a client pay the services of the DR is using
+- DR can be used according also physical proximity
+- every user and organization can create a chain of CN. They are useful to the network because:
+  - they can in any case cache and backup Gnutella content
+  - they can receive build and testing works from the network
+  - they can send GNUTella content to other interested clients
+- every CN is payed not with money, but with free access to services of other nodes in case of need, like in case of bittorrent protocol
+- every type of fetaure requires different resource usage characteristics (complie software vs send UI updates, etc..) so a CN can play different roles
+
+The workflow is this:
+- you start as client
+- you use the service of some DS or DR
+- you install a CN
+- you say that the CN can accept work from DR and DR using a % of resources
+- your CN does not use resources if they are not free
+- your CN does not receive money, but points like in case of bitorrent, and compensate when it access to other network resources
+
+Another workflow is this:
+- you install a DR
+- you register the DR to the DS
+- a DR loose trust points if it can not answer to requests it accepted, due to too many customers accepted, or because the domain became too big for the DR, but in any case it is a slowdown to answers to queries
+- a DR can be trust for buids and other tasks, but not trusted anymore for real-time queries and fast queries
+- the trust level start from maintanance tasks to real-time tasks
+- a DS favours first the DR registered for first, so they are  always busy, and it is a form of protected market
+- new DR are always informed of the load of the network, and if they will be receive money, so an admin can decide if it is good creating a DR in a certain zone
+- clients can connect directly with DR they like
+- money go from clients to DR according the used services
+- clients switches replicas when they are not satisfied from performances, so there is less money to the replica
+- clients pays the DR is using, and the DS for the random check on queries it is performing for trusting the DR
+- the income of a DR is parametrized on:
+  - the cost of a server good for the domain, mantained in the zone of the DR
+  - the cost is 2x the reference cost, so admin costs are payed
+  - the cost 2x is payed if the server is used at a 50% of its resources 
+  - the server comunicate for each request the resource used to the DS
+  - the DS can ranomly double-check these things
+  - there is no stole of money, because a client using DR resources, pays money directly to the DR, and so the DR can not receive more money than the money it is collecting from clients. The network is only used for:
+    - collecting the in/out of money, and making final aggregate payments
+    - double checking trustness of DR
+
+The final effects are:
+- globally it is a distribuited GNUtella sending, broadcasting, backup, storing of info
+- gloabally and locally CPU resources can be shared 
+- there is a random check between servers, and so trust can be mantained
+- you can create private branches/channels of info 
+*** Answers to Queries and Services
+- a server is in ready state if it has no queue of pending requests, but it is processing requests
+- a server is healthy if it is in ready state for 90% of the time
+- TODO continue
+- more requested queries can be revaluated automatically using intra-queries, when new data is pushed, and the cached result published on gnutella
+- the idea it is that the more common queries have precalculated and shared answers
+- these precalculated results can be with time discarded from the network, when they are no more accessed/useful
+- for certain CPU intensive requests favours servers in time-zone where there is the SUN or other renewable sources of energy
+*** Differences between Gnutella source files and Fast Server Synchronization
+ The servers sharing a similar domain use this method:
+ - X is the main domain server
+ - X publish a compact binary representation of the domain in form of PG tables
+ - Y is a new server that want join the domain of X
+ - Y must be on a fast network visible from X
+ - Y download the domain seed
+ - Y receives from X a WAL (binary-LOG) update of all updates to the binary representation of data
+ - Y can accept local transactions merge requests from users
+ - if a local transaction start from Z and Y, then it must remain always on Y
+ - when the local transaction is merged into a top transaction on Y, Y can send the transaction info to X (its parent server) in form of GNUTELLA link with public accessible content
+ - there is a log-stream of added up-stream transactions to the system, with meta-info about the server and involved users
+ - these top-level transactions must be merged with the binary data inside the tables
+ - they are up to date in the local tables of Y and of servers accepting the top-level transaction
+ - the top-level transaction became a public accepted transaction of the domain only when the root server of the domain incorporate it in the domain:
+   - it can request for changes before merging
+   - it include it informing in the LOG that it was included
+   - child servers can delete it from the local tables, because it is in the public tables
+   - child servers can store (in case of differences) a patch in the local tables, respect the merged public transaction
+   - all other servers became aware of new transactions only when they are included in the root server of the domain
+   - a chain of servers collaborating toghether can view a transaction when it became part of the shared LOG 
+
+ Servers form a chain of this type:
+ - R: root server of the domain
+ - C1, C2, C3: collaborating servers
+ - C1-D1: server collaborating with C1, and that recognize C1 as its authorative parent, e.g. D1 is a local instance inside organization C1
+ - C1-D1 has internal tables, then tables for C1, and then tables for R
+ - the way C1-D1 collaborate is the same way that C1 collaborate with R
+ - the design of the application must be done considering that in any case there are not very deep hierarchies of collaborating servers, and that info at certain point will be merged (when it needs to became public), or mantained only for local archiving (in C1-D1 for example mouse-gestures), or in C1 (company private data).
+ - every time R send info to C1 it do it in the form of fast binary updates to the R tables 
+ - every time C1 sends transactions to merge to R, it does it in the form of GNUTELLA logical updates to check and insert in the table
+ - so the root server for a domain must scale for absorbing the queue of updates, and it can offload cheaply the read operations
+ - a server C1 can perform complex integrity-constraints checking. The server R can not done them, and signaling that these were done from C1, and then they are checked randomly. So server R can insert data in the tables in a more fast way.  
+ - a server C1 can serve public data that is a branch of R public domain:
+   - the branch has a name 
+   - C1 mantain original R version with patches
+   - the tables of the branch are separated from R tables
+   - R is not heavy loaded with the branches
+   - users interested to the branch can cache them
+ - a server C2 interested to all C1 content, can decide to act as a silent replicator:
+   - it load a bitorrent dump of C1 data
+   - it signals that it wants to be subscribed to binary changes in tables of C1
+   - it can receive these changes from C1 or from another server interested to them
+   - the stream of changes is signed with the firm of C1 every XX bytes so it can be safely shared
+
+ Data is managed in this way:
+ - there is a logical DAG: every node of the DAG is a GNUtella like file, referencing its parent, the data changed, and so only
+ - every DAG NODE is human readable: it indicates the mime-type, the version, if it is a binary blob (image and so on)
+ - every DAG NODE is put by DokMelody in a compressed PG BRIN-like table, and the insert sequence is good also for retrieving the nodes
+ - the PG table is a physical stream/log, while the format is a DAG
+ - a server C1-D1 has a PG table with private DAG
+ - C1-D1 can ask to C1 a merge of its transactions:
+   - create a rebased PULL request transaction, with only public accessible info
+   - publish the request on the C1-merge table
+   - C1 and C1-D1 interact for merging the request
+   - when the request is considered ok, it is put in C1 public DAG of the domain
+   - C1-merge log is "public" to all C1 enabled users, all can vote, and it is like an history/community of how and merged patches
+   - C1 log does not contain the details of C1-merge log, but there is in any case a referenc to the C1-merge history if someone is interested
+   - when the transaction became public, the C1-D1 private LOG store the info about the merged transaction, and how it is patched respect private info of the transaction
+ - in any case the transactions have a built-in logical view of nesting and branching
+ - the different tables, are used for having LOGs with a different physical security access
+ - then data in the DAG LOG is put inside binary PH tables and indexes. These are used for:
+   - fast access to the data
+   - data process and answering to queries
+   - this content can be always reconstructed processing near sequentially the DAG LOG
+ - the DAG is efficient, but it can also be backup-ed and recreated using a GNUTELLA network. Useful for intelligent backup and sharing of data.
+ - as a GNUTELLA DAG, it is DAG, while on PG table it can be seen like a pseudo-log, but it is a DAG because every NODE depends not from its previous nodes (implicitely) but it depends from referenced nodes explicitely.
+ - the nature of the DAG LOG favours this:
+   - reading sequentially the DAG LOG it is likely that all the info for recreating the binary efficient form stays always in the RAM cache
+   - it can be written efficiently sequentially
+   - it can be effeciently compressed
+   - also in Fossil, the DAG and delta-patches format allows to compress multi-gygabytes sets in few mega bytes, so it is efficient storing all the changes
+ - there cane be a DAG LOG purge phase, when inner transactions can be removed from the LOG and only final results can be kept. For example info about mouse movements, micro editing operations and so on
+ - it can be used the code of Fossil or Piju for managing DAG in a relational database
+
+ There can be a DokMelody application DAG/LOG storing these events:
+ - it is published the last/head version of the DAG
+ - old events can be retrieved on demand, and if they are interesting
+ - usually only few events are interesting
+ - links to bittorrent version of a domain in binary PG form for fast initialization of a node
+ - links to WAL-E binary replication from the initialization info 
+ - all this info can be discarded with time and it is cached only permanently
+ - in case of big changes in the data structure, there are also DML update commands for indexes and so on, that are more efficient to be executed on shared servers, for updating the data, respect sending again all the base binary info
+ - in practice this LOG has as domain the application management
+
+ DAG have these property:
+ - public upstream limit (how much they can be sent to upstream: 0 private, 100000 to the root of the domain)
+ - cached derivable info: true if it can be removed
+ - permanent info: never removed
+ - other criteria for determining when it can be removed or not
+
+ It is like a hierarchical GIT (DAG) with potentially private and rebased branches, where it is mantained a link to the rebase. Because there can be links to other commits/info, then there can be various added meta-info like issues, wiki, documentation, discussions.
+
+* Papers and Technologies to Study
+** Parse many document formats
+http://tika.apache.org/ extract info from many document formats
+** IOTA
+In IOTA a node submitting a transaction had to verify also other two transactions more or less randomly.
+
+In DokMelody every node can sign his answers, and it can verify the work of other nodes.
+
+Every result can be cached like in Nectar, and signed.
+
+TODO use this technology for giving votes and trust to nodes of the network
+https://dapplife.com/coordicide-why-iota-may-have-solved-blockchains-scaling-trilemma/
+** https://keybase.io/:
+   directory of user credentials
+** https://github.com/arguman/arguman.org
+System for discussing idea based on arguments
+** Knowledge base tools and Data Mining
+- http://protege.stanford.edu/products.php#web-protege
+- https://kdl.cs.umass.edu/display/public/Proximity
+** LMDB
+https://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database
+- read oriented
+- acid transactions
+- nice with RAM
+- but data is not compressed natively
+- very small code footprint
+- very robust
+- btree based and slow with many many GB of data
+** Disruptor
+1000x faster than queue based communications between process on the same system.
+
+It has nearly the maximum physical bandwidth.
+
+TODO compare with ZeroMQ
+
+TODO compare with http://www.seastar-project.org/
+** String library support and other fast data structures
+Http://javolution.org/ 
+** IBM J9 and OMR
+IBM Eclipse OMR project is a series of tools (garbage-collector, JIT, etc...) for implementing a new language run-time, without starting from scratch.
+
+It is used for IBM J9 VM, but the run-time is generic and it can be used for Python, Ruby and many other languages.
+
+It is different from Oracle Graal project:
+- it is a "classical" run-time, where one give hints to the GC and so on
+- it is written in C++
+
+Both Graal and OMR are used in production for real projects.
+
+Probably Graal is more advanced:
+- different languages can cohexist with very few overhead
+
+Probably OMR is more lightweight: less RAM is needed.
+
+Probably OMR is a sort of LLVM with some aspects already solved: GC, efficient JIT, instrumentations and management of code.
+** Builds Systems:
+ - https://blog.netbsd.org/tnf/entry/netbsd_fully_reproducible_builds
+   - reproducible distribuited build system
+ - https://github.com/bazelbuild/bazel
+   - reproducible distribuited build system
+ - http://physics.oregonstate.edu/~roundyd/fac/
+   - interesting make alternative
+   - register the commands and the files in a build process, and then create fast upgrade plan
+ - http://jasonwhite.github.io/button/docs/
+   - automatic incremental build system
+ - http://gitian.org/ 
+   - distribuited build tool with double check of the results
+** [1]D. Hovemeyer e W. Pugh, «Finding Bugs Is Easy», n. Icdl.
+Methods for finding bugs in code in an automatized way
+** MAYBE http://cwe.mitre.org/ automatic software analysis :formal_verification:
+List of errors that can be found in code.
+** [1]J. Arndt, «Algorithms for programmers», 2007.
+Low level code transformation tricks (bit oriented and similar) for creating equivalent code that is faster.
+
+Create compiler-plugins with these rewrite rules.
+** [1]J. Tschannen, «Automatic Verification of Eiffel Programs», pag. 81.
+Automatic theorem prover that tries to prove statically that the code respect contracts.
+** BW-TREE
+Efficient data structure for writing to RAM or disk, favouring consecutive storage.
+** Undertow Java Web Server
+- 4MB of RAM
+- fast
+- non blocking IO
+- a sort of NGINX for Java
+** Garbage Collector che lavora bene con poca RAM    :memory_management:
+MC2 high performance garbage collection for memory-constrained environments - Sachindran, Moss, Berger
+
+when there is a lot of RAM a garbage collector is rather fast. But when there is few RAM a GC can be a lot slower than manual and optimal RAM management.
+** The string b-tree: a new data structure for string by Ferragina
+Strings saved on btree on disk, with compression and fast searches and other functions.
+** http://www.omg.org/index.htm
+Example of DB schema that can be useful
+** ArangoDB Multy paradigm GraphDB
+It is graph, document and key-value store. On HackerNews many said it is stable and powerful.
+** UI ideas
+http://worrydream.com/MagicInk/
+** dynamic layout of graphs
+http://www.dynagraph.org/
+** Authentication service
+https://github.com/hypebeast/micro-auth
+** Parallel fast PG DBMS
+https://greenplum.org/
+** ETL tool for big data ingestion and processing with diff
+It seems used in production.
+https://github.com/pachyderm/pachyderm
+** Produce graphs and schema
+https://mermaidjs.github.io/
+** Korfu: distributed shared log with blockchain like techonology
+https://blog.acolyer.org/2017/05/02/corfu-a-distributed-shared-log/
+** Timescale extension for PG
+https://github.com/timescale/timescaledb
+** Revolutionaly GUI written in CLOS
+https://common-lisp.net/project/mcclim/excite.html
+** Very fast persistent immutable data structure for C++
+https://sinusoid.es/immer/
+https://github.com/arximboldi/immer
+** Compares different PL GUI Toolkits from the point of view of code
+https://eugenkiss.github.io/7guis/
+
+TODO try the same task with DokMelody IDE
+** JUNG Graph analysis and layout for Java
+https://github.com/jrtom/jung
+** PG + ZFS
+https://www.slideshare.net/SeanChittenden/postgresql-zfs-best-practices
+
+Advocate that PG on ZFS is a very good match.
+
+MAYBE study and think to some BSD+ZFS+PG based distro of DokMelody server.
+** Tools for static code analysis
+https://en.wikipedia.org/wiki/List_of_tools_for_static_code_analysis
+** OSv
+ OSv is a unikernel for JVM, that in part resolve the problem of context switch, because it runs all in the same address space. So maybe it reduces the needs for using seastar like technology.
+** Visdata for data viewing
+http://visidata.org/about/
+
+It seems a pragmatic approach for managing some data.
+
+TODO take inspiration and best ideas
+** CodeBubbles
+http://www.andrewbragdon.com/codebubbles_site.asp
+
+IDE based on bubbles navigation.
+** SQLite + LMDBB + nested transactions branches
+https://github.com/aergoio/litetree
+** BigData by Apache
+Apache Arrow is a fast and standard in-memory columnar library and format.
+
+Apache Parquet is a fast and standard on-disk columnar library and format.
+
+They are used by many Apache projects.
+** Chart library with new way to visualize data
+https://dexvis.net/
+** Eve https://futureofcoding.org/essays/eve/ 
+http://witheve.com/
+
+Eve is an adavanced UI tool with a lot of new ideas.
+
+It was inspired also by Bloom project in some idea because it has an out-of-order language.
+
+The project was shut-down for lack of resources.
+** https://github.com/ssbc/patchwork
+Patchwork is a decentralized clone of Twitter, but it is based on the generic tool 
+https://www.scuttlebutt.nz/ that can share an append-only secure log, and other interesting features.
+
+Federated servers can share messages in a secure way, and keep synchronized, and sharing a safe append-only log.
+
+It works also offline and then synchronize with other computers also detached from the network.
+
+TODO see also this http://www.radicle.xyz/
+a GitRepo and other things based on IPFS so not federated but fully distributed
+** create a company server (email and so on) using NixOS
+https://github.com/nixcloud/nixcloud-webservices
+https://github.com/nixcloud/nixcloud-webservices/blob/master/documentation/nixcloud.webservices.md
+** http://rosecompiler.org/
+System used in practice for analyzing large code bases and transform them.
+** https://rr-project.org/
+Debugging tool based on registration and replay of code.
+
+FACT used in practice.
+** Compress data in RAM
+ http://blosc.pytables.org/trac
+
+very very fast compression and decompression. Faster than sending uncompressed data.
+** Impala/Thorin for partial evaluation 
+https://anydsl.github.io/
+
+- it uses partial evaluation for optiming generic librarires
+- it has a run-time based on CPS
+- it seems interesting
+- fast as C
+- supports FRP and native code FFI
+
+TODO compare with GHC core, GRIN and other IR used from UHC Haskell
+** Garbage Collector Library
+https://www.ravenbrook.com/project/mps/
+** very efficient compressed bitmaps
+http://roaringbitmap.org/about/
+** Event sourcing
+study https://msdn.microsoft.com/en-us/library/jj591559.aspx

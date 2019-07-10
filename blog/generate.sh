@@ -20,9 +20,14 @@ do
   sassc -t compressed -m inline $file out/css/$base.css
 done
 
-# NOTE: the Dok.html must be updated manually inside Emacs org-mode, with "m e e h h" sequence
-mkdir -p out/dok-lang
-cp -f -r ../docs/dok-lang/* out/dok-lang/.
+# NOTE: these HTML documents must be updated manually inside Emacs org-mode, with "m e e h h" sequence
+# and check no error messages are displayed, otherwise it will be used the last version of the document.
+for d in dok-lang dokmelody scratchpad
+do
+    echo "Copying $d"
+    mkdir -p out/$d
+    cp -f -r ../docs/$d/* out/$d/.
+done
 
 raco frog --clean -bp
 

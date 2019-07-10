@@ -1,0 +1,476 @@
+#+TITLE: DokMelody
+#+AUTHOR: Massimo Zaniboni
+#+EMAIL: mzan@dokmelody.org
+#+CREATOR: Emacs Org mode
+#+LANGUAGE: en
+#+TODO: TODO MAYBE IMPLEMENT | DONE CANCELED
+#+BIBLIOGRAPHYSTYLE: unsrt
+#+BIBLIOGRAPHY: citations plain
+#+ARCHIVE: archive.org
+#+OPTIONS: toc:2 num:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="org.css"/>
+
+* License 
+This document is released under ~SPDX-License-Identifier: CC-BY-4.0~
+
+Copyright (C) 2019 Massimo Zaniboni - mzan@dokmelody.org
+* Current status 
+It is a work-in-progress and nothing is implemented! Many notes are in scratchpad status, because I'm not yet sure of the complete design.
+* Overview 
+DokMelody aims to be:
+- a customizable environment for analyzing and transforming knowledge of every type
+- an IDE for programming in various programming languages
+- a distributed network of shared knowledge and documents
+- a collaborating community of users and content creators
+- a channel for funding content creators
+** Features 
+DokMelody is a development tool and environment for data management applications. Each possible application use the same paradigm, and it can use the data managed from other applications.
+
+DokMelody tries to combine in an effective way the complementary strengths of current well known data management technologies:
+- relational database systems: efficient management of large databases;
+- deductive database systems: declarative, logical rules can derive new facts;
+- ontologies: clear and natural description of complex knowledge-bases through classes, relations, individuals;
+- object oriented database systems: an effective modeling approach  where application domain can be specified using objects and their relationships;
+- temporal-databases: databases where facts have a valid-time;
+- fuzzy logic: facts can have different degree of truth and the  system can answer fuzzy queries like: "search for not very expensive computers with a large display" where "not very expensive" and "large display" are fuzzy concepts;
+- document management systems: the system stores, analyzes, categorizes, retrieves and transforms documents;
+- compound document user interface: a document centric environment where widgets are responsible for the management of a certain type of  information and can be integrated seamless with other widgets;
+- data revision control systems: management of multiple revisions of documents and database facts;
+- work-group applications: the system helps effective collaboration between users (off-line work, synchronization, conflict resolution, long-transactions, nested transactions shared with other member of the groups, accountability and traceability on who / when / why changed a  piece of information);
+- work-flow applications: the system enforces a structured working process;
+- agent based systems: the system reacts actively when the database satisfies certain conditions;
+- data stream processing: the system can work efficiently on a continuous data stream of new facts arriving from the real world;
+- information retrieval: the system helps the user to search for relevant information;
+- data analysis: the system summarize data into graphs and textual reports and allows users to explore the database; 
+- data mining: the system discovers (or suggests) new relationships between data;
+  
+* Card Based UI Paradigm
+** Cards
+The idea is dividing content into postcard-like small frames that can be scrolled like in TiddlyWiki.
+
+A card has a subject, and from the subject all other views are derived. 
+
+A card has compatible viewers: different viewers showing the same subject, so the user can rotate the viewer used.
+
+Focus card = it must be displayed at the same time with another card, because it contains indispensable information for the current task
+
+Task card = it is part of a task, but you can access it using scrolling. It must be accessibble, but not always visible
+** Selectors
+A selector is a card:
+- opened for selecting an element
+- one can navigate and open other sub cards
+- when the element is selected, the card is closed, and the selected element is put in the source container
+
+A permanent selector is a card:
+- always opened
+- used for opening other cards
+- opened cards are put near the permanent selector, and they go from top to bottom, so the last card are the older
+- it is like a lifestream stream and older cards fade away
+- the permanent selector has a frame containing itself and the opened cards
+** Links between cards
+There can be arrows linking an element in short form to the open cards.
+
+A card can be moved, closed, expanded, split, tabbed, change type of GTD mark.
+
+A card can absord other cards and playing the role of a container.
+** GUI modes
+The GUI modes are:
+- content navigation, i.e. search for content
+- meta-info adding, i.e. annotate useful content with private task meta-info
+- content editing, i.e. perform the task modifying the content
+
+User can switch to GUI modes using some fast combination of keys. The content-navigation and meta-info adding mode are the same, because searching and annotating are the same logical operation.
+** Navigate in a table
+Example for navigating in a big table:
+- show only part of the table, without table slide bars
+- if another part of the table is needed add the part below adding a post-card to the top or bottom, like in TiddlyWiki
+- add notes to the part of the table that must be maintained fixed because it contains useful content
+- all added notes are private taks meta-info related to the private navigation task
+- private task metainfo can form a list or a tree so one can navigate quickly between annotated content, so workspace is a tree of navigation and annotated things
+- private task meta-info can be discarded at the completition of the task, or in any case keept in a private branch, only the task editing is exported
+- optionally one can add public task meta-info if he want to document the changes. For doing this it enters in "export task meta-info" mode, and edit the task meta-info before exporting it. The private task meta-info remain, but only in the private branch. 
+** Coding example
+Example of coding GUI:
+- function code in the center
+- left: task notes
+- right: notes on the programing language, the overall picture and low-level details
+- completition help baloons are added to the bottom like in case of the table, and they vanish with time, because it is not edited content
+- in the center there are only functions or internal loops and other code, not the entire file, so one can focus with the exact part of code he needs to change
+** Spacemacs like navigation
+Spacemacs menu are good:
+- memonic
+- visually navigable if you don't remember the keys
+
+First command, then selection. The inverse of traditional GUI because it is more natural. Selection became an explicit command. After something is selected, there can be commands acting on the selected zone.
+
+Use these keys combinations:
+- SPACE: insert spacebar
+- SPACE BAR + key: start a command directly, useful when one remember the command
+- LONG SPACE BAR PRESS: show root menu, when one not remember SPACE BAR + keys
+
+Examples of commands:
+- SPACE + g = move commad
+- SPACE + s = select command
+- SPACE + m = visual move command, and use keys on the right keyboard for selecting the zone to select, with sucessive refinements, in a grid like mode 
+** Widgets
+TODO take inspiration from:
+ - lifearea
+ - snoptchat smalltalk based IDE
+ - tiddlywiki
+ - proxima
+ - hypercard
+ - Grif
+ - OTR and queue concept
+ - Kanban tool with the state in which is every task
+ - Freemind/MindMap tools
+
+Use forms with top-down ENTRIES: a line for LABEL, a line for DATA, a line for HELP:
+ - they are easier to read
+ - there is more space
+ - http://uxmovement.com/design-articles/faster-with-top-aligned-labels
+** Optimize functionalities of UI elements
+Whenever possible elements must support different scope. For example the scroolbar:
+- show the position inside the document
+- show an aproximate length of the document
+- allow to change/scroll inside the document
+* DokMelody possible applications
+** Document and Knowledge-base management tool
+*** Tasks
+Tasks are hierarchical (i.e. nested).
+
+Tasks can be private or shared with a group or public.
+
+A task has:
+- requirements (problem to solve)
+- precise outcome (checklist to respect at the end, formal acceptation of the task completition, things like: code, regression tests, send email to ...)
+- facts (research/analysis, documentation, high-level concepts)
+- actions to do 
+- sub tasks (again composed of requirements, facts, actions)
+- branches (try different approaches, before choosing one)
+*** TAGS
+TAGS are user (or agent) specified annotations (so meta-info) added to some subject.
+
+TAGS are hierarchical: a generic TAG like TODO can contains more specific TAGS like TODO-LATER, TODO-URGENT and so on.
+
+TAGS can be selected using a mindmap like tool.
+
+Filters and so on are mainly based on TAGS.
+
+Many TAGS should be automatic set.
+*** Event Triggered Workflow System
+[1]J. Wang e A. Kumar, «A Framework for Document-Driven Workflow Systems», in Business Process Management, vol. 3649, W. M. P. van der Aalst, B. Benatallah, F. Casati, e F. Curbera, A c. di Berlin, Heidelberg: Springer Berlin Heidelberg, 2005, pagg. 285–301.
+
+Information and task workflow is not rigid but flexible because it is specified according constraints, requirements and events.  
+
+Tasks can be classified also according their domintant cost:
+- task time-frame/deadline, i.e. time window is more important, postpone not urgent tasks later
+- task place, i.e. travel time is more important, execute all the available actions
+- task difficulty, i.e. focus is more important, avoid distraction, execute multipass later
+*** Lifestream Inspired Interface   
+ The lifestream software architecture by Freeman
+ [1]E. T. Freeman, «The Lifestreams Software Architecture», pag. 185.
+
+ Lifestrea uses these concepts:
+ - filename is not so important
+ - documents are put automatically in virtual directories according their dynamic classifications
+ - archiving should be automatic, and not done from the user
+ - systems should summarize info of the past, and then expand it later
+ - users remember a lot of things according the time and the context, so showing related content edited at the same time during the same work is very very important
+ - import and export of data should be automatic
+
+ Lifestream UI uses these concepts:
+ - documents are inside streams
+ - every stream has a past (not editable info), present (editable info), and future (appointmente in the future)
+ - every stream can be summarized: Summarizing is a way for reducing the amount of information. For example now I'm summarizing the paper. Billing applications summarize the income and outcome, and so on.
+ - if a user open a new stream, the old disappear from visual view
+ - operatinos inside streams are NEW, CLONE, TRANSFER, FIND, SUMMARIZE
+ - FIND opens a new lifestream according the criteria
+ - SUMMARIZE accept a lifestream and according its content it produces a summary. For example given a list of TODO it return a shor list of TODO prioritized by urgency
+ - agents are automatic scripts reacting to events
+ - experiments show that people remember the time (relative/absolute) very precisly
+ - it uses Linda tuples for specifying agents and rules on documents
+ - TODO the rule are written in explicit way: study them
+ - uses mime types for documents
+ - documents put in the future, like email in the future, are sent in the future, and  not immediately
+ - the system was used effectively at least for an year in a network/office
+ - they customized it writing agents for processing bookmarks and useful info
+   
+In DokMelody the card-based UI favours working on time-related content. But one should restore the same time-related workspace if had to work again on an interrupted task.
+
+TODO see Lifestream paper containing screenshoot and adopt some idea
+*** Check-lists
+DokMelody must supports check-lists, i.e. a list of repetitive sub tasks to do before completing the main task. 
+
+Check-lists are useful also during development, for being sure to take in account many different aspects like error-reporting, some user-requirement etc..
+
+Nested transactions can be linked to checklists, so it is clear and documented what was done for respecting a point of checklist.
+
+Check-lists are useful also if one is stuck on a problem, because they can be list of recurrent useful trick to try to apply.
+
+A good check-list leave free the mind of developer to focus on a detail at a time, because he is sure to not leave nothing behind.
+
+TODO read and apply ideas of http://www.aldana-online.de/2010/09/25/power-of-checklists-in-software-development/ 
+**** Hierarchical checklists
+ Complex tasks can require hierarchical (i.e. tree-based) checklists.
+*** TODO-Driven development
+Complex tasks can be planned creating first a checklist and then completing the details.
+*** Events, Agents and customizations
+The idea is creating a very smart environment, with Agents acting like assistants.
+
+There are agents analyzing data and adding suggestions to the user of the IDE:
+- fast IDE-related local agents
+- slow local agents analyzing local data
+- slow server/graph agents analyzing info in the background for deriving facts and considerations
+
+Often it is more useful analyzing events instead of materialzed data, because in events there is more information.  So DokMelody must be an Event Sourcing system:
+- events are put on a common bus.
+- There can be agents reading events and suggesting things to the user:
+   - what data retrieve
+   - best use of keybindings and application functionalities
+- events are ordered by detail level and they can be hierarchical
+
+Attribute-Grammars and logical rules allows for powerful specification of agensts and UI widgets.
+
+The UI can expose local events on a DBUS-like and agents can suggests actions or collaborate with the user:
+- resize windows
+- signal important events
+- do not signal too much recurring events
+- set "do not disturb state"
+- etc.. 
+** IDE for programmers
+*** Code development as data transformation process
+Development is the transformation of end user problems, into working code.  So it is a knowledge-based process. In DokMelody an high level piece of documentation is transformed iteratively to final code. All the passes can be reviewed and different paths can be followed.
+
+There are two axes of transformation during development:
+- refinements from high-level to low-level
+- fix issues inspecting low-level details and understanding their effects on the system and their rationale
+
+With DokMelody developers can navigate inside information.
+*** Ticket Transformation Process
+ A ticket has:
+ - an INTENTION description: the reason the change is happening
+ - a CONTEXT: 
+   - runninng context is related where the ticket will run
+   - discussion context is related to the forum messages and discussions leading to ticket development
+ - a REQUIREMENTS list: the features the change must have
+ - SUB-TICKET: low level tickets are the implementation pass
+ - TASKS: concrete actions that must be done
+ - various versions with discussions before merging
+ - BRANCHES: different way to implement the same INTENTION
+
+A task can be associated to some configuration of cards, and the configurations can be opened when the task is opened. 
+*** Literate Programming
+In an application its domain is the most important thing: if you don't understand the domain, the application has no practical usage. For example in a banking application, the developer not expert of banking, should become an expert of the domain reading the source code, because requirements, context and intentions are clear.
+
+So DokMelody should alwasy link every piece of code, to high-level domain descriptions. They are external links, but the link must be present.
+
+There should be also a common vocabulary of terms for a certain domain. This is also an idea of DDD.
+*** Research and Development Tasks
+A research-and-development task is a complex task requiring a:
+- research phase, where useful info is collected
+- a development phase where a plan is created
+- an execution phase
+- every phase can influence the other phase, back and forth
+- every phase can have subtask that can be themself complex tasks
+- every phase can have different branches exploring different research and development path
+
+The GUI in case of complex tasks should use this arrangement:
+- a permanent focused objective of the task on the left or top
+- collection of info and annotations to study in the center or in the middle, and it can scroll
+- an execution plan on the left, or in the bottom, and always focused
+
+Every complex task can support different branches:
+- a branch is an alternative version of the document of one of its parts
+- an user can work with different branches in parallel choosing which is the best:
+  - format a table in different way
+  - try a different value for a param
+- branches must be mergeable
+
+This can be used in different contexets:
+- during coding the task objective on SX, the programming notes on the middle, and the code on the left
+- during code design the requirements on SX/TOP, the programming notes in the middle, the design on the left/bootm.
+*** Code reuse 
+Reuse is the most important factor for reducing time and cost of software development. 
+
+DokMelody should favor reuse of:
+- code
+- concepts, information, lesson learned, check-lists
+- business data models
+
+The problem of reuse are leaky abstractions. So DokMelody must solve this problem:
+- making code inspectable, and customizable in case of drawbacks
+- comparing different solutions
+- using many indipendent layer of abstractions, through AG transformations
+- assigning layers abstractions to payable maintanaires that can improve them collecting shared funding, or by monthly taxation, or for solving concrete problems
+- in Dok, libraries can be active. So more knowledge can be injected, and they can be improved, acting like assistants of the programmer. So it is easier improving them, if there are not optimal behaviors.
+- so the division in layers leads to sharing of money:
+*** Understanding code
+[1]T. D. LaToza e B. A. Myers, «Hard-to-answer questions about code», 2010, pagg. 1–6.
+
+describes some common questions useful for understanding code.
+
+DokMelody should answer to this questions and also link source-code to:
+- issues, documents and features linked to it
+- history of changes
+- compiler-plugins used for generating and transforming it
+- etc..
+*** IDE widget for representing meta-programming transformations
+ The IDE should show:
+ - on the left the input data
+ - on the center the transformation process
+ - on the right the result obtained
+
+The selection of an element on the right should indicate the corresponding source element on the left and the transformation process on the center applied.
+
+If the layout is not good, use instead a card-based approach but showing source, transformer and result.
+
+The majority of links are in the form:
+ 
+#+BEGIN_EXAMPLE
+source --transformation-link--> dest
+#+END_EXAMPLE
+
+Every source and dest have a ~context/owner~ hierarchy.
+
+Every source and dest have a type.
+*** Latency
+An UI must be extremely reactive. Slow answers can be delayed and replaced with some filling signal.
+** Hypertext and Compound Document 
+Inspired to Grif:
+ - structural text editor with both nested parts (XML/SGML documents) and hyperlinks (hypertext)
+ - compound documents, based on a DTD model. DTD structure is used also for displaying the document, and it is the hierarchical part of a document.
+ - XML/SGML/DTD have also attributes and not only elements. In Dok they are annotations (meta-info)
+ - like in DITA, a compound documents can be composed of parts, and then a document overview that link the various parts. In this way parts can be used also for other documents. So references in Grif can be itself subparts of a hierarchical document, when appropiate. See also DITA ConceptMaps.
+ - a chunk is a piece of document that is not composed of ther documents. It can be a string, a picture, a reference href, etc.
+ - a cross-reference is a direct link
+ - an inclusion is a link to a document, and the linked document is copied in the host document, and it can be modified. The changes are reflected also to the source document.
+** Job orchestration
+DokMelody can be used for managing different jobs performed by different systems also not written in Dok:
+- send data
+- cache/save data
+- publish/reuse data
+- similar to https://www.pachyderm.io/ approach
+** Diskussion: Unified Wiki + Blog + Forum + Chat
+Problem:
+- a wiki tend to be with dispersed content and outdated on some parts
+- a manual tend to be too much authoritative, and difficult to update for casual users
+- a mailing list and forum is good for discussions, but answers to questions are hard to find
+
+Solution: write a DokMelody application where casual users and maintainers can refine the knowledge, so starting from a discussion like a mailing-list, but also on a part of documentation, to final upgrade of documentation or patch to code, or creation of FAQ or question-and-answers sections.
+
+It can be seen as a discussion tool based on Git/version-controlled changes to a document or code or both. The discussion is (private) meta-info discussion associated to every part of code or document. Changes are discussed like in a review tool.
+
+Comments to discussion can be done specifying one of the six thinking hats (https://en.wikipedia.org/wiki/Six_Thinking_Hats).
+
+In the end the result is an improved documentation or code, with discussion removed, and inspectable only from interested users and as rationale of the changes.
+** DokMelody as a Scientific Paper Collaboration Tool
+*** Scientific papers are a knowldge-base of linked documents
+A Scientific paper is explicitely and implicitely linked to:
+- problem
+- abstract of the proposed solution
+- content
+- code
+- previous work
+  - comments
+  - improvements
+  - bug fixes
+  - new considerations
+- conclusions
+- future work
+- acknowledgements
+*** DokMelody for classifying alreading existing papers
+Given a problem domain and/or a specific product, relevant papers can be:
+- listed
+- tagged
+- annotated with how they can be applied
+- discarded with motivations
+- implemented
+- collaborate with papers authors for telling them how their ideas are used
+- give concrete examples of paper ideas implementation and usage
+- create a lively research and development community 
+- integrate with scientific paper production (e.g. link different version of papers and so on) 
+- etc..
+*** DokMelody for creating new scientific papers
+DokMelody can be used also for creating new scientific papers. The final work will be released as a normal paper, but the majority of work will be inside DokMelody as collaboration data and reproducible data.
+
+Every contributor of a paper can be weighted according the mantainer of the paper, that can remain live, until final closing.
+
+A paper can start as initial, and then attract comments, contributions, until it is not declarated closed.
+
+A closed paper can have iterations and versions. 
+
+A branch paper is a branch of a final paper with differences, then at the end:
+- it is decidec if a merge is possible
+- otherwise it became a different paper, based on the original paper. So it is a FORK.
+
+A branch can become:
+- merged
+- a fork
+
+A summary paper can be only a description and analysis of other papers.
+
+DokMelody offers a:
+- shared review system based on trust
+- open work and sharing of idea, without fear of lack of attributions because all interaction can be exposed
+
+Some papers can have a paywall for releasing:
+- working code
+- and/or complete content of the paper
+- etc...
+
+The paywall can be globally collected, and refused at the end if there is consensus it was a scam.
+
+Useful papers can receive money also after publication, because they are normal DokMelody content, and content can receive funds also afterward.
+** HTML export
+Static HTML export of content for SEO and public read access.
+
+Content editing and advanced navigation is done using DokMelody IDE that will be probably QT based or HTML + JS Based.
+* DokMelody community based content creation
+** Business plan
+Current situation:
+- digital content is difficult to create, but easy to share and replicate
+- small money from many users makes not difference for the users, but a lot of difference for the content creators
+
+Proposed solution: users of digital content pay a fixed monthly sum, that is shared between content creators they like
+
+Advantages for users:
+- open accessible content is better than closed content with pay-walls
+- predictable cost is better than upfront payments
+- everyone can be a content creator, or collaborate in some useful way
+- open applications can be fixed in case of bugs and vulnerabilities, because there are no propietary lock-in 
+
+Advantage for content creators:
+- predictable constant income is better than big one-time payements
+- reuse and extension of open accessible content is better than recreating the wheel
+** Server structure
+- federation of distribuited and collaborating servers, sharing a DAG of changes on shared content
+- content can be moderated and reused from users
+- content can have private branches
+- links between content (suggestion, criticques) are added by user, using a trust approach
+- it is a true distributed and shared knowledge base
+- sharing of money to upstream contributors of content
+** Paid servers and developers 
+DokMelody is based on free services and paid services:
+- users can decide to pay a fixed monthly cost for maintaining DokMelody community (like  https://flattr.com/contributors)
+- the cost are used for paying DokMelody developers and DokMelody servers for their services
+- useful DokMelody applications/plugins are voted by users, and a part of their fixed monthly quota is given to them (like flattr)
+- DokMelody applications owners can share profit with their code contributors
+- the majority of code in DokMelody is BSL, BSD, MIT, APL, LGPL, GPL so there is no lock-in 
+- DokMelody servers answering to queries on big public data can be paid for their service
+- every server has a fixed quota of free queries to answer and they are queued if they are too much. So also non-paying users can use DokMelody services. For example 40% of queries must be free. 
+- solutions to jobs/queries are published as IPFS distributed data or something of similar
+- servers can put temporary lock for answering queries, so there is not too much replicated work
+- in any case important queries can be double-checked by many servers
+- servers signs answers, and they acquire karma
+- a server loose karma and money if it answers queries in a bad way
+- jobs can be also compilation of code, production of packages and other batch-like tasks
+- many tasks can be done on public data, or on semi-private data, so done from a network of servers where privacy is not so much important
+- it is a sort of shared google (public data) and plan9 (private data) distributed job processing
+** Search Experience in DokMelody
+Content is classified by trust, and money received (direct and indirect) and by direct and indirect links.
+
+Working groups can rate products, using some RDF format, giving curated explanations. So relevant content can be found starting from working group suggestion one trust.
+*** Punishments
+ Users and projecs not considered fair and gaming the system are banned.
+
+ Trust level can be lowered by super users, in extreme cases if the community does not reach a consensus.
