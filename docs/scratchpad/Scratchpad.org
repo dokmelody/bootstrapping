@@ -1879,6 +1879,35 @@ sourceCode none @Assert {
 
  ) } 
 #+END_EXAMPLE
+** Join different ideas and technological stacks
+A concrete example:
+- Ansible is a configuration language based on YAML
+- Ansible is also a programming language
+- in Ansible one has to convert many common programming language concepts like function call to a "strange" YAML based programming laguage
+- the same thing is for ANT using XML for specifying builds
+- Salt is a configuration manager with more advanced concepts respect Ansible, like events, but it is harder to master
+- Guix uses Lisp (Guile) both for specifying packet building, configurations, and templating
+- RPM are packages but some of them can not cohexists like nix store concept
+
+Information Technology has many different reimplementation of the same idea, using a different mix of taste, simplicity, complexity, power and so on.
+
+In an ideal world one should:
+- use a language good both for configurations (e.g. JSON) and for programming (e.g. Lisp)
+- reuse already existing engines
+- scale engines to simpler execution models (e.g. Ansible needs only SSH on the remote host to configure, while a complete Salt instance ad-hoc agents)
+- scale language to a model with simpler semantic/concept (e.g. Ansible is simpler respect Salt, but Salt is more complete)
+
+So DokMelody should:
+- define complete concepts (e.g. Salt)
+- allows simpler worlds, with simplified concepts (e.g. Ansible)
+- compile code to complete environments (e.g. from Ansible to Salt)
+- use less DSL (e.g. Dok for configurations and programming, some Dok-like language for templates and so on)
+- join best ideas (e.g. plugin-api for supporting IDES, Unix system management, mapped to the same nix-like-store)
+
+In math we join the best idea in uniform framework and we can view a things from many different point of view.
+
+In IT we should do the same.
+
 * DokMelody UI design
 ** Analyze - Decide - Act
 The  project management tool should allows to open a long transaction, analyze data, decide and then prepare a series of actions according the decision.

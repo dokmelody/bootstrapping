@@ -76,3 +76,11 @@ Optionally I can insert metainfo about an ID in-place using some HTML-like forma
 *** TODO info from previous bootstrapping documents
 *** TODO import notes about imported frog-website
 ** TODO Export info also to web/dita-like format and publish on the website
+* Dok 01
+Create a first bootstrap version of Dok language.
+** TODO Creae a PEG parser of Dok using some Racket library, into Dok AST
+** TODO Study how Racket support compilation of code
+** TODO Compile Dok AST to Racket code
+** TODO Signal as not-yet-supported some parts of Dok 01
+
+

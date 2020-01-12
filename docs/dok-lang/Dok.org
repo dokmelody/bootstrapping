@@ -611,10 +611,8 @@ Only most specific leaf type variants can be instanced directly, all other paren
 Type variants can override fields and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[#type_conformance]]).
 
 For making explicit that a field or method is redefined the syntax ~:~ and ~->~ is used instead of ~::~ and ~-->~.
-
-In case an overriding method want call the parent method, it can use the syntax ~self.super()~. ~super~ is a reserved keyword.
-
-Note that also ~this~ is a reserved keyword, and ~self.this()~ call the current method.
+*** ~super~
+~self.super()~ in an overrided method, calls the original (non overridden) version accordin the OO hierarchy.
 
 ~super~ is also used for acessing the ~self~ field inside a nested lexical scope. See this example:
 
@@ -625,6 +623,10 @@ Assert {
   l1.filter({l2.any({ self == super * 2 })}) == (4, 5)*  
 }
 #+END_SRC
+
+Both the OO hierarchy and the lexical scope are static properties of the code, so the usage of the same keywords make sense.
+*** ~this~
+~self.this()~ call the current method, and it is used for recursive functions.
 ** Type references
 If there are no name clashes in the types, Dok can use short type names like ~B~ instead of ~/A/B~. The rules are:
 - =/Self/T/G= for referring to some nested internal variant type,
@@ -856,10 +858,7 @@ An Haskell type alias like ~type Age = Int~ in Dok is:
 #+BEGIN_SRC fundamental :tangle yes
 @Assert { 
 
-  Age && Int --> ( 
-   #:NOTE: we are adding a type constraints `Int`, but `Int` is not an interface 
-   #       but an effective type, so `Age` is like an interface added to the effective type `Int`.
-
+  Int --> Age( 
    @Ensure { self >= 0 }
    #:NOTE: we can add additional constraints and methods to `Age`
 
@@ -1086,7 +1085,7 @@ Assert {
 ** Type anchoring
 Type constraints are type equations that will be resolved at compile-time. 
 
-=x.Type= returns the exact type of the value x. 
+=x.Type= returns the exact type of the value x.
 This concept is inspired to cite:bruce1999semantics and =like= keyword of Eiffel.
 
 =Self= stays for =self.Type=. 
