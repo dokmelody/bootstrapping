@@ -20,9 +20,9 @@ The design of the language is a work in progress and all can change.
 There is no compiler or interpreter of the language, so it is all vaporware. I'm publishing this mainly for self-motivation.
 * Quick tour
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
-  Assert {
+  $Assert{
     io!println("Hello World!")
 
     s1::= "Hello"
@@ -41,7 +41,7 @@ Assert {
     !helloWorld("cloudy")
   }
 
-  Assert {
+  $Assert{
 
     Int.factorial1 --> Int {
       try {
@@ -163,7 +163,7 @@ Values are immutables.
 Int, Float, String and so on are primitive values. They can not be further decomposed.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
 
  3.is(Int) 
  (3 + 1).is(Int)
@@ -180,7 +180,7 @@ Dok uses mutable variables like imperative languages but they are associated to 
 As in functional-programming languages values are used also for managing complex data structures as containers, and not only for basic values like int or string.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   r --> Int {
     b::= 2 
@@ -193,7 +193,7 @@ Assert {
 
   r == 5
 
-  Assert { 
+  $Assert{ 
     x::Int    # declare a new variable inside this code block, without specifying a value
 
     x:= 1     # assign a value to the variable 
@@ -205,7 +205,7 @@ Assert {
     y::= x 
     y == 2
 
-    Assert {
+    $Assert{
 
       x1::Int
       #:NOTE: we can not assign again `x` name to this variable
@@ -224,7 +224,7 @@ Assert {
 A record is a compound value: it contains associations between field names and field values. Fields in records are like variables in an environment. 
 
 #+BEGIN_SRC fundemantal :tangle yes
-Assert {   
+$Assert{   
   x::= (i::= 1, s::= "one")
   x.is(Record)
 
@@ -235,7 +235,7 @@ Assert {
   x.s == "one"
 }
 
-Assert {
+$Assert{
   P --> (x::Int, y::Int )
   # `P` is a type of record with fields of the specified types.
 
@@ -261,7 +261,7 @@ Assert {
   #       and so changing ``p1`` affect also ``g1.p.x``.
 }
 
-Assert {
+$Assert{
   P --> (p::Int)
   S --> (s::P)
 
@@ -297,7 +297,7 @@ Dok supports also references and in-place mutable containers, but they are rarel
 This is an usage example:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
 
   m1::= Map(From: Int, To: Int) 
   #:NOTE: `Map` is a value in Dok. In this case we are starting from the empty Map.
@@ -325,7 +325,7 @@ Assert {
 ** Common containers
 *** ~Maybe~
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
    Maybe(Of::Type) --> (
      #: A value that can have "no-value".
 
@@ -356,7 +356,7 @@ Assert {
      self.just
    }
 
-   Assert {
+   $Assert{
      x::Maybe(Int)
      x:= Maybe/Just(5)
 
@@ -378,7 +378,7 @@ Assert {
 
    # Because `Maybe` is used a lot, the compact form `Type?` can be used instead
 
-   Assert {
+   $Assert{
      x::Int?
      x.is(Int?)
      x.is(Maybe(Int))
@@ -391,7 +391,7 @@ Assert {
 #+END_SRC
 *** ~List~
 #+BEGIN_SRC fundamental :tangle yes
-   List(Of::Type] --> (
+   List(Of::Type) --> (
      #: List is a container containing a finite sequence of values of the same type
 
       @Abstract
@@ -442,7 +442,7 @@ Assert {
    # Because list is used a lot it can use the compact `Type*` form
    # and the compact ``(x, y, ...)*`` form
 
-   Assert {
+   $Assert{
      x::= Int* 
      x.is(List(Int))
      x.isEmpty 
@@ -480,18 +480,18 @@ Assert {
 
       @UseArraySyntax
  
-      @Require { i >=Self.from && i < Self.to } 
+      $Require{ i >=Self.from && i < Self.to } 
     }
 
     !set(i::Int, value::Of) --> Self {
         @Abstract
         @UseArraySyntax
 
-        @Require { i >= Self.from && i < Self.to }
+        $Require{ i >= Self.from && i < Self.to }
     }
   )
 
-  Assert {
+  $Assert{
     a::Array(from: 1, to: 10, Of: String)
     a(0):= "Zero"
     a(1):= "One"
@@ -586,7 +586,7 @@ Type variants must respect the same implicit and explicit contracts of the paren
 Only most specific leaf type variants can be instanced directly, all other parents of the hieararchy are implicitly assumed =Abstract=.
 
 #+BEGIN_SRC fundemantal :tangle yes
-@Assert { 
+$Assert{ 
   T --> ( 
     a::Int
     # this is a field of the type, and its value can change at run-time
@@ -617,7 +617,7 @@ For making explicit that a field or method is redefined the syntax ~:~ and ~->~ 
 ~super~ is also used for acessing the ~self~ field inside a nested lexical scope. See this example:
 
 #+BEGIN_SRC fundamental :tangle no
-Assert {
+$Assert{
   l1::= (1, 2, 3, 4, 5, 6)*
   l2::= (8, 10, 50)*
   l1.filter({l2.any({ self == super * 2 })}) == (4, 5)*  
@@ -644,7 +644,7 @@ If there are no name clashes in the types, Dok can use short type names like ~B~
 Types can be extended adding new fields, methods and nested variant types to them.
 
 #+BEGIN_SRC fundamental :tangle yes
-@Assert {
+$Assert{
 
  P --> ( 
    p::Int
@@ -684,7 +684,7 @@ Types can be extended adding new fields, methods and nested variant types to the
 In Dok it is possible converting between types.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
  CartesianPoint --> (x::Double, y::Double)
 
  PolarPoint --> (distance::Double, angle::Angle)
@@ -736,7 +736,7 @@ From a certain point of view if values are instances of types (i.e. the type des
  but they can not contain type variants.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
  Comparable --> ( 
    @Abstract
@@ -800,7 +800,7 @@ An interface can require that the type supporting it will support also one or mo
  Monoid && Semigroup --> (
    Identity --> Self { 
      @Abstract 
-     @Ensure {
+     $Ensure {
        x .op. Self.Identity == x
        Self.Identity .op. x == x
      }
@@ -856,10 +856,10 @@ Dok supports type aliasing using an alternative form of [[#interfaces-constraint
 An Haskell type alias like ~type Age = Int~ in Dok is:
 
 #+BEGIN_SRC fundamental :tangle yes
-@Assert { 
+$Assert{ 
 
   Int --> Age( 
-   @Ensure { self >= 0 }
+   $Ensure{ self >= 0 }
    #:NOTE: we can add additional constraints and methods to `Age`
 
    isMajor --> Bool { self >= 18 }
@@ -902,7 +902,7 @@ system is slower (the compiler can not apply some optimizations).
  directly from the external. So they contains internal low-level implementation details.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   PE --> ( 
     _x::Int 
@@ -921,7 +921,7 @@ value, and type invariant must be respected.
 Every type can have special functions, called constructors, for creating and initializing a value.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
    Point --> (
      x::Double
      y::Double
@@ -993,7 +993,7 @@ Functions and types can contains inner types that are not variants of the parent
 If their name starts with =_= they are private types, otherwise they can be accessed also outside the type, using the namespace of the parent type and (in case) also of the function containing it.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
    P --> (
      p::Int
 
@@ -1023,7 +1023,7 @@ Assert {
 #+END_SRC
 ** Type inspection
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
   x::Int
   x:= 5 
 
@@ -1064,7 +1064,7 @@ Assert {
 - all next references to ~x~ are assumed to be of the specified type, so it is a form of safe type coercion
 
 #+BEGIN_SRC fundamental :tangle yes
-@Assert { 
+$Assert{ 
   T --> ( 
      t::Int
 
@@ -1091,7 +1091,7 @@ This concept is inspired to cite:bruce1999semantics and =like= keyword of Eiffel
 =Self= stays for =self.Type=. 
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   Figure --> ( 
       translate --> Self {
         @Abstract
@@ -1143,20 +1143,20 @@ because they are used like distinct service types, and the hosting type
 is not related to them.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
 
   BoundedList(Of::Type, maxLength::Int) --> (
     length --> Int {
       @Abstract 
-      @Ensure { result <= Self.maxLength }
+      $Ensure{ result <= Self.maxLength }
     }
 
     !add(v::Self.Of) --> Self {
       @Abstract
 
-      @Require { self.length <= Self.maxLength }
+      $Require{ self.length <= Self.maxLength }
 
-      @Ensure { self.length == oldSelf.length + 1 }
+      $Ensure{ self.length == oldSelf.length + 1 }
     }
   )
 
@@ -1164,7 +1164,7 @@ Assert {
   l!add(1) 
   l!add(2)
 
-  Assert { 
+  $Assert{ 
     l.length == 2 
     l.maxLength == 10 
   } 
@@ -1221,7 +1221,7 @@ class CatShelter extends Shelter<Cat> {
 In Dok:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   Animal --> (
     /Cat
     /Dog
@@ -1252,7 +1252,7 @@ In Dok you can pass a ~Shelter(Cat)~ to every method expecting a ~Shelter(Animal
 Comparable and other binary methods can be a problem in OOP with naive type systems. In Dok the code is simply:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
  Eq --> ( 
    @Abstract
 
@@ -1286,7 +1286,7 @@ So variant, contravariant and method overridding can cohexist safely in Dok beca
 Another example of container exhibiting covariant and contravariant:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   Set(Of::Ord) --> (
     has(e::Of) --> Bool
@@ -1321,7 +1321,7 @@ In cite:bruce2003some there is the "expression problem" that is a relatively sim
  In Dok we can use type params as constraints, in a very similar way:
 
  #+BEGIN_SRC fundamental :tangle yes
- Assert {
+ $Assert{
   Expr(R::Type) --> (
 
     /I(R:Int) --> (x::Int)
@@ -1359,7 +1359,7 @@ In Dok a function is a referential transparent method of an object which result 
 In Dok every function must be a method of a type, i.e. there can not be functions with only arguments, but without a ~self~ object.
 
 #+BEGIN_SRC fundemantal :tangle yes
-Assert {
+$Assert{
 
   Person --> ( 
     birthDay::Date
@@ -1401,7 +1401,7 @@ Functions can be recursive. Tail call recursive functions are guarantee to not w
 ~this~ is a reserved word, and ~this(x, y)~ calls the current function. For example:
 
 #+BEGIN_SRC fundemantal :tangle yes
-Assert {
+$Assert{
   Int.factorial --> Int {
     try {
       self == 0
@@ -1428,7 +1428,7 @@ Assert {
   because order of application is not important.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {   
+$Assert{   
 
   Eq --> (
     @Abstract
@@ -1472,7 +1472,7 @@ Assert {
  a new version of the ~self~ object.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
   Person --> ( 
     name::String 
     
@@ -1528,7 +1528,7 @@ Assert {
 Whenever possible as suggested by cite:meyer1997object in the command-query-separation principle, a pure action should return nothing, but only change the environment. The effects of the action can be then inspected using functions of the ~self~ object. But there can be API requiring actions returning values.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   IntStream --> (
     _curr::Int := -1
@@ -1586,7 +1586,7 @@ Assert {
   A nested function is visible only inside the lexical scope of the function defining it.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   P --> (
     p::Int
 
@@ -1612,7 +1612,7 @@ A nested actions is like a [[#nested-function]] but it can change the variables 
 In case action is invoked inside a domain specific language in which the order of execution is not deterministic and so it is not clear the order of changes of the parent variables and fields, the compiler will signal an error. The rational is that nested actions are support actions, and so their semantic/effect must be clear.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   Int*.mySum --> Int {
     s::= 0
     self!forEach { 
@@ -1637,7 +1637,7 @@ Dok does not supports currying of functions (i.e. a function in Dok accepts a tu
 Some example of higher-order functions usage:
 
  #+BEGIN_SRC fundamental :tangle yes
- Assert {
+ $Assert{
 
    Any*.filter(condition::Fun(From::Self, To::Bool)) --> Self* {   
      #: Create a sequence with only the elements respecting the filter condition.
@@ -1647,7 +1647,7 @@ Some example of higher-order functions usage:
      #: Create a sequence applying to every element the `do` transformation
    }
 
-   Assert {
+   $Assert{
      x::= (1, 2, 3, 4, 5, 6)*
     
      x.filter({self > 3}) == (4, 5, 6)*
@@ -1674,7 +1674,7 @@ They supports closures so they can see the variables of the parent lexical scope
 
 An example:
  #+BEGIN_SRC fundamental :tangle yes
- Assert {
+ $Assert{
    limit::= 3
    x::= (1, 2, 3, 4, 5, 6)*
     
@@ -1699,7 +1699,7 @@ In any case the result of the calculation from scratch and of the updating code 
 
 #+BEGIN_SRC fundamental :tangle ys
 
-Assert { 
+$Assert{ 
 
   Person --> (
     earns::=Int*   
@@ -1754,7 +1754,7 @@ The idea is that sometime imperative code is more short and "natural" than funct
   the code block returns the =Bool= false to the caller, that can fail if it is using the code block result as condition.
 
  #+BEGIN_SRC fundamental :tangle yes
- Assert { 
+ $Assert{ 
 
    b1::= False
    b1 == False 
@@ -1785,7 +1785,7 @@ The idea is that sometime imperative code is more short and "natural" than funct
 ~try~ branches can change variables in the surrounding scope and so they can have side-effects.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   # An example of a `try` returning a result
   r::= try {
@@ -1823,7 +1823,7 @@ Assert {
 ~if~ evaluates/executes the ~then~ branch if the condition inside the ~if~ part is respected, otherwise it executes the ~else~ branch if it is specified. If used in [[#design-by-contracts]] formulas it is equivalent to logical implication ~A ==> B~.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   x::= 10
 
@@ -1887,7 +1887,7 @@ Assert {
 ~iff~ stays for "if and only if" and when used in [[#design-by-contracts]] is equivalent to logical double implication ~A <==> B~.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   x::= 10
   y::= x * 2
@@ -1963,7 +1963,7 @@ In case of ~iff~ is a sequence of expressions with actions inside:
 - the same rules of ~iff~ as sequence of expressions will be used
 ** =a && b=
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   a::Bool
   b::Bool
 
@@ -2002,19 +2002,19 @@ Dok has only one form of loop, the =repeat= command.
 This is an example inspired by cite:meyer1997object
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
 
  (a::Int, b::Int).gcd --> Int { 
    #: Greater common divisor
 
-   @Require { a > 0 && b > 0 } 
+   $Require{ a > 0 && b > 0 } 
 
    x::= a
    y::= b
 
    repeat {
-     @Ensure { x > 0 && y > 0 }
-     @Ensure { 
+     $Ensure{ x > 0 && y > 0 }
+     $Ensure{ 
        #: the pair ``(x, y)`` has the same greatest common divisor as the pair ``(a, b)`` 
      }
 
@@ -2043,7 +2043,7 @@ Assert {
      }
    }
 
-   @Ensure { x == y }
+   $Ensure{ x == y }
    x
  } 
 } 
@@ -2085,7 +2085,7 @@ A failing block of code or function can add more info about the reason of failur
 Fail info can be expensive to generate, so it will be effectively generated only if one of the caller is using it. Otherwise the compiler will disable its generation.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   String.parseAge --> Int {
     b::= 1
@@ -2145,7 +2145,7 @@ See [[#exceptions]].
  - compiling pure Dok code to efficient executable code
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   IO --> ( 
     !!OpenFile(name::String) --> FileHandle {
@@ -2204,7 +2204,7 @@ Assert {
  useful having actions that are not rollbackable.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert { 
+$Assert{ 
   x::= 0 
   y::= 0 
 
@@ -2245,7 +2245,7 @@ Assert {
  native code.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   CRef(Of::Type) --> (
      !!share --> Self {
        #: Create a copy of the reference, sharing the same content.
@@ -2301,7 +2301,7 @@ value of the original tree.
 This example is inspired to cite:saraiva1999purely
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   Tree(T::Comparable) --> (
     /Fork --> (
@@ -2414,7 +2414,7 @@ The only differences with Dok functions it is that they can depend from top-down
  and it changes only when explicitely specified.
 ** Special attributes
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
  Expr --> (
    /Val --> (x::Int)
@@ -2447,303 +2447,246 @@ Assert {
   :CUSTOM_ID: metaprogramming
   :END:
 Metaprogramming is the management of code as normal data: i.e. code can be read, analyzed, transformed or generated. 
-Dok supports compile-time metaprogramming, but not at run-time. 
-
-Metaprogramming is useful for extending Dok with Domain Specific Languages (DSL), specializing generic libraries/code, analyzing and optimizing code, supporting different run-time environments
-
-Dok compiler is customizable by Dok users. Dok code is compiled to Dokk (the double "k" stays for "Dok kernel language"). Dokk is a simplified variant of Dok with strict semantic, no nested transactions and attribute grammars. Its run-time costs can be easily understood.
-- code transformation can be inspected and customized using the [[DokMelody IDE]]
-** Generating code values
+It is useful for:
+- extending Dok with Domain Specific Languages (DSL)
+- analyzing and optimizing code
+- supporting different run-time environments
+** Nested DSLs
+Dok code can be composed of many nested/embedded DSLs, e.g.:
+- a source language ~S~
+- a nested/embedded/guest language ~E~
+- and so on, forming arbitrarly nested hieararchies of DSL code fragments
+** Source DSL to eval
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  code1::= Dok[
-    x::= 0
-    x + 1
-  ]
-  code1.is(Dok)
-  #:NOTE: this is an example of a value that is Dok code, specified using `Dok` DSL syntax.
-  
-  x.eval == 1
-  #:NOTE: we are evaluating the code
+$PseudoCode{
+  Int.add_v1(x::Int) --> Int $Dok{
+    #:NOTE: a function returning a Dok `Int` value, 
+    #       and specified using `Dok` DSL.
+ 
+    self + x
+  }
+
+  # `add_v1` can be obviously defined omitting the ``$Dok`` annotation,
+  # because inside `Dok` code, the ``$Dok`` is implicit:
+
+  Int.add_v2(x::Int) --> Int { 
+    self + x 
+  }
+
+  x::= Int $C{
+    return(1);
+  }
+  #:NOTE: `x` has Dok type `Int` and its value is calculated evaluating 
+  #       a C-like code. 
 }
 #+END_SRC
-** Analyzing code values
-Dok code can be analyzed (reflection) at compile-time. 
+** Embedded DSL to eval
+An host ~H~ DSL can contain fragment of code written in another embedded ~E~ DSL. The embedded code can be converted to ~H~ code from compiler plugins, or to target ~T~ DSL code toghether with ~H~ code.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  T --> (
-    n::Int
-
-    f --> Int
-
-    /A --> (
-      f -> { self.n * 2 }
-    )
-
-    /B --> (
-      f -> { self.n * 4 }
-    )
-  )
-
-  ta::= T/A()
-  ta.is(T)
-  #:NOTE: parent type is taken in consideration
-
-  ta.is(T/A)
-  ta.isExactly(T/A)
-  #:NOTE: this is the most exact type
-   
-  T.metaInfo.function.f.is(Dok/Fun)
-  #:NOTE: `metaInfo` select the compile-time information associated to every type and object.
-}
-#+END_SRC
-** Annotations 
-Annotations are metainfo added to the code. They can be optimazation hints, documentation notes and so on. The real semantic of an annotation depends from the used plugins during code compilation. 
-
-Annotations are applied to the entire parent scope owning them.
-
-#+BEGIN_SRC fundemantal :tangle yes
-Assert {
-
-  T --> (
-
-    @Abstract
-    #:NOTE: says that values of type `T` can not be instantied directly,
-    #       but that `T` is an interface that must be supported by other types.
-
-    increase(x::Int) --> Int {
-      @Abstract
-      #:NOTE: says that this function can not be used directly 
-    }
+$PseudoCode{
  
-    @..
-    @Id("f-def")
-    f(x::Int) --> Int 
-    ..@
-    #:NOTE: the `@Id` annotation is applied to the marked section between `@.. ..@`.
-    #       It is not a distinct scope, but a section used only for applying the meta annotations.
-  )
+   Int.div(x::Int) --> Int {
+     $Require{
+       #:NOTE: this is code specified in `Require` DSL
+       #       and converted from compiler into `Dok` code testing
+       #       the property at run-time or in other cases 
+       #       as a compile-time test 
 
-  x::= @Id("f-def")
-  x == @Dok[f(x::Int) --> Int]
-  # we are reusing the piece of code called as "f-def".  
+       x != 0
+     }
+
+     self / x
+   }
 }
 #+END_SRC
-** Nested Domain Specific Languages (DSL)
-A Domain specific language (DSL) is language with a specific syntax and semantic, useful for modelling and solving problems in a certain domain.
-
-DSL can be nested. For example Design by contracts annotations are nested inside Dok code, or HTML-like template DSL can contains fragments of Dok code that can contains design by contract annotations.
-
-Every DSL block has a:
-- host-DSL: the DSL containing one or more guest-DSL blocks of code 
-- guest-DSL: the DSL used for the DSL block of code
-- target-DSL: the DSL to which is compiled the host-DSL and the guest-DSL
-
-For example we can produce an HTML representation of some code (target-DSL), and we can process some SVG content (guest-DSL), inside a comment (host-DSL), inside Dok code (host-DSL). The Dok compiler architecture will try to manage all these combinations, and it will advise the user when some combination is not supported.
-
-Types, objects and other programming elements defined in the guest-DSL are indicated as ~$someElement~ in the host-DSL, for indicating that ~someElement~ must be transformed in the corresponding ~someElement~ of the host-DSL according the rules of the compiler-plugin. At the same time in the guest-DSL programming language elements defined in the host-DSL or other guest-DSL are indicated using ~$anotherElement~ notation.
-
-#+BEGIN_SRC fundemantal :tangle yes
-Assert {
-
-  SomeDSL --> (
-    /Bad
-    /GoodEnough
-    /Good
-    /VeryGood
+** DSL type definitions
+A DSL can be used for defining new types.
+#+BEGIN_SRC fundamental :tangle yes
+@PseudoCode{
+  BinaryNumber --> $PEG(
+    ~ <-- (Zero / One)+
+    Zero <-- "0"
+    One <-- "1"
   )
 
-  String --> SomeDSL {
-    #: The default parser of a DSL.
-    
-    n::Int
-    n:= self.Int
-    try {
-      self >= 9
-      /VeryGood
-    } else {
-      self >= 8
-      /Good
-    } else {
-      self >= 6
-      /GoodEnough
-    } else {
-      /Bad
-    }
-  }
+  #:NOTE: `BinaryNumber` is a Dok type defined using a syntax similar to Packaret Expression Grammar.
+  #       The compiler convert the type definition from PEG syntax to some valid Dok syntax.
+  
+  b::BinaryNumber
+  b:= "10".BinaryNumber
+  b(0).is(BinaryNumber/Zero)
+  b(1).is(BinaryNumber/One)
+}
+#+END_SRC
+** Generating DSL values at run-time
+Values can have a DSL that is an ad-hoc syntax for representing them. These values can be generated from this format, parsing a string. This can be done at run-time.
 
-  # The form `@SomeDSL[..]` is equivalent to the explicit parsing `"..".SomeDSL`
-  x::= @SomeDSL[10]
-  x.is(SomeDSL)
-  x == "10".SomeDSL
-  x == /SomeDSL/VeryGood
+#+BEGIN_SRC fundamental :tangle yes
+@PseudoCode{
 
-  # DSL can be nested
+  "6.div(2)".Dok.is(Dok)
+  #:NOTE: this is a fragment of Dok code
 
-  x:= @SomeDSL[
-    @String[6]
+  c::Dok
+  c:= "6.div(${ 1 + 1})".Dok
+
+  c == "6.div(2)".Dok
+  
+  # if the run-time supports Dok compilation and eval then we can do
+
+  c.eval == 3 
+}
+#+END_SRC
+** Generating DSL values at compile-time
+DSL code can be used for defining values. The DSL define both a type and a DSL.
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+ 
+  x::Int
+  x:= 1
+
+  s::= $String(
+    The DSL of a string is the content of the string.
+    It can refers to other values using unquoting, like x = ${x.toString}.
+  )
+
+  # Obviously also basic types like Int, admit this
+  z::= $Int(5)
+
+  c::Dok
+  c:= $Dok(
+    6.div(2)
+  )
+  c.eval == 3
+}
+#+END_SRC
+** Annotations and meta-info
+Annotations are additional meta-info associated to a piece of code, that can suggests proper behaviour to compilers processing the code.
+
+An annotation generate some information that can be recognized or discarded from compilers. So the information is not mandatory for the execution of the code.
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+
+   Int.fun3(x::Int) {
+     $Inline
+     #:NOTE: this is an annotation sent to the compiler.
+     #       So it is like meta-info hints.
+
+     self + x
+   }
+ 
+   Int.anotherFun(x::Int) --> Int {
+     $SomeMetaInfoProp(someAttr: "some tag", anotherAttr: 5)
+     #:NOTE: this is meta info applied to `anotherFun` lexical-scope,
+     #       having additional attributes.
+   }
+
+}
+#+END_SRC
+** Macro expansions
+A function can generate code in the host DSL. The function acts like a macro generating code to compile.
+
+The code returned from the function must be the same of the host DSL, or some DSL recognized from the compiler.
+
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+
+   $someMacroExpansion(someParam)
+   #:NOTE: call `someMacroExpansion` at compile-time that will generate some code
+   #       in the current DSL.
+}
+#+END_SRC
+** Referencing entities defined in another DSL
+An embedded DSL can define variables and these variables can be used inside the host DSL. The semantic of these variables depends from the compiler plugin managing the compilation and it depends from the host DSL, the embedded DSL and the context. 
+
+Usually it should be rather intuitive figuring out the meaning of the code (e.g. interaction between an imperative language and a relational database), but the compiler can complete all boiler-plate details and thanks to global analysis of code can optimize some access patterns.
+
+These "foreign" entities are prefixed by ~$~ when their semantic is different from the semantic of current DSL. Doing so it became more explicit that there are hidden details, managed by the compiler. When the semantic of the two DSL is the same or very similar, there is no usage of ~$~ prefix.
+
+The same ~$~ prefix is used for referencing in an embeded DSL entities defined in the host DSL, and having a different semantic respect the embeded DSL.
+
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+
+  $DB [
+    Person --> ( 
+      name::$String
+      #:NOTE: we are referencing the String type defined in ``Dok``
+      #       that is a value and not an entity, like in case of 
+      #       types defined inside ``DB`` and so it make sense
+      #       using ``$String``.
+
+      father::Person?
+      #:NOTE: in ``DB`` semantic types are references, 
+      #       and we have references instead of values.
+
+      mother::Person?
+    )
+
+    mzan::Person(name: "Massimo Zaniboni")
   ]
-  x == /SomeDSL/GoodEnough
 
-  # DSL supports anti-quotation, i.e. some Dok code can be called inside the DSL used as template
-  y::= 6
-  x:= @SomeDSL[@{y + 2}]
-  x == /SomeDSL/Good
+  !IO.println($mzan.id ++ ": " ++ $mzan.name)
+  #:NOTE: ``$mzan`` is a variable defined in a guest DSL, and it has a semantic different from ``Dok``
+  #       (i.e. it is a reference in this case). 
+  #       The compiler must manage it in a special way, and it is useful making explicit also in the code.
  
-  y:= 0
-  x:= @SomeDSL[1@{y.toString}]
-  x == "10".SomeDSL
-  x == /SomeDSL/VeryGood
-
-  # We define an DSL supporting evaluation, using the default function `eval`.
-
-  Expr --> (
-    eval --> Int
-
-    /Const --> (
-      n::Int
-      eval --> { self.n }
-    )
-
-    /Sum --> (
-      x::Expr
-      y::Expr
-      eval --> { self.x + self.y }
-    )
-  )
- 
-  # We define the parser using a PEGParser DSL
-
-  String --> Expr {
-    String --> MyParse @PEGParser[
-      .Digit_1_9 --> @PegRange[[1-9]]
-      .Digit_0_9 --> @PegRange[[0-9]]
-  
-      /Const --> (d1::Digit_1_9, dn::Digit_0_9*)
-      /Sum --> (x::Expr, "+"::_, y::Expr)
-    ]
-
-    MyParse --> Expr
-    MyParse/Const -> Expr { /Expr/Const(n: self.d1 ++ self.dn).Int) }
-    MyParse/Expr -> Expr { /Expr/Sum(x: self.x.Expr, y: self.y.Expr) }
-
-    self.MyParse.Expr      
-  }
-
-  # We define a compiler-plugin for evaluating Expr inside a String DSL.
-  # The host DSL is managed in Dok as an owner type wheret the related type conversion is specified.
-
-  String -> (
-    Expr --> String {
-      self.eval.String
-    }
-  )
-
-  # and we use nested anti-quotations written in `Expr` instead of `Dok`
-
-  s::= "2 + 2 = @Expr { 2 + 2 } = @{(2 + 2).String}" 
-  s == "2 + 2 = 2 = 2"
-
-
-  # DSL can have fields. They are managed like type params, and not object fields,
-  # i.e. they are params of `Self` type and not of `self` object.
-
-  ExprWithBase(base::Int) --> (
-    @Require { base >= 2 }
-
-    expr::Expr
-
-    eval --> Int { self.expr.eval }
-  )
-
-  String --> ExprWithBase {
-    String --> MyParse @PEGParser[
-      .Digit_1_base --> @PegRange[[1-@{base.String}]]
-      .Digit_0_base --> @PegRange[[0-@{base.String}]]
-  
-      /Const --> (d1::Digit_1_base, dn::Digit_0_base*)
-      /Sum --> (x::Expr, "+"::_, y::Expr)
-    ]
-
-    MyParse --> Expr
-
-    MyParse/Const -> Expr { 
-      b::= 1
-      i::= 0
-      n::= 0
-      s::= self.d1 ++ self.dn
-      repeat {
-        @MaxRepetitions { s.length }
-        while { i < s.length }
-        n:= n + s(i).Int * b
-        b:= b * Self.base
-        i:= i + 1
-      }
-     
-      /Expr/Const(n) 
-    }
-
-    MyParse/Expr -> Expr { /Expr/Sum(x: self.x.Expr, y: self.y.Expr) }
-
-    ExprWithBase(expr: self.MyParse.Expr)      
-  }
-
-  x:= @ExprWithBase(base: 2)[10]
-  x.eval == 2
-
-  "11".ExprWithBase(base: 2).eval == @ExprWithBase[11] == 3
-
 }
 #+END_SRC
+** Injecting embeded DSL code in the same lexical-scope of the host DSL 
+A fragment of DSL code can be part of the host DSL lexical-scope, but expressed using a different DSL.
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+  x::= 5
+  
+  @Assert[
+    y::= x + 1
+  ]
 
-** Macro 
-Dok uses metaprogramming also for adding to the language powerful and useful constructs and reducing boilerplate code.
-*** ~@Case~
- OOP code repeats the same function definition in many nested variant types. Sometime it is better specifying a function following a FP approach. ~@Case~ allows this, and it allows also the repetition of common tests sharing a common pattern, reducing code boiler-plate. 
-
-  #+BEGIN_SRC fundamental :tangle yes
-  Assert {
-   Expr(R::Type) --> (
-
-     /I(R:Int) --> (x::Int)
-     /B(R:Bool) --> (b::Bool)
-     /Add(R:Int) --> (x::Expr(Int), y::Expr(Int))
-     /Mul(R:Int) --> (x:Expr(Int), y:Expr(Int))
-     /Eq(R:Bool) --> (x:Expr(Int), y:Expr(Int))
-
-     eval --> R {
-      @Case[self.is(~)] {
-        /I
-        self.x
-      } else {
-        /B
-        self.b
-      } else {
-        /Add
-        self.x.eval + self.y.eval
-      } else {
-        /Mul
-        self.x.eval * self.y.eval
-      } else {
-        /Eq
-        self.x.eval == self.y.eval 
-      }
-      #:NOTE: the macro will check at compile-time that all cases are matched
-   )
-  }
-  #+END_SRC
+  y == 6 
+  #:NOTE: `y` is visible inside the paren lexical-scope, 
+  #       because the code inside ``[...]`` is at the same lexical-scope. 
+}
+#+END_SRC
 ** Aspect Oriented Programming (AOP)
-  :PROPERTIES:
-  :CUSTOM_ID: AOP
-  :END:
+   :PROPERTIES:
+   :CUSTOM_ID: AOP
+   :END:
 In Aspect Oriented Programming (AOP) paradigm:
- - a complex problem can be partitioned in rather orthogonal aspects
- - each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler-plugins
+- a complex problem can be partitioned in rather orthogonal aspects
+- each aspect can be implemented extending previous code, or adding meta-annotations to the code, and/or adding compiler-plugins
+- code transformation can be inspected and customized using the [[DokMelody IDE]]
 
 Dok code annotations and (customizable) compiler-plugins can supports powerful form of AOP because code regarding a certain aspect can be injected using global program analysis.
 
 Dok favours a layered implementation: from high-level code to low-level code. When aspects implementation is not perfectly orthogonal (i.e. implementation details of one aspect influence the implementation of another aspect), there can be high-level layers where the two aspects are nearly completely orthogonal, and intertwined implementation details can be specified only at lower level.
+*** User customizable compilation passes 
+ Dok code can be composed of nested DSL, e.g. a source/host language ~H~, a target language ~T~, an optional embeded language ~E~.
+
+ Code is analyzed and transformed to ~T~ DSL using a series of collaborating and user definable compilation passes.
+
+ A compilation pass can translate ~E~ directly into ~T~, or it can be helped by DSL compilers translating first ~E~ into ~H~ DSL.
+
+ Compilation pass are ordered. The order of passes is important, because it can change the semantic or the produced code ~T~.
+ Passes are executed one or more time, iteratively, until a fix point is reached. In this way 
+ a compiler ~C~ can produce also some intermediate code in other DSL, and these fragment of code will be further transformed.
+
+ TODO details will be fixed during development and real-world usage. It depends also from:
+ - the real power of attribute-grammars
+ - lesson learned studying other metaprogramming and compilation based systems
+*** Dokk
+ Dokk is the Dok Kernel Language. Dokk is a simplified variant of Dok with strict semantic, no nested transactions and attribute grammars. Its run-time costs can be easily understood.
+
+ Dokk can be the target of many compilation pass involving imperative code, because it is high-level, but with predictable run-time cost.
+** Dok is not an homoiconic programming language
+Dok language thanks to attribute-grammars and other logical rules is good for writing compilers, but contrary to Lisp it is not an homoiconic programming language, because the syntax of Dok code is different from the data structure used for representing code. 
+
+This is not a big disavantage in Dok, because in any case code is represented using abstract-syntax-tree (AST) that are a good fit for attribute-grammars, and the natural hierarchical data format of Dok. An homoiconic syntax can simplify simple macro and code processing, but complex transformations requires a global view of the AST.
+** Compile-time only metaprogramming
+Dok does not implement all the features of a generic metaprogramming language, because it supports only compile-time meta-programming, i.e. Dok applications are usually shipped without reflection and meta-information about their code.
+
+Only the Dok compiler and optionally the DokMelody IDE have access to the code of the application, but this is done using normal Dok constructs on data that in this case represents code. So Dok has a simplified semantic respect programming languages with metaprogramming at run-time.
 * Design by contracts and refinement types
   :PROPERTIES:
   :CUSTOM_ID: design-by-contracts
@@ -2757,18 +2700,18 @@ Dok uses a design by contracts (DbC) cite:meyer1997object and refinement types c
 Contracts can be written using the [[#nested-transaction-semantic]] that is rather expressible and side-effect free.
 ** Example
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   Person --> ( 
 
     birthday::Date
 
     age(atDate::Date) --> Int { 
-      @Require {
+      $Require{
         atDate >= self.birthday
       }
 
-      @Ensure {
+      $Ensure{
         $result >= 0
         #:NOTE: ``$result`` is a special variable, associated to the result of the function
       }
@@ -2787,7 +2730,7 @@ Assert {
    error in the caller code. An exception of type =CodeError= is raised.
    A function should never check explicitely the =@Require= conditions,
    because it is an error on the caller.
- - =@Ensure= for conditions that must be respected from the called code. They
+ - =$Ensure= for conditions that must be respected from the called code. They
    are used also for specifying the invariants of a type. If an =@Ensure=
    condition is not respected, then there is an error in the code.
    The caller had not to check this condition, because it is an error in the provider side.
@@ -2805,10 +2748,10 @@ Assert {
   of the parent type, and its definition replaces completely the
   definition of the parent type (i.e. it is put in logical or, with the
   definition of the parent). Doing so any caller respecting the parent condition for sure respect also the type variant condition.
-- if =@Ensure= in redefined, then its definition extend the conditions
+- if =$Ensure= in redefined, then its definition extend the conditions
   of the parent type (i.e. it is put in logical and, with the definition of
   the parent). Doing so if the caller expects some properties for the result, these properties are met also from the type variant.
-- =@Usually=, =@Assert= of the are not considered any more applicable
+- =$Usually=, =@Assert= of the are not considered any more applicable
   because they are associated to code, not to function semantic
 * Map-Reduce programming model
    :PROPERTIES:
@@ -2828,7 +2771,7 @@ In case of complex data transformations, in Dok map-reduce and functional data t
 ~map~ applies a side-effect free function to every element of a container, and return a container with the modified elements. 
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   (1, 2, 3)*.map({ self * 2 }) == (2, 4, 6)*
 
   l::= (1, 2, 3)*.map {
@@ -2847,7 +2790,7 @@ Assert {
 
 #+BEGIN_SRC fundamental :tangle yes
 
-Assert {
+$Assert{
   Int*.mySum --> Int {
     s::= 0
     self!forEach { 
@@ -2865,7 +2808,7 @@ Assert {
 ~fold~ in Haskell corresponds to the ~reduce~ part of the map-reduce programming model. Dok does not support directly fold-like functions. The reduce part is supported using ~do~ and ~!forEach~, like in this example:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   (1,2,3)*.do {
     s::= 0
     self!forEach {
@@ -2906,7 +2849,7 @@ Streams are containers, so they supports also map-reduce programming model. At t
     }
   )
 
-  Assert {
+  $Assert{
 
     OddNumbers --> Stream(Of:Int) (
       _curr::= 0
@@ -2932,7 +2875,7 @@ Streams are containers, so they supports also map-reduce programming model. At t
 The usual functions on containers like ~filter~, ~take~ and so on are defined. For example:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   
   Any*.filter(cond::Fun(From::Self, To::Bool)) --> Self* {
     r::= Self*
@@ -3013,8 +2956,8 @@ digraph {
 This an example of a relational database schema, defined using the Knil DSL. The syntax is very similar to Dok, but the semantic is diferent because in Knil objects are entities and not values.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
     Book --> (
       isbnCode::$String @Key
       title::$String
@@ -3042,10 +2985,10 @@ Assert {
 The same schema but with explained semantic:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
-  @Knil[
-    @Id("schema1")..
+  Knil[
+    @Id("schema1") [
     Book --> (
       isbnCode::$String @Key
       # `@Key` says that a Book is an entity identified uniquely from `isbnCode` value
@@ -3089,7 +3032,7 @@ Assert {
       in::Country
       on::$Date
     )
-    ..@
+    ]
   ]
 }
 #+END_SRC
@@ -3102,13 +3045,13 @@ Integrity constraints are conditions that are guarantee to be true before a data
 TODO many important details yet to decide/design
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
     S -> (
       city::$String
       status::Int
 
-      @Require {
+      Require {
         if { 
           self.city == "London" 
         } then { 
@@ -3117,7 +3060,7 @@ Assert {
       }
     )
 
-    @Require {
+    Require {
       S.forall { 
         s1::= self.status
         if {
@@ -3177,8 +3120,8 @@ So the weak vs strong reference problem is automatically solved in Dok and Knil:
 Knil relations can be seen as types in Dok, so normal Dok functions can be added to these types.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
     @Include("schema1")
 
     Sell.worthPoints --> $Int { self.book.worthPoint }
@@ -3209,8 +3152,8 @@ Despite the apparent suggestion that queries are building virtual relations, thi
 Note that according [[#knil-optimizations]] these queries can be initially only a specification of the required result, while an efficient versions can be derived later.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
     @Include("schema1")
 
     Sell.worthPoints --> $Int { self.book.worthPoint }
@@ -3239,8 +3182,8 @@ In case of grouping queries, the result of the query function is usually a Dok M
 
 These high-level queries can be further optimized rewriting them in more low-level code according the physical database format.
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
 
     Supplier --> (
       name::$String
@@ -3301,7 +3244,7 @@ In case of simple recursion rules the best approach is using [[#knil-kb]] becaus
 Recursive queries are written using Dok recursive functions, and they are compiled from Knil in hopefully efficient code, but this is not guarantee.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   @Example {
     # This is an example of multiple linear recursive query.
@@ -3314,7 +3257,7 @@ Assert {
     SG(x, y):- Sibiling(x, y).
   }
 
-  @Knil[
+  Knil[
     Person --> (
       name::$String
     )
@@ -3460,8 +3403,8 @@ Schema are specified as typed facts. There can be zero, one or more facts for ea
 These are different examples of schema with extensive documentation about the Knil notation:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
-  @Knil[
+$Assert{
+  Knil[
       
     Any knows Any
     Any hasEnemy Any   
@@ -3553,7 +3496,7 @@ The Knil compiler will manage automatically the logical derivation of intensiona
 Efficient rules will be derived in best-effort-mode from the Knil compiler, and it will advise if this is not possible. So it is not guarantee that every Knil rule schema and related query on it will be efficient to execute, but it is possible for the user being informed and finding in case some work arounds.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   Person hasParent Person
   Person parentOf Person
@@ -3658,7 +3601,7 @@ TODO describe the minor differences between Bloom channels and Kalm channels
 This is an example of syntax/semantic:
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
    KeyValueStore --> @Kalm.Process[
      #:NOTE: we are defining a type of Kalm.Proces using the Kalm DSL.
 
@@ -3716,7 +3659,7 @@ Assert {
 This is another example
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
    KVS --> @Kalm.Protocol[
      #:NOTE: `@Kalm.Protocol` is a `Process` that is `@Abstract`
 
@@ -3861,7 +3804,7 @@ Dok tries to mask the fact that explicit resources are process, using a rather n
 A resource can be owned by only one process: the process creating it. This process can pass the resource to its methods because there is only one thread of execution, so it is like passing ownership. Resources can not be sent to external process. So resource ownership semantic is simplified and it is always clear who had to release it: the process that created it.
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
   countLines::= do {
     fh::= File!!open("someFileName.txt", Mode/Read)
@@ -3885,7 +3828,7 @@ Assert {
 Rollbackable actions prefixed with ~with~ will be rollbacked at the exit of the scope owning them. 
 
  #+BEGIN_SRC fundamental :tangle yes
- Assert {
+ $Assert{
 
    x::= 1   
    do {
@@ -3903,7 +3846,7 @@ Rollbackable actions prefixed with ~with~ will be rollbacked at the exit of the 
 Object methods can be modified only using the ~with~ modifier. 
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
    x::BigDecimal
    y::BigDecimal
@@ -3936,7 +3879,7 @@ In general the Dok semantic is a call-by-need but with implicit priority between
 * Source code documentation
 Dok supports rich comments, i.e. comments can be tagged according their intendeed scope.
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
   ##: Module section 1
   ##
   ##  This section is about module comment structure.
@@ -4030,14 +3973,16 @@ Assert {
 
   ##: Naming piece of code for later reference
 
-  @..
-  Id("someIdName")
-  # Assign a name to some Dok code.
-  @..
-  Id("otherName")[
+  @Id("someIdName")[
+  # Assign a name to some Dok code,
+  # but without creating a lexical scope for compiled code,
+  # i.e. the lexical scope is only for the meta-programming annotation.
+  # For this reason there is no identation.
+ 
+  @Id("otherName")[
   # this code has complete reference name "someIdName/otherName"
-  ..@
-  ..@
+  ]
+  ]
 }
 #+END_SRC
 * Editing macro
@@ -4211,7 +4156,7 @@ Game f(Game game) {
 #+END_SRC
 
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
  Game --> (
   
@@ -4309,7 +4254,7 @@ In Dok we have no lazy evaluation but the compiler is free to produce efficient 
 #        yield f
 #        n, f = n + 1, f * (n + 1)
 
-Assert {
+$Assert{
 
   FactorialStream --> Stream(Of: Int) (
     _n = 0
@@ -4373,7 +4318,7 @@ In Dok:
 - the high-level data contained in ~Vertex~ and ~Edge~ can be parameters
  
 #+BEGIN_SRC fundamental :tangle yes
-Assert {
+$Assert{
 
  Graph(E::Type, V::Type) --> (
    @Abstract

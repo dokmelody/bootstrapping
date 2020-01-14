@@ -78,9 +78,23 @@ Optionally I can insert metainfo about an ID in-place using some HTML-like forma
 ** TODO Export info also to web/dita-like format and publish on the website
 * Dok 01
 Create a first bootstrap version of Dok language.
+** TODO Racket-PEG library is released under GPL license
+Check if I can still use GPL license also for the bootstrap version of Dok or I need to use a GPL license.
+
+Temporarly I will double-license source files under Boost and GPL license, and I will license the project under GPL, specifying the reason.
+
+I asked here for a relicense of the work: https://github.com/rain-1/racket-peg/issues/78
 ** TODO Creae a PEG parser of Dok using some Racket library, into Dok AST
 ** TODO Study how Racket support compilation of code
 ** TODO Compile Dok AST to Racket code
 ** TODO Signal as not-yet-supported some parts of Dok 01
+** TODO Find a better syntax and semantic for metaprogramming
+- study the work of others
+- understand better quotation, quasi-quotation, anti-quotation
 
+** MAYBE I can avoid Racket SyntaxObjects in Dok
+In Racket a SyntaxObject contains context informations about a syntax element.
 
+In Dok probably I can store them in attribute-gramars processors.
+
+In Guix there are G-Expressions. Probably in Dok I can directly DSL and compilers for them.
