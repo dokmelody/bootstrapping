@@ -4088,6 +4088,8 @@ Lisp has ideally a simpler syntax and semantic, but in practice there are many v
 In Dok is easier chaining calls: e.g. ~self.f.g.h(x)~ vs ~(h (g (f self)) x)~
 
 Lisp can manage code as data, so it allows metaprogramming at compile-time and run-time. Dok uses metaprogramming only at compile-time but it tries to focus on a more powerful analysis phase of the source code using attribute grammars and other built-in concepts.
+
+Lisp is homoiconic because Lisp abstract syntax tree is also Lisp code. Dok instead has a syntax that is different from its abstract syntax tree representation. In any case Dok has useful costructs for analyzing and transforming hierarchical data (i.e. code). 
 ** Haskell
 *** Differences with Monads
 In Haskell Monads can be used for adding a new semantic to a sequence of actions:

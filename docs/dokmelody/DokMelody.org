@@ -43,7 +43,42 @@ DokMelody tries to combine in an effective way the complementary strengths of cu
 - information retrieval: the system helps the user to search for relevant information;
 - data analysis: the system summarize data into graphs and textual reports and allows users to explore the database; 
 - data mining: the system discovers (or suggests) new relationships between data;
-  
+* Text oriented IDE  
+** DokMelody is not a projectional editor
+A projectional editor https://en.wikipedia.org/wiki/Structure_editor supports DSL with many different syntax and also graphical elements because it stores the structure of a language, not its syntax as a plain string. An example used in production is https://www.jetbrains.com/mps/
+
+Some advantages are:
+- can display and edit both texual, tabular and graphical elements
+- extensive autocompletition
+- there is no special syntax to know for each DSL
+- the editor allows the editing of only valid code fragments of the specified DSL
+- no parsing is needed for reading source code, because it is already saved in abstract-syntax-tree format (e.g. XML format)
+
+Some disavantages are:
+- sometime editing is not a pure and linear keyboard experience
+- the internal format is something like XML or other structured format, and so not easily manageable from traditional textual tools like diff, merge, and so on
+
+DokMelody is not a projectional editor.
+** DokMelody favours text-based languages
+DokMelody uses a traditional textual rapresentation of code, that must be parsed.
+
+Because users can not know too much DSL, DokMelody tries to use a limited number of DSL like:
+- Dok for code
+- MarkDown for documentation
+- Latex for math formula
+- CSV or similar formats for tabular data
+- Graphviz for diagrams
+- PEG for grammar specification
+- etc..
+
+DokMelody can show the corresponding graphical representation, while the user edit the source code, and can suggest snippest and templates for common pattern of code. The reasons are:
+- hopefully there are not too much code formats to use and some standardization can be reach
+- text code can be generated and refactored more easily, and it is more metaprogramming prone
+- editing can be done using favoured editor keybinding of the user, and without the need to practice with a projectional editor
+** DokMelody IDE is mandatory for coding 
+DSL syntax is important, but in any case in DokMelody a good integration with the IDE is assumed in order to be productive and view all/only important details of code.
+
+Text representation should be a good-enough fallback view, but the usual coding and reading activity is assumed to be done with DokMelody and not with traditional editors.
 * Card Based UI Paradigm
 ** Cards
 The idea is dividing content into postcard-like small frames that can be scrolled like in TiddlyWiki.
