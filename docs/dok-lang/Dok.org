@@ -282,10 +282,28 @@ $Assert{
    :PROPERTIES:
    :CUSTOM_ID: tuple
    :END:
-A tuple is like a [[#record]], but in which the position of the fields is important, and in some cases the field name can be omitted in favour of the position.
+A tuple is a [[#record]] having implicit default field names.
 
-Tuples are used mainly as arguments of functions, because functions can be called without specifying the argument name, e.g. ~10.mod(2)~.
-** Containers as values (Persistent Data Structures)
+#+BEGIN_SRC fundemantal :tangle yes
+$Assert{
+  t::=(0, 1, "two")
+
+  t.x0 == 0
+  t.x1 == 1
+  t.x2 == "two"
+
+  t.x0.is(Int)
+  t.x1.is(Int)
+  t.x2.is(String)
+
+  t.get(0) == 0
+  t.get(1) == 1
+  t.get(2) == "two"
+
+  t.size == 3
+}
+#+END_SRC
+** Containers as values (i.e. as persistent data structures)
 Like in functional programming languages, also compound types (e.g. records, containers, etc..) are values.
 
 Containers that are values are called Persistent Data Structures and there are various efficient implementations of them. They allows also efficient rollback of changes in case of [[#nested-transaction-semantic]]. 
@@ -511,7 +529,7 @@ Dok joins object-oriented-programming (OOP) with some functional-programming (FP
 - concrete objects are used (mainly) for representing hierarchical data (e.g. source code, documents, etc..), and so more like FP sum types than OOP subclasses
 - inner class (inner types in Dok terms) are used a lot more than in traditional OOP, because they introduce service types describing parts of hierarchical data
 
-Like in OOP and FP, concrete types can support abstract interfaces representing abstract concepts.
+Like in OOP and FP, concrete types can support abstract nterfaces representing abstract concepts.
 
 The design guidelines are:
 - OOP conceps are used for representing physical hierarchical data, and for defining an hierarchy of logical interfaces 
@@ -607,6 +625,47 @@ $Assert{
   )
 } 
 #+END_SRC
+** Compact type variants
+  :PROPERTIES:
+  :CUSTOM_ID: compact-type-variants 
+  :END:
+Every type variant is a distinct type, but sometime these types can have no attributes or only one attribute, so they are rather compact. Dok allows to use a compact syntax for these types. 
+
+#+BEGIN_SRC fundemantal :tangle yes
+$Assert{ 
+  MathPrecision --> (
+    /Infinite
+    /Finite --> (Int)
+  )
+
+  p1::= MathPrecision/Infinite
+  #:NOTE: `MathPrecision/Infinite` is a type without attributes. 
+  #       Its only information consists in its type-tag,
+  #       and this is completely fair and coherent with Dok type semantic.
+
+  p2 == MathPrecision/Infinite
+  #:NOTE: the type of `p2` can be used in tests, like it is a value.
+
+  p2 == Infinite
+  #:NOTE: it is known at compile-time that `p2.is(MathPrecision)`
+  #       so this short expression is perfectly clear,
+  #       and more readable than long version `MathPrecision/Infinite`.
+
+  p2::= MathPrecision/Finite(4)
+  #:NOTE: `MathPrecision/Finite` type has only one attribute, 
+  #       so it can remain unamed.  
+
+  p2 == Finite(4)
+  #:NOTE: again a rather compact notation
+
+  p2.x0 == 4
+  p2.get(0) == 4
+  #:NOTE: types with unamed attributes follow
+  #       the same syntax and semantic of tuples.
+} 
+#+END_SRC
+** Compact types
+They have the same syntax and semantic of [[compact-type-variants]]. They are more used inside type-variants than as standalone types.
 ** Overriding
 Type variants can override fields and methods of parent type like in normal object-oriented languages. Also types of the methods can be redefined during overriding (see [[#type_conformance]]).
 
@@ -786,7 +845,7 @@ $Assert{
  )
 #+END_SRC
 *** Interfaces hieararchy
-An interface can require that the type supporting it will support also one or more other interfaces.
+An interface can require that the type supporting it will support also one or more other interfaces. Doing so interfaces forms an hierarchy where more constraints and features are added to every layer. 
 
 #+BEGIN_SRC fundamental :tangle yes
 
@@ -797,7 +856,7 @@ An interface can require that the type supporting it will support also one or mo
    }
  )
 
- Monoid && Semigroup --> (
+ Monoid --> Semigroup (
    Identity --> Self { 
      @Abstract 
      $Ensure {
@@ -808,16 +867,13 @@ An interface can require that the type supporting it will support also one or mo
  )
 #+END_SRC
 *** Interface instances
-A type =A= implements an interface =B= through the specification of a conversion from =A= to =B=. 
+A concrete type can support one or more interfaces. The syntax is similar to the case of interfaces hierarchy, but in this case there is a concrete type and an interface, instead of two interfaces.
 
 #+BEGIN_SRC fundamental :tangle yes
  Int -> Comparable ( 
-   #:NOTE: we are saying that we can convert a value
-   #       of type `Int` to a value of type `Comparable`,
-   #       and that this is the default conversion to apply
-   #       every time a function requiring a `Comparable`
-   #       receives an `Int`.
-   #       So we are saying that `Int` supports/implements interface `Comparable`. 
+   #:NOTE: ``->`` is used instead of ``-->`` because `Int` is not a new type,
+   #       but an already existing type, that we are extending
+   #       with the support of a new interface.
 
    x `compare` y -> Ordering { 
      x.compareIntBuiltIn(y) 
@@ -847,6 +903,7 @@ A type constraint can specify one or more interface constraints
 
 } # close the Assert
 #+END_SRC
+** TODO Multiple inheratince
 ** Type aliases
    :PROPERTIES:
    :CUSTOM_ID: type-alias
@@ -858,9 +915,9 @@ An Haskell type alias like ~type Age = Int~ in Dok is:
 #+BEGIN_SRC fundamental :tangle yes
 $Assert{ 
 
-  Int --> Age( 
-   $Ensure{ self >= 0 }
-   #:NOTE: we can add additional constraints and methods to `Age`
+  Age --> Int ( 
+    $Ensure{ self >= 0 }
+    #:NOTE: we can add additional constraints and methods to `Age`
 
    isMajor --> Bool { self >= 18 }
   )
@@ -1662,6 +1719,75 @@ Some example of higher-order functions usage:
    }
  }
  #+END_SRC
+** Optional arguments
+  :PROPERTIES:
+  :CUSTOM_ID: function-optional-arguments
+  :END:
+Dok tries to join in a unique way the concepts of
+- functions with optional arguments having a default value
+- classes with static fields (i.e. field value is unique for each instannce of the class)
+- dependency injection
+
+The idea is that:
+- diferent functions can have the same set of optional arguments
+- a value of an optional argument should be set only one time from a caller and used every time functions sharing the same set of optional arguments are called
+
+Viewed in this way the semantic is similar to using global variables contaning the params values, or better having a shared environment, or better having a shared environment but with a predictable lexically-scoped semantic like in case of =with= used for [[dependency_injection]].
+
+#+BEGIN_SRC fundamental :tangle yes
+$PseudoCode{
+
+  $locale::= $Context(
+    language::String
+    
+    currencyPrecision::Int
+
+    keyboardMap::String
+  )
+
+  Invoice --> (
+    $UseContext($locale)
+
+    total::Rational
+
+    showTotal --> String {
+      self.total.show(withPrecision:= $locale.currencyPrecision)
+      #:NOTE: ``currencyPrecision`` is like an otpional ever accessible argument of the function
+    }
+  )
+
+  do {
+    with [
+      $locale.currencyPrecision = 2
+      $locale.language = "it"
+    ]
+    i::= Invoice(total:= 92.758)
+    !print i.showTotal
+  }
+}
+#+END_SRC
+
+** Function arguments are a record
+The arguments of a function can be seen as a record in Dok. A function can be called specifying some code returning a compatible record.
+
+#+BEGIN_SRC fundamental :tangle yes
+$Assert{
+
+  Int.sum3(x::Int, y::Int) --> Int {
+    self + x + y
+  }
+
+  args::= (x:= 1, y:= 1)
+  1.sum3(1, 1) == 1.sum3{args} == 3
+
+  1.sum3{
+    args2::= args
+    args2.x:= 2
+    args2.y:= 3
+    args2
+  } == (1 + 2 + 3) == 6
+}
+#+END_SRC
 ** Anonymous functions
    :PROPERTIES:
    :CUSTOM_ID: anonymous-function
@@ -2294,11 +2420,15 @@ They are a sort of visitor pattern on steroids, because:
   change slightly
 - they can not use functions with side effects because they are pure equations and they had to be referentially transparent
 
-This example will introduce AG syntax and semantic. The task of the example is: replace the tree with a
+This example is inspired to cite:saraiva1999purely
+The task is: replace the tree with a
 similar tree, but where each node value is replaced with the minimum node
 value of the original tree.
 
-This example is inspired to cite:saraiva1999purely
+The AG solution is based on:
+- a bottom-up attribute for calculating the minimum value of eachh subtree
+- a top-down attribute telling to each node which is the global minimum value found in the entire tree
+- a rewrite attribute with a subtree similar to the previous tree, but with the minimum value used in each `Tree/Tip` node
 
 #+BEGIN_SRC fundamental :tangle yes
 $Assert{
@@ -2329,44 +2459,55 @@ $Assert{
       #: The minimum value of all the nodes of the tree.
       #:NOTE: it is propagated top-down from root to all children.
       #       The use of ``<--`` instead of ``-->`` represents this.
+      #       You can imagine a top-dow attribute like an implicit
+      #       parameter passed to any function. It is sort of 
+      #       always accessible environment.
+
+      (self.globalMin, self.min)*.minim
+      #:NOTE: the global minim value to pass to each subtree is the minimum
+      #       of the value found from the parent node and passed to this node
+      #       using the `globalMin` attribute, and the minimu value found in
+      #       children of the node, using so bottom-up attributes.
    
-      @Abstract 
     }
 
-    withGlobalMin --rewrite--> Self {
-      #: A rewrite AG attribute replacing Tip values with `self._globalMin`.
-      @Abstract
+    globalMin <--init-- {
+        self.min
+	#:NOTE: each top-down attribute starts with an initial value in the case
+	#       this is the first node of the hierarchy.
     }
- 
+
     /Tip -> (
       min -> { self.value }
-
-      globalMin <-init- { 
-        self.value
-        #:NOTE: this is the initial value of the top-down attribute
-        #       generated for the top/root of the tree.
-        #       All other values will be generated by normal `<-`
-        #       update rules, and if not specified (as in this case)
-        #       by implicit copy-the-inherited-value rules.
-      }
-
-      withGlobalMin -rewrite-> Self { 
-       Tip(self.globalMin)
-      }
     )
 
     Fork -> (
       min -> { (self.left.min, self.right.min).minimum }
-
-      globalMin <-init- {
-        self.min
-        #:NOTE: only for the root node (by the `<-init-`) the global minimum is the minimum value found on the two nodes
-      }
-
-      #:NOTE: there is no `withGlobalMin` rule, so 
-      #       `Fork` elements are simply "copied".
     )
   ) 
+
+  Tree -> (
+    withGlobalMin --> Self {
+      #: A rewrite AG attribute replacing Tip values with `self._globalMin`.
+     
+      $RewriteRule
+      #:NOTE: apply semantic of rewrite rules.
+      #       In particular replace each node with trees with replaced elements.
+      #       Because Dok is a value based language, a new copy of the tree
+      #       must be created explicitely. The rewrite rule avoids the repetition
+      #       of simple clone operations.
+    }
+
+    /Tip -> (
+      withGlobalMin -> Self { 
+       Tip(value:= self.globalMin)
+       #:NOTE: replace this node with a version having the global minimum found value.
+      }
+    )
+
+    #:NOTE: the ``$ReriteRule`` annotation create this boilerplate function in automatic
+    # > /Fork( withGlobalMin -> (left:= self.left.withGlobalMin, right:= self.right.withGlobalMin))
+  )
 
   tree1::= Tree(Fork(Tip(10), Fork(Tip(5), Tip(1))))
 
@@ -2374,9 +2515,11 @@ $Assert{
   tree1.left.value == 10
 
   tree1.left.globalMin == 10
-  #:NOTE: we apply `minimValue` to a new tree value, so the visit start from the beginning again
+  #:NOTE: we are applying `globalMin` to a new tree value, 
+  # so the visit start from the beginning again, starting with
+  # the ``init`` rule o the attribute.
 
-  tree1.withMinValue == Tree(Fork(Tip(1), Fork(Tip(1), Tip(1))))
+  tree1.withGlobalMin == Tree(Fork(Tip(1), Fork(Tip(1), Tip(1))))
 } 
 #+END_SRC
 ** Bootm-up attributes
@@ -2386,6 +2529,9 @@ Bottom-up attributes are similar to Dok functions:
 
 The only differences with Dok functions it is that they can depend from top-down attributes and/or other bottom-up attributes and so the calculation of their value can require one or more implicit visiting of the hiearchical data structure. 
 ** Top-down attributes
+  :PROPERTIES:
+  :CUSTOM_ID: topdown-attributes
+  :END:
  Top-down attributes are assigned from parent nodes to theirs children
  nodes. They are propagated top-down, because it is the parent node =P= setting their values before the children will be visited.
 
@@ -2412,7 +2558,9 @@ The only differences with Dok functions it is that they can depend from top-down
  always the top-down attributes of the parent. This is a sane rule,
  because it propagates the computation context from parents to children,
  and it changes only when explicitely specified.
-** Special attributes
+** Collection attributes
+A collection attribute keep collecting new values during the visiting of the tree. It can be implemented using normal bottom-up attributes, but the pattern is often used, so they are also a special type of attribute. They start always as an empty collection, and then every rule specify which elements to add to the collection. 
+
 #+BEGIN_SRC fundamental :tangle yes
 $Assert{
 
@@ -3689,7 +3837,7 @@ $Assert{
      ^ --> GetResponse*
    ]
   
-   BasicKVS && KVS --> @Kalm.Process[
+   BasicKVS --> KVS $Kalm.Process(
 
      State --> (
        key::$String @Key
@@ -3711,7 +3859,7 @@ $Assert{
          )
        }
      )
-   ]
+   )
 
 }
 #+END_SRC
@@ -3820,58 +3968,38 @@ $Assert{
   IO!println("There are " ++ countLines.String ++ " lines")
 }
 #+END_SRC
-* Dependency Injection and Contexts
+* Dependency Injection and contexts
   :PROPERTIES:
   :CUSTOM_ID: dependency_injection
   :END:
+Depedency injection cite:wiki:dependency-injection is a pattern in which a service is split in sub services, and it is configured with which sub services to call. Changing the sub services will change the behaviour of the main service. For example during testing the payment card processor service can be replaced with a fake service.
+
+In Dok dependency injection and contexts can be used for modifying default options/parameters of services but also of normal functions.
 ** The ~with~ modifier
-Rollbackable actions prefixed with ~with~ will be rollbacked at the exit of the scope owning them. 
+Rollbackable actions prefixed with ~with~ will be rollbacked at the exit of the scope owning them. So the ~with~ can configure something, and then restore to original params at the end.
 
  #+BEGIN_SRC fundamental :tangle yes
  $Assert{
 
    x::= 1   
    do {
-     with x::= 2
-     #:NOTE: the effects will be discarded outside the scope
-
+     with [
+       x::= 2
+       #:NOTE: the effects will be discarded outside the scope of parent =do { .. }=
+     ]
      x == 2
    }
    x == 1
  }
  #+END_SRC
-** Contexts
-~with~ can be used for changing the run-time context. For example for assigning new definitions to methods of objects, or using different Process/services.
 
-Object methods can be modified only using the ~with~ modifier. 
+~with~ can be used also for customizing methods of a type inside some part of the code, using ad-hoc code.
 
-#+BEGIN_SRC fundamental :tangle yes
-$Assert{
+The advantage of ~with~ semantic are that in- effects depend from the lexical scope of the ~with~ instruction and not from the dynamic scope, so they are more predictable (i.e. a property of code and not of code execution).
 
-   x::BigDecimal
-   y::BigDecimal
-   
-   BigDecimal.precision == Infinite
-   
-   x:= 0.1234
-   y:= 0.1234
-   
-   x + y == 0.2468
+** Context
+Functions with optional arguments use contexts. See [[function-optional-arguments]].
 
-   do {
-     with BigDecimal.precision:= 2
-     x + y == 0.24 
-   }
-   BigDecimal.precision == Infinite
-}
-#+END_SRC
-
-** Dependency Injection
-Depedency injection cite:wiki:dependency-injection is a pattern in which a service is split in sub services, and it is configured with which sub services to call. Changing the sub services will change the behaviour of the main service. For example during testing the payment card processor service can be replaced with a fake service.
-   
-Dependency injection is supported in Dok using:
-- ~with~ context modifier
-- metaprogramming rules injecting new behaviour to objects
 * Dok semantic
 Dok semantic is not formally defined, and never it will be. Only the semantic of Dok-Kernel (Dokk) will be (maybe) formally defined. Dokk is a simplified version of Dok without advanced features and with a strict order of evaluation semantic. The semantic of a Dok source code is the semantic of the corresponding Dokk code obtained from its compilation. Dokk code can be inspected and analyzed using the DokMelody IDE. Dok is composed from many DSL and extensions and so it can become impractical to fully define all its aspects. On the contrary a developer can freely apply different compilation transformations and inspect the resulting Dokk code for seeing if it is all as expected. The power of Dok is more on the metaprogramming analysis and transformation of code than in the inner composable semantic of Dok.
 
@@ -4087,6 +4215,8 @@ Lisp has ideally a simpler syntax and semantic, but in practice there are many v
 
 In Dok is easier chaining calls: e.g. ~self.f.g.h(x)~ vs ~(h (g (f self)) x)~
 
+In Lisp arguments of a function call are elements of a list and they are manageable both a compile-time and run-time without difference. In Dok you can not change at run-time (at least easily as in Lisp) the name of the function to call (that in Lisp is the first argument of the list), but you can pass arguments to a function passing a record, that is manegeable at run-time in a similar way to Lisp.
+
 Lisp can manage code as data, so it allows metaprogramming at compile-time and run-time. Dok uses metaprogramming only at compile-time but it tries to focus on a more powerful analysis phase of the source code using attribute grammars and other built-in concepts.
 
 Lisp is homoiconic because Lisp abstract syntax tree is also Lisp code. Dok instead has a syntax that is different from its abstract syntax tree representation. In any case Dok has useful costructs for analyzing and transforming hierarchical data (i.e. code). 
@@ -4278,11 +4408,7 @@ More complex cases in Dok will be solved using Actors or the Bloom approach. So 
 ** Comparison with =Familia= type system
 Familia cite:zhang_familia:_2017 is a programming language that tries unifying interfaces, type classes, and family polymorphism and many other related advanced concepts of functional and object-oriented type systems in a rather simple but powerful type system. Dok type systems has the same aim, but I know the subject a lot less respect the two authors. So it is usefull comparing Dok with Familia for validating (at least informally) Dok againts a well designed and advanced programming language.
 
-As said also Dok tries to join functional and object oriented type systems concepts, using:
-- ~S/T~ type variant (i.e. a form a algebrait types)
-- ~S.T~ inner type (i.e. distinct types defined inside the namespace of the parent type)
-- ~T && S~ interface hierarchy (i.e. a form of interface multiple inheritance where for example an interface ~T~ can be implemented only if it respects also an interface ~S~)  
-- ~T -> S~ type conversion (i.e. interface implementation, or conversion between isomorphic/compatible concrete types)
+As said also Dok tries to join functional and object oriented type systems concepts using compact type variants in functional-like way. On the contrary the usual OOP approach is used for interfaces, because a concrete type suppos an interface case by case.
 
 In Familia the term =interface= is used for concepts/class as defined in math-oriented language, while =class= is used for concrete implementation of an interface. In Dok there are only types: some types plays the role of interface/class, while other of concrete implementation.
 
