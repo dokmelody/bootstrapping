@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<!--  This file is part of the DITA Open Toolkit project. See the accompanying LICENSE file for applicable license.  -->
+<map xml:lang="en-US">
+  <title>Dokmelody</title>
+
+  <topicmeta>
+    <author>Massimo Zaniboni</author>
+    <critdates>
+      <created date="January, 2023"/>
+    </critdates>
+  </topicmeta>
+
+  <topicref href="topics/dokmelody/about-dokmelody.md" format="mdita">
+  </topicref>
+  <topicref href="topics/dok/about-dok.md" format="mdita">
+       <topicref href="topics/dok/design/about-dok-design.md" format="mdita" collection-type="sequence">
+       </topicref>
+    </topicref>
+  <topicref href="topics/doknil/about-doknil.md" format="mdita">
+  </topicref>
+  <topicref href="topics/tuttology/about-tuttology.md" format="mdita">
+  </topicref>
+
+  <topicref href="topics/references/ADR/about.md" format="mdita">
+    <topicref href="topics/references/ADR/ADR-001-use-ADRS.md" format="mdita">
+    </topicref>
+    <topicref href="topics/references/ADR/ADR-002-use-DIVIO.md" format="mdita">
+    </topicref>
+    <topicref href="topics/references/ADR/ADR-003-use-MIT-and-CC-BY-licenses.md" format="mdita">
+    </topicref>
+    <topicref href="topics/references/ADR/ADR-004-favours-project-branching-and-forking.md" format="mdita">
+    </topicref>
+   </topicref>
+
+
+<!-- TODO test -->
+<reltable>
+  <relheader>
+    <relcolspec type="concept"/>
+    <relcolspec type="task"/>
+    <relcolspec type="reference"/>
+  </relheader>
+  <relrow>
+    <relcell>
+      <topicref href="topics/dokmelody/about-dokmelody.md"/>
+    </relcell>
+    <relcell>
+      <topicref href="topics/tuttology/about-tuttology.md"/>
+      <topicref href="topics/references/ADR/ADR-003-use-MIT-and-CC-BY-licenses.md"/>
+    </relcell>
+  </relrow>
+</reltable>
+
+</map>

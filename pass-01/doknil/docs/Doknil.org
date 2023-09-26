@@ -1,0 +1,265 @@
+#+TITLE: Doknil-v0.01 - An Knowledge-Base Specification Language
+#+LANGUAGE: en
+#+LICENSE: [[https://creativecommons.org/licenses/by/4.0/][Creative Commons Attribution 4.0 International]]
+#+SPDX-License-Identifier: CC-BY-4.0
+#+COPYRIGHT: 2021-2022 Massimo Zaniboni <mzan@dokmelody.org>
+
+* About
+Doknil is a simple and limited [[https://en.wikipedia.org/wiki/Ontology_language][knowledge-base specification language]] for linking chunks of information. In Doknil information is mainly stored in documents, and not exposed directly as Doknil facts. Doknil scope is facilitating human navigation between knowledge, following links, but not representing knowledge in a complete and formal way.
+
+The Doknil name is composed from Dok (i.e. documents) and Knil (i.e. link written in reverse), so it means "relationships between documents".
+
+This first version of Doknil is implemented as a Common Lisp (CL) Domain Specific Language (DSL), using macro, that compiles Doknil knowledge-base (KB) to Postgresql code.
+* Example
+A Software Project is composed of many linked pieces of information, living in the: documentation; issue manager; code; forum; mind of the programmers. For example
+
+#+BEGIN_SRC dot :file software-project.png :cmdline -Kdot -Tpng
+digraph {
+ specification_requirement -> design_decision -> implementation_detail;
+ issue -> code_patch -> implementation_detail;
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:software-project.png]]
+
+Doknil can be used as a literate-programming tool for linking chunks of information and code, so you can navigate between them. This is an example of a Lisp project involving "palindrome words", specified using a Doknil KB.
+
+TODO rewrite chunk examples
+#+BEGIN_EXAMPLE
+(def-chunk s (MarkDown "We need to check if a text is a palindrome."))
+(fact! s :isa specification))
+
+(def-chunk e (MarkDown "A palindrome is a phrase which reads the same backward and forward."))
+(fact! e :isa definition :of s)
+
+(def-chunk d (MarkDown "We can assume not very long texts and use plain strings."))
+(fact! d :isa design-note :of s)
+
+(def-chunk c
+  (RacketCode
+    (define (palindrome? str)
+      (let* ([lst (string->list (string-downcase str))]
+             [slst (remove* '(#\space) lst)])
+        (string=? (list->string (reverse slst)) (list->string slst))))))
+
+(fact! c :isa implementation :of d)
+
+(def-chunk cp (URL "http://www.rosettacode.org/wiki/Palindrome_detection#Racket"))
+(fact! c :isa derived-work :of cp)
+#+END_EXAMPLE
+
+* Doknil specification
+** Chunks
+A =chunk= is an external piece of information, with:
+- a human readable ID, unique inside the name-space where the def-chunk is defined;
+- a reference to where chunk content is stored;
+- the format of the reference;
+- optionally the data format of the chunk;
+
+#+BEGIN_EXAMPLE
+(def-data-type
+   /text (/html /markdown)
+   /url (/image (/png /jpeg)))
+
+(def-ref-type /url /file (/local /nfs))
+
+(def-chunk doc1 :ref "readme.md" :ref-type /file/local :data-type /text/markdown)
+#+END_EXAMPLE
+** Types and roles
+A =chunk= can have one or more logical =type=. =Types= can be hierarchical. =Types= can acts also like roles of a =chunk= in certain =context=.
+
+#+BEGIN_EXAMPLE
+(def-roles
+   /company
+   /document (/scientific-paper /book)
+   /person (/student))
+#+END_EXAMPLE
+** Facts
+Facts specify the =type= or the =role= of a chunk, in case there are additional =context= information.
+
+#+BEGIN_EXAMPLE
+(fact! c :isa company)
+(fact! d :isa department :of c)
+(fact! p :isa project :of d)
+(fact! i :isa feature :of p)
+(fact! k :isa document)
+(fact! k :isa issue :of i)
+(fact! Smith :isa husband :of Mary :in LittleNovel :until 1980-07-01)
+#+END_EXAMPLE
+
+Facts start with the subject =chunk=, =:isa= or the synonimous =:is=, followed by the =type= or =role=. Then other attributes can be added to the =fact=.
+** Queries
+Queries are used for navigating inside the Knowledge-Base. Doknil is meant to be used from humans, so queries reults will be truncated if they contain too much elements.
+
+#+BEGIN_EXAMPLE
+(query (?and (?d :isa issue/open :of p)
+             (?d :isa issue/important :of p)
+             (?a :isa author :of ?d)
+             (?a :isa project-maintainer :of ?another-project)))
+#+END_EXAMPLE
+** MAYBE  Variables in queries
+In Doknil all distinct variables like =?p1= and =?p2= and constants like =p3= are assumed with distinct values, because otherwise one should use the same variable or constant in the query.
+** TODO Include considerations on compound queries
+** Specific roles subsumes generic roles
+=Types= (or =roles=) are hierarchical, and a fact valid for a role =child= is valid also for the parent role.
+
+#+BEGIN_EXAMPLE
+(def-role /document (/scientific-paper))
+
+(fact! d1 :isa scientific-paper)
+
+(test? d1 :isa document)
+#+END_EXAMPLE
+
+=Types= admit a full type path specifications starting from root type, like =/document/scientific-paper= or short path specification in case names are unique and non-ambigous.
+** Parts
+Some =roles= can define something like =owned :isa part :of owner= relationship between =chunks=. Then, every part of =owned= will be also a part of =owner=. =/part= is a special role, having this property.
+
+#+BEGIN_EXAMPLE
+(def-role
+  /part
+    (/department
+     /project (/task /issue /feature)))
+
+(def-role
+  /responsible
+  /customer
+  /requester)
+
+(fact! dep1 :isa department :of company1)
+(fact! proj1 :isa project :of dep1)
+(fact! task1 :isa feature :of proj1)
+(fact! Acme :isa customer)
+(fact! Acme :isa requester :of task1)
+
+; this is the direct fact
+(test? task1 :isa feature :of proj1)
+
+; proj1 is owned by dep1, hence task1 is also a part of dep1
+(test? task1 :isa project/feature :of dep1)
+
+; dep1 is owned by company1, hence task1 is also a part of company1
+(test? task1 :isa project/feature :of company1)
+
+(test? task1 :isa part :of proj1)
+(test? task1 :isa part :of dep1)
+(test? task1 :isa part :of company1)
+
+; NOTE: roles that are not sub-roles of "/part" are not affected by "/part" inheritance
+(test? (not (Acme :isa requester :of proj1)))
+#+END_EXAMPLE
+** Contexts
+A =context= is a way to add additional roles to a set of =facts=.
+
+#+BEGIN_EXAMPLE
+(def-role
+  /domain (/math /biology /physics)
+  /fiction (/novel /film /book)
+  /culture
+  /person
+  /group (/company /laboratory)
+  /project
+)
+
+(fact! Lord-of-the-Rings :isa fiction/book)
+(fact! Foundation-Series :isa fiction/book)
+
+(cntx :in fiction/Lord-of-the-Rings
+  (fact! Gondor :isa city)
+  (fact! Gandalf :isa wizard))
+
+(cntx :in Foundation-Series
+  (fact! Trantor :isa planet)))
+
+(test? (not (Gondor :isa city)))
+(test? (not (Trantor :isa planet)))
+
+(cntx :in Lord-of-the-Rings
+  (test? Gondor :isa city)
+  (test? (not (Trantor :isa planet))))
+
+; this is synonimous, because the context is explicit
+(test? Gondor :isa city :in Lord-of-the-Rings)
+(test? Gondor :isa city :in fiction/Lord-of-the-Rings)
+#+END_EXAMPLE
+*** Nested contexts
+#+BEGIN_EXAMPLE
+(cntx :in fiction/Lord-of-the-Rings
+  (cntx :in language/English
+    (fact! Gondor :isa city)
+    (fact! Gandalf :isa wizard)))
+
+; this is equivalent to
+
+(fact! Gondor :isa city :in fiction/Lord-of-the-Rings :in language/English)
+(fact! Gandalf :isa wizard :in fiction/Lord-of-the-Rings :in language/English)
+#+END_EXAMPLE
+** Tagged facts
+Facts can be tagged. These =tags= can be used for reusing or branching these =facts=, between different =contexts=. =Tags= group facts without: introducing a distinct namespace; adding some semantic meaning to the grouped facts; being accessible by queries. =Tags= are only a pragmatic, low-level and purely syntax way for referencing a set of =facts=.
+
+#+BEGIN_EXAMPLE
+(fact! book1 :isa book)
+(fact! film1 :isa film :of book)
+
+(cntx :in fiction/book1
+  (fact! Mary :isa character)
+  (fact! Smith :isa character)
+  (tag ^no-in-film
+    (fact! Elisa :isa character)
+    (fact! Elisa :isa mother :of Smith)))
+
+(cntx :in fiction/film1
+  (include-facts book1)
+  (exclude-facts book1^no-in-film))
+
+(test? Elisa :isa mother :of Smith :in fiction/book1)
+(test? (not (Elisa :isa mother :of Smith :in fiction/film1)))
+#+END_EXAMPLE
+
+=exclude-facts= has more priority than =include-facts=, so it must be specified later.
+
+Inclusion and exclusion of a branch, without specifying the tag, affects all the facts (tagged or not tagged) of the branch.
+
+=(include-facts /a/b^c)= includes all facts of =/a= and =/a/b^c=, but not the facts of =/a/b= that are not in the tag =/a/b^c=. The reason is that facts inside =/a/b^c= does not make sense without the facts of =/a=.
+
+=(exclude-facts /a/b^c)= excludes only the facts inside =/a/b^c=.
+** Intensional facts
+Extensional facts are facts explicitely specified, while intensional facts are facts derived by derivation rules. In Doknil there are few and fixed derivation rules, by: hierarchy of =roles=; hierarchy of =parts=.
+
+Other intensional facts can be added automatically for the IDE and related tool, when they analize the content of chunks. So there can be ad-hoc derivation rules.
+** Intensional contexts
+Some =contexts= can capture advanced concepts like: facts true in a certain time-frame; facts true in a certain transaction; facts true in a certain revision of a document.
+
+These intensional =contexts= and related facts can be created and managed automatically from the system, and there can be had-hoc rules for deriving intensional =facts=.
+** Negation semantic
+Doknil assumes usually the [[https://en.wikipedia.org/wiki/Closed-world_assumption][closed-world-assumption]], i.e. what is not currently known to be true, is false.
+
+Sometime the DokMelody IDE can manage at the UI level some roles according the  (open-world-assumption)[https://en.wikipedia.org/wiki/Open-world_assumption], i.e. that the truth value of a statement may be true irrespective of whether or not it is known to be true. But this is not formalized in Doknil, and it is only explicitely managed from the DokMelody UI.
+
+Despite the closed-world-assumption, Doknil can support also explicit negation, using the contexts, and in particular the ``exclude`` statement. So a context can explicitely negate facts asserted in a group context. This information is used for sure during derivation of facts, but it can be used also from the DokMelody IDE for showing in a clear way the differences between two contexts.
+** No reification of facts
+Doknil does not support reification of facts, so facts can not be subject of discourse. This simplify the semantic of the language.
+** Meta information
+=Types= can be used as subjects and objects of facts. This is useful for documenting Doknil schema, using Doknil.
+
+This does not introduces complexities to the semantic of Doknil, because it is like adding meta-information to the knowledge-base, but without affecting the extenional and intensional =facts= at the underlying level.
+** Types and roles can be specific of a context
+=Types= and =roles= can be defined inside a contexts. In this case:
+- their name must be not in conflict with the name of a =type= and =role= defined in a parent context;
+- the =role= has a meaning only for queries and facts defined inside the =context=;
+
+This feature can be used for using domain-specific terms.
+
+In case of conflicting names, the suggested convention is using something like =(fact! fun1 :isa `monotone`)=.
+** Chunks cannot be defined inside contexts
+Chunks cannot be defined inside =contexts=. Their identifier is always global.
+* Comparison with other Knowledge-Base languages
+Doknil has derivation rules, but they are few and built-in, i.e. the user can not specify new rules. From an expressive point of view, Doknil is more powerful than [[https://en.wikipedia.org/wiki/Resource_Description_Framework][RDF]], because it has derivation rules, but less powerful than [[https://en.wikipedia.org/wiki/Web_Ontology_Language][OWL]].
+
+Contrary to OWL, Doknil can manage directly contexts, i.e. facts that are true only inside a certain domain/context.
+
+Doknil is comparable to a relational DB schema, with these differences:
+- there are no integer, string and similar attributes, but only relations between chunks;
+- there are built-in transitive closure rules between hierarchy of =roles= and =contexts=;
+- it has a more English-oriented syntax;

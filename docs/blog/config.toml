@@ -1,0 +1,85 @@
+baseURL = "/"
+canonifyURLs = false
+languageCode = "en-us"
+title = "Dokmelody"
+theme = "ink-free"
+paginate = 6
+rssLimit = 120
+pluralizelisttitles = false
+publishDir = "../_build"
+
+copyright = "© Massimo Zaniboni - mzan@dokmelody.org"
+
+[permalinks]
+  posts = "/:year/:month/:day/:title"
+
+[params]
+	subtitle = "A federated system for programming and sharing information"
+
+	# Optional 64x64 avatar image.
+	avatar = "/imgs/dokmelody-icon-64.png"
+
+	featherIconsCDN = false
+
+	# Site color - dark/light/auto
+	mode = "light"
+
+	# Enable a table of contents
+	toc = "none"
+
+	# Max tags
+	maxTags = 7
+
+	# Define words per minute to approximate reading time
+	wpm = 250
+
+# Nav.
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "Posts"
+url = "/posts"
+weight = 2
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 3
+
+[[menu.main]]
+name = "Docs"
+url = "/docs/topics/dokmelody/about-dokmelody.html"
+weight = 4
+
+[[menu.main]]
+name = "Contacts"
+url = "/contacts"
+weight = 7
+
+[[params.social]]
+name = "RSS"
+icon = "rss"
+url = "/blog/index.xml"
+
+[taxonomies]
+   tag = "tags"
+
+[markup]
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = false
+    hl_Lines = ""
+    lineNoStart = 1
+    lineNos = false
+    lineNumbersInTable = false
+    noClasses = true
+    style = "github"
+    tabWidth = 4
+
+  [markup.tableOfContents]
+    endLevel = 3
+    ordered = true
+    startLevel = 2
