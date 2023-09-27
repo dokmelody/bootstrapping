@@ -21,15 +21,15 @@
 	{{- template "_internal/schema.html" . -}}
 	{{- template "_internal/opengraph.html" . -}}
 	{{- template "_internal/twitter_cards.html" . -}}
-	<link rel="stylesheet" type="text/css" href="{{ .Site.BaseURL }}css/dokmelody.css" />
+	<link rel="stylesheet" type="text/css" href="/css/dokmelody.css" />
 
 	{{ if and (isset .Site.Params "social") (isset .Site.Params "feathericonscdn") (eq .Site.Params.featherIconsCDN true) -}}
 		<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 	{{- else if (isset .Site.Params "social") -}}
-		<script src="{{ .Site.BaseURL }}js/feather.min.js"></script>
+		<script src="/js/feather.min.js"></script>
 	{{ end }}
-		<script src="{{ .Site.BaseURL }}js/main.js"></script>
+		<script src="/js/main.js"></script>
 	{{- if isset .Site.Params "customjs" -}}
-		{{- range .Site.Params.customJS }}<script src="{{ $.Site.BaseURL }}{{ . }}"></script>{{- end }}
+		{{- range .Site.Params.customJS }}<script src=""></script>{{- end }}
 	{{- end }}
 </head>

@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://bootstrapping.dokmelody.org/"
 canonifyURLs = false
 languageCode = "en-us"
 title = "Dokmelody"
@@ -27,11 +27,11 @@ copyright = "© Massimo Zaniboni - mzan@dokmelody.org"
 	# Enable a table of contents
 	toc = "none"
 
-	# Max tags
-	maxTags = 7
+  # Max tags
+  maxTags = 7
 
-	# Define words per minute to approximate reading time
-	wpm = 250
+  # Define words per minute to approximate reading time
+  wpm = 250
 
 # Nav.
 [[menu.main]]
@@ -62,7 +62,7 @@ weight = 7
 [[params.social]]
 name = "RSS"
 icon = "rss"
-url = "/blog/index.xml"
+url = "https://bootstrapping.dokmelody.org/index.xml"
 
 [taxonomies]
    tag = "tags"

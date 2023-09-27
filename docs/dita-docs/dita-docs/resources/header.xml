@@ -3,7 +3,7 @@
   <div class="container">
     <a class="navbar-brand" href="https://bootstrapping.dokmelody.org">
       <img src="/images/dokmelody-icon.png" alt="" height="1em"/>
-      Dokmelody
+      bootstrapping.dokmelody.org
     </a>
     <button
       class="navbar-toggler"
