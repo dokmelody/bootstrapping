@@ -19,6 +19,7 @@
     #:array-operations
     #:bordeaux-threads
     #:esrap
+    #:parse-float
     )
   :pathname "src/"
   :serial t
@@ -26,15 +27,15 @@
     ((:file "ast")
      (:file "parser")
      (:file "dok"))
-  :in-order-to ((asdf:test-op (asdf:test-op :dok/tests))))
+  :in-order-to ((asdf:test-op (asdf:test-op :dok-01/tests))))
 
 (defsystem "dok-01/tests"
   :description "Test suite for Dok programming language"
   :author "Massimo Zaniboni <mzan@dokmelody.org>"
   :licence "MIT"
-  :depends-on (:dok
+  :depends-on (:dok-01
                #:parachute)
-  :pathname "src/tests/"
+  :pathname "tests/"
   :serial t
   :components ((:file "parser"))
   :perform (asdf:test-op (op c) (uiop:symbol-call :parachute :test :dok-parser/tests))

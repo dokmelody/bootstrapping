@@ -2,10 +2,10 @@
 ;; Copyright (C) 2023 Massimo Zaniboni <mzan@dokmelody.org>
 
 (defpackage :dok-parser/tests
-  (:import-from :esrap
-               :parse)
-  (:use :cl :dok-ast :dok-parser :parachute)
-  )
+  (:import-from :parachute #:define-test #:true)
+  (:import-from :dok-parser #:parse-dok)
+  (:use :cl
+        :dok))
 
 (in-package :dok-parser/tests)
 
@@ -17,7 +17,7 @@
   (true (parse-dok "return my-id"))
   (true (parse-dok "return my-new-id"))
   (true (parse-dok "data A [
-  slot x
+  slot x::Int
 
   fun f::Int {
     return 0

@@ -1,7 +1,7 @@
 ;; SPDX-License-Identifier: MIT
 ;; Copyright (C) 2023 Massimo Zaniboni <mzan@dokmelody.org>
 
-(defpackage :dok-ast
+(defpackage :dok
   (:import-from :trivial-types
      :proper-list
      :tuple)
@@ -9,17 +9,78 @@
      :hash-table-keys)
   (:import-from :serapeum :let1)
   (:use :cl :defstar)
+  (:export
+     #:Code
+     #:Stmt
+     #:Stmt/Return
+     #:Stmt/Assert
+     #:Stmt/Data-decl
+     #:Stmt/Var-decl
+     #:Data-part
+     #:Data-part/Slot-decl
+     #:Data-part/Variant-decl
+     #:Data-part/Fun-decl
+     #:Nested-data-decl
+     #:Fun-param-decl
+     #:Type-ref
+     #:Type-ref-path
+     #:Type-ref-path/Self
+     #:Type-ref-path/Variant
+     #:Type-ref-path/Data
+     #:Type-param
+     #:Expr
+     #:Expr/Default-value
+     #:Expr/Value
+     #:Expr/Value/Integer
+     #:Expr/Value/Float
+     #:Expr/Value/String
+     #:Expr/Value/Self
+     #:Expr/Value/Id
+     #:Expr/Binary-expr
+     #:Expr/Stmts
+     #:Expr/Fun-call
+     #:Fun-call-chain
+     #:value
+     #:id
+     #:param
+     #:start-pos #:end-pos
+     #:expr
+     #:stmt*
+     #:name
+     #:type-param*
+     #:cmd-rest
+     #:data-part*
+     #:type-ref
+     #:fun-param-decl*
+     #:result
+     #:type-ref-path*
+     #:arg1 #:arg2 #:operator
+     #:fun-call-chain*
+     #:argument*
+     ))
+
+(in-package :dok)
+
+(defclass Node ()
+  ((start-pos
+    :accessor start-pos
+    :initarg :start-pos
+    :type integer
+    :initform 0)
+   (end-pos
+    :accessor end-pos
+    :initarg :end-pos
+    :type integer
+    :initform 0))
   )
 
-(in-package :dok-ast)
-
-(defclass Code ()
+(defclass Code (Node)
   ((stmt*
     :accessor stmt*
     :initarg :stmt*
     :type (proper-list Stmt))))
 
-(defclass Stmt () ())
+(defclass Stmt (Node) ())
 
 (defclass Stmt/Return (Stmt)
   ((expr
@@ -45,7 +106,7 @@
    (cmd-rest
     :accessor cmd-rest
     :initarg :cmd-rest
-    :type string)
+    :type (or null string))
    (data-part*
     :accessor data-part*
     :initarg :data-part*
@@ -57,15 +118,15 @@
     :type string)
    (type-ref
     :initarg :type-ref
-    :type Type-ref)
+    :type (or null Type-ref))
    (cmd-rest
     :initarg :cmd-rest
-    :type string)
+    :type (or null string))
    (expr
     :initarg :expr
-    :type Expr)))
+    :type (or null Expr))))
 
-(defclass Data-part ()
+(defclass Data-part (Node)
   ())
 
 (defclass Data-part/Slot-decl (Data-part)
@@ -76,13 +137,13 @@
    (type-ref
     :accessor type-ref
     :initarg :type-ref
-    :type Type-Ref)
+    :type (or null Type-Ref))
    (expr
     :accessor expr
     :initarg :expr
-    :type Expr)))
+    :type (or null Expr))))
 
-(defclass Data-part/Varian-decl (Data-part)
+(defclass Data-part/Variant-decl (Data-part)
   ((name
     :accessor name
     :initarg :name
@@ -90,7 +151,7 @@
    (cmd-rest
     :accessor cmd-rest
     :initarg :cmd-rest
-    :type string)
+    :type (or null string))
    (data-part*
     :accessor data-part*
     :initarg :data-part*
@@ -112,7 +173,7 @@
    (cmd-rest
     :accessor cmd-rest
     :initarg :cmd-rest
-    :type string)
+    :type (or null string))
    (stmt*
     :accessor stmt*
     :initarg :stmt*
@@ -124,7 +185,7 @@
     :initarg :stmt/data-decl
     :type Stmt/Data-decl)))
 
-(defclass Fun-param-decl ()
+(defclass Fun-param-decl (Node)
   ((id
     :accessor id
     :initarg :id
@@ -132,15 +193,15 @@
    (type-ref
     :accessor type-ref
     :initarg :type-ref
-    :type Type-ref)))
+    :type (or null Type-ref))))
 
-(defclass Type-ref ()
+(defclass Type-ref (Node)
   ((type-ref-path*
     :accessor type-ref-path*
     :initarg :type-ref-path*
     :type (proper-list Type-ref-path))))
 
-(defclass Type-ref-path () ())
+(defclass Type-ref-path (Node) ())
 
 (defclass Type-ref-path/Self (type-ref-path)
   ())
@@ -161,7 +222,7 @@
     :initarg :type-param*
     :type (proper-list Type-param))))
 
-(defclass Type-param ()
+(defclass Type-param (Node)
   ((param
     :accessor param
     :initarg :param
@@ -171,7 +232,7 @@
     :initarg :value
     :type Type-ref)))
 
-(defclass Expr () ())
+(defclass Expr (Node) ())
 
 (defclass Expr/Default-value (Expr) ())
 
@@ -227,13 +288,13 @@
   ((expr
     :accessor expr
     :initarg :expr
-    :type Exrp)
+    :type Expr)
    (fun-call-chain*
     :accessor fun-call-chain*
     :initarg :fun-call-chain*
     :type (proper-list Fun-call-chain))))
 
-(defclass Fun-call-chain ()
+(defclass Fun-call-chain (Node)
   ((id
     :accessor id
     :initarg :id
