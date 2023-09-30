@@ -15,9 +15,7 @@ copyright = "© Massimo Zaniboni - mzan@dokmelody.org"
 
 [params]
 	subtitle = "A federated system for programming and sharing information"
-
-	# Optional 64x64 avatar image.
-	avatar = "/imgs/dokmelody-icon-64.png"
+	favicon = "/imgs/dokmelody-icon-64.png"
 
 	featherIconsCDN = false
 

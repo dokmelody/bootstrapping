@@ -1,5 +1,7 @@
 #!/usr/bin/env rc
 
+redo update-websites
+
 RDIR='/srv/www/bootstrapping.dokmelody.org'
 RHOST='dokmelody.org'
 
