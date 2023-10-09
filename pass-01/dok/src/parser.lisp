@@ -29,6 +29,9 @@
     (or (lower-case-p c)
         (equal c #\_)))
 
+(defun type-id-start-p (c)
+    (upper-case-p c))
+
 (defun symbol-id-p (c)
   (or (alphanumericp c)
       (member c (list #\- #\_ #\< #\>))))
@@ -49,20 +52,13 @@
     (and WS* (or #\newline #\return) (* (or WS #\newline #\return)))
   (:constant nil))
 
-(defrule REST-ID
-    (or (alphanumericp character)
-        SYMBOL-ID))
-
 (defrule ID
     (and (symbol-id-start-p character) (* (symbol-id-p character)))
   (:destructure (c1 cs)
      (coerce (list* c1 cs) 'string)))
 
-(defrule START-TYPE-ID
-    (upper-case-p character))
-
 (defrule TYPE-ID
-    (and START-TYPE-ID (* REST-ID))
+    (and (type-id-start-p character) (* (symbol-id-p character)))
   (:destructure (c1 cs)
      (coerce (list* c1 cs) 'string)))
 
@@ -105,7 +101,10 @@
     (:destructure (c1 cs)
       (format nil "-~a" cs)))
 
-(defrule code stmts)
+(defrule code
+    (and stmts)
+  (:destructure (stmts)
+    (make-instance 'dok:Code :stmt* stmts)))
 
 (defrule stmts
     (or stmts-multi-line
@@ -304,21 +303,30 @@
     (make-instance 'dok:Type-ref :type-ref-path* (list* t1 ts))))
 
 (defrule type-ref-start
-    (or type-ref-self type-ref-variant type-ref-data))
+    (or type-ref-self
+        type-ref-variant-start
+        type-ref-root-start
+        type-ref-data-start))
 
 (defrule type-ref-self
     (and "Self")
     (:destructure (ignore1)
             (make-instance 'dok:Type-ref-path/Self)))
 
-(defrule type-ref-variant
+(defrule type-ref-variant-start
   (and "../" TYPE-ID)
   (:destructure (ignore1 type-id)
     (make-instance
        'dok:Type-ref-path/Variant
        :name type-id)))
 
-(defrule type-ref-data
+(defrule type-ref-root-start
+  (and "/")
+  (:constant
+    (make-instance
+       'dok:Type-ref-path/Root)))
+
+(defrule type-ref-data-start
   (and TYPE-ID (? (and "(" WS* type-params ")")))
   (:destructure (type-id params)
      (make-instance
@@ -365,8 +373,13 @@
 ; (trace-rule 'expr :recursive t)
 ; (trace-rule 'stmt :recursive t)
 ; (trace-rule 'stmts :recursive t)
-; (trace-rule 'WS+ :recursive t)
 ; (describe-grammar 'sexp)
+; (trace-rule 'WS* :recursive t)
+; (trace-rule 'WS+ :recursive t)
+; (trace-rule 'NL+ :recursive t)
+; (trace-rule 'data-content :recursive t)
+; (trace-rule 'data-content-multi-line :recursive t)
+; (trace-rule 'data-content-one-line :recursive t)
 ; (trace-rule 'sexp :recursive t)
 ; (parse 'sexp "(foo bar 1 quux)")
 ; (untrace-rule 'sexp :recursive t)

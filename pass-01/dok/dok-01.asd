@@ -6,7 +6,6 @@
   :author "Massimo Zaniboni <mzan@dokmelody.org>"
   :licence "MIT"
   :depends-on (
-    #:defclass-std
     #:trivia
     #:alexandria
     #:serapeum
