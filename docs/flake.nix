@@ -32,6 +32,11 @@
 
       plugin5 = ./dependencies/com.oxygenxml.diagrams.svg.zip;
 
+      plugin6 = pkgs.fetchurl {
+        url = "https://github.com/jason-fox/fox.jason.favicon/archive/master.zip";
+        sha256 = "EMIkrgG75lJADaXHibQz2n/6uwBxjoibpGJPVcD4v5M=";
+      };
+
     in rec {
       packages.${system}.dita-for-dokmelody = pkgs.stdenv.mkDerivation rec {
           name = "dita-for-dokmelody";
@@ -59,6 +64,7 @@
             ./bin/dita install ${plugin3}
             ./bin/dita install ${plugin4}
             ./bin/dita install ${plugin5}
+            ./bin/dita install ${plugin6}
             runHook postInstall
           '';
         };
