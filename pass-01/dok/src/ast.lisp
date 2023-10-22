@@ -1,7 +1,9 @@
 ;; SPDX-License-Identifier: MIT
 ;; Copyright (C) 2023 Massimo Zaniboni <mzan@dokmelody.org>
 
-(defpackage :dok
+;; Abstract Syntax Tree (AST) and Attribute Grammars (AG) definitions.
+
+(defpackage :dok/ast
   (:import-from :trivial-types
      :proper-list
      :tuple)
@@ -10,6 +12,7 @@
   (:import-from :serapeum :let1)
   (:use :cl :defstar)
   (:export
+     #:Node
      #:Code
      #:Stmt
      #:Stmt/Return
@@ -52,6 +55,7 @@
      #:cmd-rest
      #:data-part*
      #:type-ref
+     #:type-decl
      #:fun-param-decl*
      #:result
      #:type-ref-path*
@@ -59,18 +63,43 @@
      #:fun-call-chain*
      #:argument*
      #:parent-scope
+     #:I-Declaration
+     #:fully-qualified-name
+     #:walk1
+     #:walk2
+     #:parent-decl
+     #:data-part/nested-data-decl
      ))
 
-(in-package :dok)
+(in-package :dok/ast)
 
 ;;; The AST
+
+(defclass I-Declaration ()
+  ((name
+    :accessor name
+    :initarg :name
+    :type string)
+   (fully-qualified-name
+    :accessor fully-qualified-name
+    :initarg :fully-qualified-name
+    :type (or null string)
+    :initform nil
+    :documentation "An attribute compiled later. A fully qualified name like `A/B.C`")
+   (parent-decl
+    :accessor parent-decl
+    :initform nil
+    :type (or null I-Declaration)
+    :documentation "An attribute compiled later, pointing to the data type containing an inner type decl."))
+  (:documentation "An interface used by all declarations."))
 
 (defclass Node ()
   ((parent-scope
     :accessor parent-scope
     :initarg :parent-scope
     :type (or null Node)
-    :initform nil)
+    :initform nil
+    :documentation "An attribute compiled later.")
    (start-pos
     :accessor start-pos
     :initarg :start-pos
@@ -103,12 +132,8 @@
     :initarg :expr
     :type Expr)))
 
-(defclass Stmt/Data-decl (Stmt)
-  ((name
-    :accessor name
-    :initarg :name
-    :type string)
-   (type-param*
+(defclass Stmt/Data-decl (Stmt I-Declaration)
+  ((type-param*
     :accessor type-param*
     :initarg :type-param*
     :type (proper-list Type-param))
@@ -119,14 +144,11 @@
    (data-part*
     :accessor data-part*
     :initarg :data-part*
-    :type (proper-list Data-part))))
+    :type (proper-list Data-part))
+   ))
 
-(defclass Stmt/Var-decl (Stmt)
-  ((id
-    :initarg :id
-    :accessor id
-    :type string)
-   (type-ref
+(defclass Stmt/Var-decl (Stmt I-Declaration)
+  ((type-ref
     :initarg :type-ref
     :accessor type-ref
     :type (or null Type-ref))
@@ -142,12 +164,8 @@
 (defclass Data-part (Node)
   ())
 
-(defclass Data-part/Slot-decl (Data-part)
-  ((id
-    :accessor id
-    :initarg :id
-    :type string)
-   (type-ref
+(defclass Data-part/Slot-decl (Data-part I-Declaration)
+  ((type-ref
     :accessor type-ref
     :initarg :type-ref
     :type (or null Type-Ref))
@@ -156,12 +174,8 @@
     :initarg :expr
     :type (or null Expr))))
 
-(defclass Data-part/Variant-decl (Data-part)
-  ((name
-    :accessor name
-    :initarg :name
-    :type string)
-   (cmd-rest
+(defclass Data-part/Variant-decl (Data-part I-Declaration)
+  ((cmd-rest
     :accessor cmd-rest
     :initarg :cmd-rest
     :type (or null string))
@@ -170,12 +184,8 @@
     :initarg :data-part*
     :type (proper-list Data-part))))
 
-(defclass Data-part/Fun-decl (Data-part)
-  ((id
-    :accessor id
-    :initarg :id
-    :type string)
-   (fun-param-decl*
+(defclass Data-part/Fun-decl (Data-part I-Declaration)
+  ((fun-param-decl*
     :accessor fun-param-decl*
     :initarg :fun-param-decl*
     :type (proper-list Fun-param-decl))
@@ -198,12 +208,8 @@
     :initarg :stmt/data-decl
     :type Stmt/Data-decl)))
 
-(defclass Fun-param-decl (Node)
-  ((id
-    :accessor id
-    :initarg :id
-    :type string)
-   (type-ref
+(defclass Fun-param-decl (Node I-Declaration)
+  ((type-ref
     :accessor type-ref
     :initarg :type-ref
     :type (or null Type-ref))))
@@ -325,65 +331,89 @@
     :initarg :argument*
     :type (proper-list Expr))))
 
-(defun walk1 (node parent-scope)
-  "Walk in each node of the AST, completing `parent-scope' attribute."
+(defun* (walk1 -> null)
+          ((node (or null Node))
+           (parent-scope (or null Node))
+           (fqn (or null string))
+           (parent-decl (or null I-Declaration)))
+  "Walk in each node of the AST, completing the attributes:
+   `parent-scope',
+   `fully-qualified-name',
+   `parent-decl'"
 
   (when node
+    (let* ((decl-sep (typecase node
+                         (Stmt/Data-decl ".")
+                         (Data-part/Variant-decl "/")
+                         (Data-part/Fun-decl ".")
+                         (Data-part/Nested-data-decl ".")
+                         (Fun-param-decl ".")))
+           (fqn2 (if (typep node 'I-Declaration)
+                     (if fqn
+                         (format nil "~a~a~a" fqn decl-sep (name node))
+                         (format nil "~a" (name node)))
+                     fqn)))
+
+    ; TODO manage var and slot
+    (when (typep node 'I-Declaration)
+      (setf (slot-value node 'fully-qualified-name) fqn2)
+      (setf (slot-value node 'parent-decl) parent-decl))
+
     (setf (slot-value node 'parent-scope) parent-scope)
     (etypecase node
       (Code (loop for p in (stmt* node)
-                  do (walk1 p node)))
-      (Stmt/Return (walk1 (expr node) parent-scope))
-      (Stmt/Assert (walk1 (expr node) parent-scope))
+                  do (walk1 p node fqn parent-decl)))
+      (Stmt/Return (walk1 (expr node) parent-scope fqn parent-decl))
+      (Stmt/Assert (walk1 (expr node) parent-scope fqn parent-decl))
       (Stmt/Data-decl
        (loop for p in (type-param* node)
-             do (walk1 p parent-scope))
+             do (walk1 p parent-scope fqn2 parent-decl))
        (loop for p in (data-part* node)
-             do (walk1 p node)))
+             do (walk1 p node fqn2 node)))
       (Stmt/Var-decl
-       (walk1 (expr node) parent-scope)
-       (walk1 (type-ref node) parent-scope))
+       (walk1 (expr node) parent-scope fqn parent-decl)
+       (walk1 (type-ref node) parent-scope fqn parent-decl))
       (Data-part/Slot-decl
-       (walk1 (type-ref node) parent-scope)
-       (walk1 (expr node) parent-scope))
+       (walk1 (type-ref node) parent-scope fqn parent-decl)
+       (walk1 (expr node) parent-scope fqn parent-decl))
       (Data-part/Variant-decl
        (loop for p in (data-part* node)
-             do (walk1 p node)))
+             do (walk1 p node fqn2 node)))
       (Data-part/Fun-decl
        (loop for p in (fun-param-decl* node)
-             do (walk1 p parent-scope))
-       (walk1 (result node) parent-scope)
+             do (walk1 p parent-scope fqn2 parent-decl))
+       (walk1 (result node) parent-scope fqn parent-decl)
        (loop for p in (stmt* node)
-             do (walk1 p node)))
+             do (walk1 p node fqn2 parent-decl)))
       (Data-part/Nested-data-decl
-       (walk1 (stmt/data-decl node) node))
+       (walk1 (stmt/data-decl node) node fqn2 parent-decl))
       (Fun-param-decl
-       (walk1 (type-ref node) parent-scope))
+       (walk1 (type-ref node) parent-scope fqn parent-decl))
       (Type-ref
        (loop for p in (type-ref-path* node)
-             do (walk1 p parent-scope)))
+             do (walk1 p parent-scope fqn parent-decl)))
       (Type-ref-path/Self nil)
       (Type-ref-path/Variant nil)
       (Type-ref-path/Data
        (loop for p in (type-param* node)
-             do (walk1 p parent-scope)))
+             do (walk1 p parent-scope fqn parent-decl)))
       (Type-param
-       (walk1 (value node) parent-scope))
+       (walk1 (value node) parent-scope fqn parent-decl))
       (Expr/Value nil)
       (Expr/Default-value nil)
       (Expr/Binary-expr
-       (walk1 (arg1 node) parent-scope)
-       (walk1 (arg2 node) parent-scope))
+       (walk1 (arg1 node) parent-scope fqn parent-decl)
+       (walk1 (arg2 node) parent-scope fqn parent-decl))
       (Expr/Stmts
        (loop for p in (stmt* node)
-             do (walk1 p parent-scope)))
+             do (walk1 p parent-scope fqn parent-decl)))
       (Expr/Fun-call
-       (walk1 (expr node) parent-scope)
+       (walk1 (expr node) parent-scope fqn parent-decl)
        (loop for p in (fun-call-chain* node)
-             do (walk1 p parent-scope)))
+             do (walk1 p parent-scope fqn parent-decl)))
       (Fun-call-chain
        (loop for p in (argument* node)
-             do (walk1 p parent-scope))))))
+             do (walk1 p parent-scope fqn parent-decl)))))))
 
 ;;;
 ;;; Name analysis

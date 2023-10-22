@@ -1,0 +1,38 @@
+
+data Int [
+
+]
+
+data A [
+  :^ This is the definition of `A` data type
+
+  fun f::Int {
+    return 0
+  }
+
+  variant ../B [
+    :^ `A/B` is a subtype (i.e. variant) of type `A`
+
+    fun f::Int -override {
+
+      : This is a normal comment, inside the code of `A/B.f`
+
+      return 1
+    }
+  ]
+
+  variant ../C [
+    fun f::Int -override {
+      return 2
+    }
+  ]
+]
+
+var a::A
+assert a.f == 0
+
+var b::A/B
+assert b.f == 1
+
+var c::A/C
+assert c.f == 2

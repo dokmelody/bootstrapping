@@ -1,16 +1,17 @@
 ;; SPDX-License-Identifier: MIT
 ;; Copyright (C) 2023 Massimo Zaniboni <mzan@dokmelody.org>
 
-(defpackage :dok-parser
+
+(defpackage :dok/parser
   (:import-from :trivial-types
      :proper-list
      :tuple)
   (:use :cl :esrap :parse-float)
-  (:export :parse-dok))
+  (:export :parse-dok
+           :parse-dok-file
+           :parse-dok-stream))
 
-; TODO recognize comments
-
-(in-package :dok-parser)
+(in-package :dok/parser)
 
 (defun not-doublequote (char)
   (not (eql #\" char)))
@@ -48,8 +49,16 @@
 (defrule WS+ (+ WS)
   (:constant nil))
 
+(defrule NL
+  (or #\newline #\return)
+  (:constant nil))
+
 (defrule NL+
-    (and WS* (or #\newline #\return) (* (or WS #\newline #\return)))
+    (and WS* NL (* (or WS NL)))
+  (:constant nil))
+
+(defrule comment
+  (and WS* (or ":TODO " ":DONE " ":MAYBE " ":CANCELLED " ":^ " ": ") WS* (* (not NL)) NL+)
   (:constant nil))
 
 (defrule ID
@@ -78,14 +87,14 @@
     (and INTEGER-VALUE "." INTEGER-VALUE)
   (:destructure (v1 ignore1 v2)
     (make-instance
-       'dok:Expr/Value/Float
-       :value (parse-float (format nil "~a.~a" (dok:value v1) (dok:value v2))))))
+       'dok/ast:Expr/Value/Float
+       :value (parse-float (format nil "~a.~a" (dok/ast:value v1) (dok/ast:value v2))))))
 
 (defrule INTEGER-VALUE
     (and (? "-") (+ (digit-char-p character)))
     (:destructure (sign cs)
       (make-instance
-         'dok:Expr/Value/Integer
+         'dok/ast:Expr/Value/Integer
          :value (let ((v (convert-chars #'parse-integer cs)))
                      (if sign (- 0 v) v)))))
 
@@ -93,7 +102,7 @@
   (and #\" (* (not-doublequote character)) #\")
   (:destructure (ignore1 cs ignore2)
     (make-instance
-       'dok:Expr/Value/String
+       'dok/ast:Expr/Value/String
        :value (coerce cs 'string))))
 
 (defrule CMD-REST
@@ -104,7 +113,7 @@
 (defrule code
     (and stmts)
   (:destructure (stmts)
-    (make-instance 'dok:Code :stmt* stmts)))
+    (make-instance 'dok/ast:Code :stmt* stmts)))
 
 (defrule stmts
     (or stmts-multi-line
@@ -116,9 +125,9 @@
       (list stmt)))
 
 (defrule stmts-multi-line
-  (and NL+ (+ (and stmt NL+)))
+  (and NL+ (+ (and (* comment) stmt NL+)))
   (:destructure (ignore1 stmts)
-    (mapcar #'first stmts)))
+    (mapcar #'second stmts)))
 
 (defrule stmt
     (or stmt-return
@@ -129,18 +138,18 @@
 (defrule stmt-return
     (and "return" WS+ expr)
     (:destructure (ignore1 ignore2 expr)
-      (make-instance 'dok:Stmt/Return :expr expr)))
+      (make-instance 'dok/ast:Stmt/Return :expr expr)))
 
 (defrule stmt-assert
     (and "assert" WS+ expr)
     (:destructure (ignore1 ignore2 expr)
-      (make-instance 'dok:Stmt/Assert :expr expr)))
+      (make-instance 'dok/ast:Stmt/Assert :expr expr)))
 
 (defrule type-decl
   (and "data" WS+ TYPE-ID (or WS+ (and "(" WS* type-params ")" WS+)) (? CMD-REST) WS* (? (and "[" WS* data-content "]" WS*)))
   (:destructure (ignore1 ignore2 type-id maybe-params maybe-cmd ignore3 maybe-content)
     (make-instance
-       'dok:Stmt/Data-decl
+       'dok/ast:Stmt/Data-decl
        :name type-id
        :type-param* (third maybe-params)
        :cmd-rest maybe-cmd
@@ -155,9 +164,9 @@
     (list* p1 (mapcar #'fourth ps))))
 
 (defrule data-content-multi-line
-  (and NL+ (* (and data-part NL+)))
+  (and NL+ (* (and (* comment) data-part NL+)))
   (:destructure (ignore1 parts)
-    (mapcar #'first parts)))
+    (mapcar #'second parts)))
 
 (defrule data-part
     (or slot-decl
@@ -169,8 +178,8 @@
   (and "slot" WS+ ID (or WS+ (and "::" type-ref)) (? expr))
   (:destructure (ignore1 ignore2 slot-id maybe-type-ref maybe-expr)
     (make-instance
-     'dok:Data-part/Slot-decl
-     :id slot-id
+     'dok/ast:Data-part/Slot-decl
+     :name slot-id
      :type-ref (second maybe-type-ref)
      :expr maybe-expr)))
 
@@ -178,7 +187,7 @@
   (and "variant" WS+ "../" TYPE-ID (? (and WS+ CMD-REST WS+)) (? (and WS* "[" WS* data-content "]" WS*)))
   (:destructure (ignore1 ignore2 ignore3 type-id maybe-cmd maybe-data)
     (make-instance
-       'dok:Data-part/Variant-decl
+       'dok/ast:Data-part/Variant-decl
        :name type-id
        :cmd-rest (second maybe-cmd)
        :data-part* (fourth maybe-data))))
@@ -190,8 +199,8 @@
          "}" WS*)
    (:destructure (ignore1 ignore2 fun-id params ignore3 type-ref ignore4 maybe-cmd ignore5 ignore6 stmts ignore7 ignore8)
    (make-instance
-     'dok:Data-part/Fun-decl
-     :id fun-id
+     'dok/ast:Data-part/Fun-decl
+     :name fun-id
      :fun-param-decl* params
      :result type-ref
      :cmd-rest (second maybe-cmd)
@@ -211,14 +220,14 @@
     (list* p1 (mapcar #'fourth ps))))
 
 (defrule params-decl-multi-line
-  (+ (and NL+ param-decl))
+  (+ (and NL+ (* comment) param-decl))
   (:destructure (params)
-    (mapcar #'second params)))
+    (mapcar #'third params)))
 
 (defrule param-decl
   (and ID "::" type-ref)
   (:destructure (id ignore1 type-ref)
-    (make-instance 'dok:fun-param-decl :id id :type-ref type-ref)))
+    (make-instance 'dok/ast:fun-param-decl :name id :type-ref type-ref)))
 
 (defrule expr
     (or binary-expr
@@ -228,7 +237,7 @@
   (and unary-expr OPERATOR WS+ unary-expr)
   (:destructure (arg1 operator ignore1 arg2)
     (make-instance
-       'dok:Expr/Binary-expr
+       'dok/ast:Expr/Binary-expr
        :arg1 arg1
        :operator operator
        :arg2 arg2)))
@@ -248,7 +257,7 @@
   (and "{" WS* stmts "}" WS*)
   (:destructure (ignore1 ignore2 stmts ignore3 ignore4)
     (make-instance
-       'dok:Expr/Stmts
+       'dok/ast:Expr/Stmts
        :stmt* stmts)))
 
 (defrule value
@@ -260,17 +269,17 @@
   (:destructure (v ignore1) v))
 
 (defrule self-value "self"
-  (:constant (make-instance 'dok:Expr/Value/Self)))
+  (:constant (make-instance 'dok/ast:Expr/Value/Self)))
 
 (defrule id-value (and ID)
   (:destructure (id-name)
-    (make-instance 'dok:Expr/Value/Id :id id-name)))
+    (make-instance 'dok/ast:Expr/Value/Id :id id-name)))
 
 (defrule fun-call-chain
     (and value (+ (and "." fun-call-chain-part)))
     (:destructure (value parts)
       (make-instance
-         'dok:Expr/Fun-call
+         'dok/ast:Expr/Fun-call
          :expr value
          :fun-call-chain* (mapcar #'second parts))))
 
@@ -278,7 +287,7 @@
     (and ID (? arguments) WS*)
   (:destructure (fun-id arguments ignore1)
     (make-instance
-     'dok:Fun-call-chain
+     'dok/ast:Fun-call-chain
      :id fun-id
      :argument*  arguments)))
 
@@ -291,8 +300,8 @@
     (and "var" WS+ ID (or WS+ (and "::" type-ref)) (? (and CMD-REST WS+)) (? expr))
   (:destructure (ignore1 ignore2 id maybe-type maybe-cmd maybe-expr)
     (make-instance
-       'dok:stmt/var-decl
-       :id id
+       'dok/ast:stmt/var-decl
+       :name id
        :type-ref (second maybe-type)
        :cmd-rest (first maybe-cmd)
        :expr maybe-expr)))
@@ -300,7 +309,7 @@
 (defrule type-ref
   (and type-ref-start (* type-ref-path))
   (:destructure (t1 ts)
-    (make-instance 'dok:Type-ref :type-ref-path* (list* t1 ts))))
+    (make-instance 'dok/ast:Type-ref :type-ref-path* (list* t1 ts))))
 
 (defrule type-ref-start
     (or type-ref-self
@@ -311,26 +320,26 @@
 (defrule type-ref-self
     (and "Self")
     (:destructure (ignore1)
-            (make-instance 'dok:Type-ref-path/Self)))
+            (make-instance 'dok/ast:Type-ref-path/Self)))
 
 (defrule type-ref-variant-start
   (and "../" TYPE-ID)
   (:destructure (ignore1 type-id)
     (make-instance
-       'dok:Type-ref-path/Variant
+       'dok/ast:Type-ref-path/Variant
        :name type-id)))
 
 (defrule type-ref-root-start
   (and "/")
   (:constant
     (make-instance
-       'dok:Type-ref-path/Root)))
+       'dok/ast:Type-ref-path/Root)))
 
 (defrule type-ref-data-start
   (and TYPE-ID (? (and "(" WS* type-params ")")))
   (:destructure (type-id params)
      (make-instance
-        'dok:Type-ref-path/Data
+        'dok/ast:Type-ref-path/Data
         :name type-id
         :type-param* (mapcar #'third params))))
 
@@ -341,14 +350,14 @@
     (and "." TYPE-ID (? (and "(" WS* type-params ")" WS*)))
   (:destructure (ignore1 ignore2 type-id params)
     (make-instance
-     'dok:Type-ref-path/Data
+     'dok/ast:Type-ref-path/Data
      :name type-id
      :type-param* (mapcar #'third params))))
 
 (defrule type-ref-path-variant
   (and "/" TYPE-ID)
   (:destructure (ignore1 type-id)
-    (make-instance 'dok:Type-ref-path/Variant :name type-id)))
+    (make-instance 'dok/ast:Type-ref-path/Variant :name type-id)))
 
 (defrule type-params
   (or type-params-one-line type-params-multi-line))
@@ -359,9 +368,9 @@
     (list* p1 (mapcar #'fourth ps))))
 
 (defrule type-params-multi-line
-  (and (+ (and NL+ type-param)) NL+)
+  (and (+ (and NL+ (* comment) type-param)) NL+)
   (:destructure (ps ignore1)
-    (mapcar #'second (first ps))))
+    (mapcar #'third (first ps))))
 
 (defrule type-param
     (and TYPE-ID "::" type-ref)
@@ -388,3 +397,9 @@
 
 (defun parse-dok (src)
   (parse 'Code src))
+
+(defun parse-dok-file (fname)
+  (parse-dok (alexandria:read-file-into-string fname)))
+
+(defun parse-dok-stream (in)
+  (parse-dok (alexandria:read-stream-content-into-string in)))

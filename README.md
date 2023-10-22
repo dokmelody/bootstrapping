@@ -7,11 +7,15 @@ Dokmelody will be composed of:
 - the Dok programming language;
 - the Doknil knowledge-base language, for linking the various parts of a project;
 - the Tuttology IDE
-- the services for running the federation of servers
+- the Dokmelody services for running the federation of servers
 
 ## Bootstrapping
 
-This repo is an attempt to bootstrap a first usable version of Dokmelody. It is all in design and early development state.
+This repo is an attempt to bootstrap a first usable version of Dokmelody, using Common Lisp as implementation and target programming language.
+
+## Status
+
+Early alpha: nothing of useful.
 
 ## Contacts
 
@@ -34,10 +38,6 @@ For the documentation
 cd docs
 nix develop
 ```
-
-## Status
-
-Up to date there is nothing of useful to try.
 
 ## Licenses
 

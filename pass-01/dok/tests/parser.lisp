@@ -1,13 +1,13 @@
 ;; SPDX-License-Identifier: MIT
 ;; Copyright (C) 2023 Massimo Zaniboni <mzan@dokmelody.org>
 
-(defpackage :dok-parser/tests
+(defpackage :dok/parser/tests
   (:import-from :parachute #:define-test #:true)
   (:import-from :dok-parser #:parse-dok)
   (:use :cl
-        :dok))
+        :dok/parser))
 
-(in-package :dok-parser/tests)
+(in-package :dok/parser/tests)
 
 (define-test parse-tokens
   :serial nil
